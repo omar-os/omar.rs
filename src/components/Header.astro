@@ -1,0 +1,143 @@
+---
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/docs/", label: "Docs" },
+  { href: "/blog/", label: "Blog" },
+];
+---
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <span class="logo-text">one-man army</span>
+      <span class="logo-cursor">_</span>
+    </a>
+    <nav class="nav">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "nav-link",
+              {
+                active:
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(item.href)),
+              },
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href="https://discord.gg/X76PSzmfWr"
+        class="nav-link nav-icon"
+        target="_blank"
+        rel="noopener"
+        aria-label="Discord"
+      >
+        <svg width="20" height="16" viewBox="0 0 71 55" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M60.1 4.9A58.5 58.5 0 0 0 45.4.2a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.4 37.4 0 0 0 25.4.3a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.5 5a.2.2 0 0 0-.1 0C1.5 17.2-.9 29.1.3 40.8v.1a58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .3-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.8 38.8 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.9a.2.2 0 0 1 .2 0 42 42 0 0 0 35.6 0 .2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .3 36.4 36.4 0 0 1-5.5 2.7.2.2 0 0 0-.1.3 47.2 47.2 0 0 0 3.6 5.8.2.2 0 0 0 .3.1A58.6 58.6 0 0 0 70.3 41v-.2C71.8 27.3 67.8 15.5 60.2 5a.2.2 0 0 0-.1 0ZM23.7 33.5c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.6 6.5-5.8 6.5Zm21.4 0c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.5 6.5-5.8 6.5Z"/>
+        </svg>
+      </a>
+      <a
+        href="https://github.com/lsk567/omar"
+        class="nav-link nav-external"
+        target="_blank"
+        rel="noopener"
+      >
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.5rem;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .logo-text {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .logo-cursor {
+    color: var(--accent);
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--accent);
+  }
+
+  .nav-icon {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-icon svg {
+    display: block;
+  }
+
+  .nav-external {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .nav-external:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .nav {
+      gap: 1rem;
+    }
+    .nav-link {
+      font-size: 0.85rem;
+    }
+  }
+</style>
