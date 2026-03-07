@@ -74,6 +74,7 @@ const posts = (await getCollection("blog")).sort(
   .post-card:hover {
     border-color: var(--accent);
     transform: translateY(-1px);
+    box-shadow: 0 2px 20px rgba(201, 168, 76, 0.08);
   }
 
   .post-card time {
@@ -84,7 +85,7 @@ const posts = (await getCollection("blog")).sort(
 
   .post-card h2 {
     font-size: 1.25rem;
-    color: var(--text-bright);
+    color: var(--accent);
     margin: 0.25rem 0 0.5rem;
   }
 

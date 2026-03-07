@@ -15,8 +15,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <span class="hero-accent">300 agents.</span>
         </h1>
         <p class="hero-subtitle">
-          <code>omar</code> is a TUI for creating powerful agentic organizations.
-          Manage deep hierarchies of parallel AI agents from a single terminal.
+          <code>omar</code> is a TUI for orchestrating powerful agentic armies.
+          Command deep hierarchies of parallel AI agents from a single terminal.
         </p>
         <div class="hero-install">
           <pre><code><span class="prompt">$</span> make install && omar</code></pre>
@@ -196,7 +196,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     height: 200%;
     background: radial-gradient(
       ellipse at 30% 20%,
-      var(--accent-glow) 0%,
+      rgba(201, 168, 76, 0.08) 0%,
       transparent 50%
     );
     pointer-events: none;
@@ -213,18 +213,20 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
     margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    color: #ffffff;
   }
 
   .hero-accent {
-    color: var(--accent);
-    text-shadow: 0 0 30px var(--accent-glow);
+    color: var(--crimson);
+    text-shadow: 0 0 40px var(--crimson-glow);
   }
 
   .hero-subtitle {
     font-size: 1.15rem;
-    color: var(--text-dim);
+    color: var(--text);
     margin-bottom: 2rem;
     max-width: 480px;
     line-height: 1.7;
@@ -267,11 +269,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     max-width: 400px;
     border-radius: var(--radius);
     opacity: 0.9;
+    border: 1px solid var(--border);
   }
 
   /* Features */
   .features {
     padding: 5rem 0;
+    border-top: 1px solid var(--border);
   }
 
   .section-title {
@@ -279,6 +283,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     text-align: center;
     margin-bottom: 3rem;
     font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .features-grid {
@@ -304,24 +310,26 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   .feature-icon {
     font-size: 1.5rem;
-    color: var(--accent);
+    color: var(--crimson);
     margin-bottom: 0.75rem;
   }
 
   .feature-card h3 {
     font-size: 1.05rem;
     margin-bottom: 0.5rem;
+    color: var(--accent);
   }
 
   .feature-card p {
     font-size: 0.9rem;
-    color: var(--text-dim);
+    color: var(--text);
     line-height: 1.6;
   }
 
   /* Quick Start */
   .quickstart {
     padding: 5rem 0;
+    border-top: 1px solid var(--border);
   }
 
   .steps {
@@ -345,11 +353,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--crimson);
+    color: #ffffff;
     font-weight: 700;
     border-radius: 50%;
     font-size: 1.1rem;
+    box-shadow: 0 0 15px var(--crimson-glow);
   }
 
   .step-content {
@@ -359,6 +368,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   .step-content h3 {
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
+    color: var(--accent);
   }
 
   .step-content ul {
@@ -367,14 +377,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .step-content li {
-    color: var(--text-dim);
+    color: var(--text);
     font-size: 0.9rem;
     padding: 0.15rem 0;
   }
 
   .step-content li::before {
     content: "- ";
-    color: var(--accent);
+    color: var(--crimson);
   }
 
   .step-content pre {
@@ -382,13 +392,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .step-content p {
-    color: var(--text-dim);
+    color: var(--text);
     font-size: 0.9rem;
   }
 
   /* Backends */
   .backends {
     padding: 3rem 0 5rem;
+    border-top: 1px solid var(--border);
   }
 
   .backends-table {
@@ -411,8 +422,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   .backends-table th {
     background: var(--bg-surface);
-    color: var(--text-bright);
+    color: var(--accent);
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   /* Responsive */
