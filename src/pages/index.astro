@@ -203,8 +203,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   .hero-inner {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 3rem;
     align-items: center;
     position: relative;
   }
@@ -265,7 +265,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .hero-image img {
-    max-width: 400px;
+    max-width: 100%;
+    width: 600px;
     border-radius: var(--radius);
     opacity: 0.9;
     border: 1px solid var(--border);
@@ -452,7 +453,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     }
 
     .hero-image img {
-      max-width: 280px;
+      max-width: 90%;
+      width: 400px;
     }
 
     .features-grid {
