@@ -1,0 +1,88 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  date: string;
+  description?: string;
+  author?: string;
+}
+
+const { title, date, description, author = "OMAR Team" } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="blog-post container">
+    <header class="post-header">
+      <time class="post-date"
+        >{
+          new Date(date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })
+        }</time
+      >
+      <h1 class="post-title">{title}</h1>
+      {description && <p class="post-desc">{description}</p>}
+      <span class="post-author">by {author}</span>
+    </header>
+    <div class="post-body prose">
+      <slot />
+    </div>
+    <footer class="post-footer">
+      <a href="/blog/">&larr; All posts</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .blog-post {
+    max-width: 48rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+  }
+
+  .post-header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+  }
+
+  .post-date {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+  }
+
+  .post-title {
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .post-desc {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .post-author {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .post-footer a {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .post-footer a:hover {
+    color: var(--accent);
+  }
+</style>

@@ -1,0 +1,121 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+const sidebarItems = [
+  { href: "/docs/", label: "Getting Started" },
+  { href: "/docs/architecture/", label: "Architecture & Design" },
+  { href: "/docs/implementation/", label: "Implementation" },
+  { href: "/docs/api-reference/", label: "HTTP API Reference" },
+  { href: "/docs/agent-orchestration/", label: "Agent Orchestration" },
+  { href: "/docs/distribution/", label: "Distribution" },
+];
+
+const pathname = Astro.url.pathname;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="docs-layout container">
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <h4 class="sidebar-title">Documentation</h4>
+        {
+          sidebarItems.map((item) => (
+            <a
+              href={item.href}
+              class:list={["sidebar-link", { active: pathname === item.href }]}
+            >
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </aside>
+    <article class="docs-content prose">
+      <h1>{title}</h1>
+      <slot />
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 3rem;
+    padding-top: 2.5rem;
+    padding-bottom: 4rem;
+    min-height: calc(100vh - 3.5rem);
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 5rem;
+    height: fit-content;
+  }
+
+  .sidebar-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    border-radius: 6px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .sidebar-link:hover {
+    color: var(--text-bright);
+    background: var(--bg-surface);
+  }
+
+  .sidebar-link.active {
+    color: var(--accent);
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .docs-layout {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .sidebar {
+      position: static;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .sidebar-nav {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .sidebar-link {
+      border-left: none;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.6rem;
+    }
+  }
+</style>

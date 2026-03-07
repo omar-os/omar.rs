@@ -1,0 +1,97 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout
+  title="Getting Started"
+  description="Get started with OMAR - a TUI for managing AI agent organizations"
+>
+  <h2>What is OMAR?</h2>
+  <p>
+    OMAR (one-man army) is a TUI dashboard for creating and managing powerful
+    agentic organizations. It runs on tmux and lets you orchestrate deep
+    hierarchies of parallel AI coding agents from a single terminal.
+  </p>
+
+  <h2>Prerequisites</h2>
+  <ul>
+    <li><strong>tmux 3.0+</strong> &mdash; session multiplexer</li>
+    <li><strong>Rust 1.70+</strong> &mdash; for building from source</li>
+    <li><strong>GNU Make</strong> &mdash; build system</li>
+    <li>
+      <strong>An agent backend</strong> &mdash; <a
+        href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+        >Claude Code</a
+      > (default) or <a href="https://github.com/anomalyco/opencode"
+        >Opencode</a>
+    </li>
+  </ul>
+
+  <h2>Installation</h2>
+  <pre><code>$ make install</code></pre>
+
+  <h2>Launch</h2>
+  <pre><code>$ omar</code></pre>
+  <p>
+    This starts the OMAR dashboard with the default agent backend (Claude Code).
+    To use Opencode instead:
+  </p>
+  <pre><code>$ omar --agent opencode</code></pre>
+
+  <h2>Your First Session</h2>
+  <ol>
+    <li>
+      Launch <code>omar</code> &mdash; you'll see the TUI dashboard with your executive
+      assistant (EA)
+    </li>
+    <li>
+      Copy a prompt into your EA window:
+      <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
+    </li>
+    <li>
+      Watch agents spawn. Use <strong>&uarr;&darr;</strong> to cycle agents, <strong
+        >&rarr;</strong
+      > to drill deeper, <strong>&larr;</strong> to go back
+    </li>
+    <li>
+      To shut down:
+      <pre><code>Shutdown the test project and its agents.</code></pre>
+    </li>
+  </ol>
+
+  <h2>Key Bindings</h2>
+  <table>
+    <thead>
+      <tr><th>Key</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      <tr
+        ><td><code>&uarr;/&darr;</code></td><td
+          >Navigate agents at current level</td
+        ></tr
+      >
+      <tr><td><code>&rarr;</code></td><td>Drill into deeper level</td></tr>
+      <tr><td><code>&larr;</code></td><td>Back out to parent level</td></tr>
+      <tr><td><code>Enter</code></td><td>Attach to agent (popup)</td></tr>
+      <tr><td><code>n</code></td><td>Spawn new agent</td></tr>
+      <tr><td><code>r</code></td><td>Refresh status</td></tr>
+      <tr><td><code>q</code></td><td>Quit dashboard</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Next Steps</h2>
+  <ul>
+    <li>
+      <a href="/docs/architecture/">Architecture & Design</a> &mdash; understand how
+      OMAR works
+    </li>
+    <li>
+      <a href="/docs/api-reference/">HTTP API Reference</a> &mdash; programmatic agent
+      control
+    </li>
+    <li>
+      <a href="/docs/agent-orchestration/">Agent Orchestration</a> &mdash; manager-worker
+      patterns
+    </li>
+  </ul>
+</DocsLayout>

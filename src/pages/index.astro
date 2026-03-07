@@ -1,0 +1,456 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Home"
+  description="Lead an army of 300 agents to solve humanity's biggest problems. OMAR is a TUI for creating powerful agentic organizations."
+>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          Lead an army of<br />
+          <span class="hero-accent">300 agents.</span>
+        </h1>
+        <p class="hero-subtitle">
+          <code>omar</code> is a TUI for creating powerful agentic organizations.
+          Manage deep hierarchies of parallel AI agents from a single terminal.
+        </p>
+        <div class="hero-install">
+          <pre><code><span class="prompt">$</span> make install && omar</code></pre>
+        </div>
+        <div class="hero-actions">
+          <a href="/docs/" class="btn btn-primary">Get Started</a>
+          <a
+            href="https://github.com/lsk567/omar"
+            class="btn btn-outline"
+            target="_blank"
+            rel="noopener">View on GitHub</a
+          >
+        </div>
+      </div>
+      <div class="hero-image">
+        <img
+          src="/img/thermopylae.png"
+          alt="Thermopylae - Lead your army of agents"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">&#9632;</div>
+          <h3>Professional TUI Dashboard</h3>
+          <p>
+            Monitor all your agents in one place with a beautiful terminal
+            interface built on ratatui.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9650;</div>
+          <h3>Deep Agent Hierarchy</h3>
+          <p>
+            Create parallel agent organizations, just like a company. Navigate
+            levels with arrow keys.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9654;</div>
+          <h3>Talk to Any Agent</h3>
+          <p>
+            Attach to any agent at any level. You are always in control of the
+            conversation.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9733;</div>
+          <h3>Slack Integration</h3>
+          <p>
+            Connect your agents to Slack channels. Bridge the gap between human
+            and AI workflows.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9788;</div>
+          <h3>Computer Use</h3>
+          <p>
+            Agents can see and control your Linux desktop. Debug GUIs, interact
+            with applications.
+          </p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">&#9881;</div>
+          <h3>Highly Customizable</h3>
+          <p>
+            Built on tmux. Supports all tmux commands and key bindings for
+            maximum flexibility.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section class="quickstart">
+    <div class="container">
+      <h2 class="section-title">Quick Start</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Install Dependencies</h3>
+            <ul>
+              <li>tmux 3.0+</li>
+              <li>Rust 1.70+</li>
+              <li>GNU Make</li>
+              <li>
+                <a
+                  href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+                  >Claude Code</a
+                > or <a href="https://github.com/anomalyco/opencode"
+                  >Opencode</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Build &amp; Launch</h3>
+            <pre><code><span class="prompt">$</span> make install
+<span class="prompt">$</span> omar</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Give Your EA a Task</h3>
+            <p>
+              Copy a prompt into your executive assistant window and watch
+              agents spawn.
+            </p>
+            <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agent Backends -->
+  <section class="backends">
+    <div class="container">
+      <h2 class="section-title">Supported Agent Backends</h2>
+      <div class="backends-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Backend</th>
+              <th>How to launch</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td
+                ><a
+                  href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+                  >Claude Code</a
+                ></td
+              >
+              <td><code>omar</code> (default)</td>
+            </tr>
+            <tr>
+              <td
+                ><a href="https://github.com/anomalyco/opencode">Opencode</a
+                ></td
+              >
+              <td><code>omar --agent opencode</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    padding: 6rem 0 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      ellipse at 30% 20%,
+      var(--accent-glow) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    position: relative;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-accent {
+    color: var(--accent);
+    text-shadow: 0 0 30px var(--accent-glow);
+  }
+
+  .hero-subtitle {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .hero-subtitle code {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .hero-install {
+    margin-bottom: 2rem;
+  }
+
+  .hero-install pre {
+    display: inline-block;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+  }
+
+  .prompt {
+    color: var(--accent);
+    user-select: none;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-image {
+    display: flex;
+    justify-content: center;
+  }
+
+  .hero-image img {
+    max-width: 400px;
+    border-radius: var(--radius);
+    opacity: 0.9;
+  }
+
+  /* Features */
+  .features {
+    padding: 5rem 0;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-weight: 700;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    transition:
+      border-color 0.2s,
+      transform 0.2s;
+  }
+
+  .feature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .feature-icon {
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* Quick Start */
+  .quickstart {
+    padding: 5rem 0;
+  }
+
+  .steps {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .step {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 700;
+    border-radius: 50%;
+    font-size: 1.1rem;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-content ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .step-content li {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    padding: 0.15rem 0;
+  }
+
+  .step-content li::before {
+    content: "- ";
+    color: var(--accent);
+  }
+
+  .step-content pre {
+    margin-top: 0.5rem;
+  }
+
+  .step-content p {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  /* Backends */
+  .backends {
+    padding: 3rem 0 5rem;
+  }
+
+  .backends-table {
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .backends-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .backends-table th,
+  .backends-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .backends-table th {
+    background: var(--bg-surface);
+    color: var(--text-bright);
+    font-weight: 600;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+    }
+
+    .hero-subtitle {
+      margin: 0 auto 2rem;
+    }
+
+    .hero-actions {
+      justify-content: center;
+    }
+
+    .hero-image {
+      order: -1;
+    }
+
+    .hero-image img {
+      max-width: 280px;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .step {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+</style>

@@ -1,0 +1,123 @@
+---
+const pathname = Astro.url.pathname;
+const navItems = [
+  { href: "/", label: "Home" },
+  { href: "/docs/", label: "Docs" },
+  { href: "/blog/", label: "Blog" },
+];
+---
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="logo">
+      <span class="logo-text">omar</span>
+      <span class="logo-cursor">_</span>
+    </a>
+    <nav class="nav">
+      {
+        navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              "nav-link",
+              {
+                active:
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(item.href)),
+              },
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a
+        href="https://github.com/lsk567/omar"
+        class="nav-link nav-github"
+        target="_blank"
+        rel="noopener"
+      >
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 3.5rem;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .logo-text {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .logo-cursor {
+    color: var(--accent);
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    transition: color 0.2s;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--text-bright);
+  }
+
+  .nav-github {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .nav-github:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .nav {
+      gap: 1rem;
+    }
+    .nav-link {
+      font-size: 0.85rem;
+    }
+  }
+</style>
