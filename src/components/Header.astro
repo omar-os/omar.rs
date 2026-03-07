@@ -32,8 +32,16 @@ const navItems = [
         ))
       }
       <a
+        href="https://discord.gg/X76PSzmfWr"
+        class="nav-link nav-external"
+        target="_blank"
+        rel="noopener"
+      >
+        Discord
+      </a>
+      <a
         href="https://github.com/lsk567/omar"
-        class="nav-link nav-github"
+        class="nav-link nav-external"
         target="_blank"
         rel="noopener"
       >
@@ -101,13 +109,13 @@ const navItems = [
     color: var(--accent);
   }
 
-  .nav-github {
+  .nav-external {
     padding: 0.35rem 0.75rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
 
-  .nav-github:hover {
+  .nav-external:hover {
     border-color: var(--accent);
     color: var(--accent);
   }
