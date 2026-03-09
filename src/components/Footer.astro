@@ -1,5 +1,11 @@
 ---
+interface Props {
+  lang?: string;
+}
 
+const { lang = "en" } = Astro.props;
+const isZh = lang.startsWith("zh");
+const prefix = isZh ? "/zh" : "";
 ---
 
 <footer class="footer">
@@ -15,8 +21,8 @@
       <a href="https://discord.gg/X76PSzmfWr" target="_blank" rel="noopener"
         >Discord</a
       >
-      <a href="/docs/">Docs</a>
-      <a href="/blog/">Blog</a>
+      <a href={`${prefix}/docs/`}>{isZh ? "文档" : "Docs"}</a>
+      <a href={`${prefix}/blog/`}>{isZh ? "博客" : "Blog"}</a>
     </div>
   </div>
 </footer>

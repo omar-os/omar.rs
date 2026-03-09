@@ -1,0 +1,87 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout
+  title="快速开始"
+  description="开始使用 OMAR —— 一个用于管理 AI 智能体组织的 TUI 工具"
+  lang="zh-CN"
+>
+  <h2>什么是 OMAR？</h2>
+  <p>
+    OMAR（one-man army）是一个用于创建和管理智能体组织的 TUI 仪表盘。 它运行在
+    tmux 之上，让你在一个终端内编排深层并行 AI 编程智能体。
+  </p>
+
+  <h2>前置依赖</h2>
+  <ul>
+    <li><strong>tmux 3.0+</strong> —— 终端复用器</li>
+    <li><strong>Rust 1.70+</strong> —— 从源码编译</li>
+    <li><strong>GNU Make</strong> —— 构建系统</li>
+    <li>
+      <strong>智能体后端</strong> —— <a
+        href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+        >Claude Code</a
+      >（默认）或 <a href="https://github.com/anomalyco/opencode">Opencode</a>
+    </li>
+  </ul>
+
+  <h2>安装</h2>
+  <pre><code>$ make install</code></pre>
+
+  <h2>启动</h2>
+  <pre><code>$ omar</code></pre>
+  <p>
+    这会使用默认智能体后端（Claude Code）启动 OMAR 仪表盘。 如需使用 Opencode：
+  </p>
+  <pre><code>$ omar --agent opencode</code></pre>
+
+  <h2>第一次使用</h2>
+  <ol>
+    <li>
+      运行 <code>omar</code> —— 你会看到 TUI 仪表盘和你的执行助理（EA）
+    </li>
+    <li>
+      将提示词粘贴到 EA 窗口：
+      <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
+    </li>
+    <li>
+      观察智能体自动创建。用 <strong>&uarr;&darr;</strong> 切换智能体，<strong
+        >&rarr;</strong
+      > 深入下层，<strong>&larr;</strong> 返回上层
+    </li>
+    <li>
+      关闭时：
+      <pre><code>Shutdown the test project and its agents.</code></pre>
+    </li>
+  </ol>
+
+  <h2>快捷键</h2>
+  <table>
+    <thead>
+      <tr><th>按键</th><th>操作</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>&uarr;/&darr;</code></td><td>在当前层级切换智能体</td></tr>
+      <tr><td><code>&rarr;</code></td><td>深入下一层级</td></tr>
+      <tr><td><code>&larr;</code></td><td>返回上一层级</td></tr>
+      <tr><td><code>Enter</code></td><td>附加到智能体（弹窗）</td></tr>
+      <tr><td><code>n</code></td><td>创建新智能体</td></tr>
+      <tr><td><code>r</code></td><td>刷新状态</td></tr>
+      <tr><td><code>q</code></td><td>退出仪表盘</td></tr>
+    </tbody>
+  </table>
+
+  <h2>下一步</h2>
+  <ul>
+    <li>
+      <a href="/zh/docs/architecture/">架构与设计</a> —— 了解 OMAR 的工作原理
+    </li>
+    <li>
+      <a href="/zh/docs/api-reference/">HTTP API 参考</a> —— 程序化管理智能体
+    </li>
+    <li>
+      <a href="/zh/docs/agent-orchestration/">智能体编排</a> —— 管理者-执行者模式
+    </li>
+  </ul>
+</DocsLayout>

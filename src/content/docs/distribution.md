@@ -7,6 +7,7 @@ order: 6
 ## Project Overview
 
 OMAR is a Rust workspace with 3 crates:
+
 - `omar` (main binary) - the TUI dashboard
 - `omar-slack-bridge` - Slack bridge binary
 - `omar-computer-bridge` - computer-use bridge binary
@@ -38,14 +39,14 @@ brew install omar
 
 ## Distribution Priority
 
-| Priority | Platform | Reach | Notes |
-|----------|----------|-------|-------|
-| 1 | GitHub Releases | High | Foundation for everything else |
-| 2 | cargo install (crates.io) | High (Rust users) | Trivial once metadata is ready |
-| 3 | Homebrew tap | High (macOS) | Uses GitHub Release binaries |
-| 4 | AUR | Medium (Arch) | Community may create this |
-| 5 | Nix | Medium | Growing community |
-| 6 | npm wrapper | Low | Only if targeting JS developers |
+| Priority | Platform                  | Reach             | Notes                           |
+| -------- | ------------------------- | ----------------- | ------------------------------- |
+| 1        | GitHub Releases           | High              | Foundation for everything else  |
+| 2        | cargo install (crates.io) | High (Rust users) | Trivial once metadata is ready  |
+| 3        | Homebrew tap              | High (macOS)      | Uses GitHub Release binaries    |
+| 4        | AUR                       | Medium (Arch)     | Community may create this       |
+| 5        | Nix                       | Medium            | Growing community               |
+| 6        | npm wrapper               | Low               | Only if targeting JS developers |
 
 ## GitHub Releases
 

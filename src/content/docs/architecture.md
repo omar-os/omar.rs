@@ -42,30 +42,35 @@ OMAR is a TUI dashboard for orchestrating AI coding agents via tmux. It provides
 ## Core Components
 
 ### Workspace Structure
+
 OMAR is a Rust workspace with 3 crates:
+
 - **`omar`** - Main binary: TUI dashboard, HTTP API, event scheduler
 - **`omar-slack-bridge`** - Slack Socket Mode integration
 - **`omar-computer-bridge`** - X11 computer use (mouse, keyboard, screenshots)
 
 ### Session Types
+
 - **Dashboard**: `omar-dashboard` - the TUI session (auto-created on launch)
 - **Executive Assistant**: `omar-agent-ea` - auto-started manager agent
 - **Work Agents**: `omar-agent-<name>` - spawned by EA or API
 
 ### Unified Agent Model
+
 All agents use the same role - there is no PM/worker distinction in code. Every agent (except the EA) receives `agent.md` as its system prompt. The EA receives `executive-assistant.md` with memory context.
 
 ### Parent-Child Hierarchy
+
 Agents track parent-child relationships in `~/.omar/agent_parents.json`. The TUI renders this as a navigable command tree with Unicode box-drawing characters. Navigate with arrow keys to drill into child agents.
 
 ## Health Monitoring
 
 Health is determined by pane content change between refresh frames:
 
-| State | Icon | Meaning |
-|-------|------|---------|
-| Running | ● | Pane content changed since last check |
-| Idle | ○ | No output change detected |
+| State   | Icon | Meaning                               |
+| ------- | ---- | ------------------------------------- |
+| Running | ●    | Pane content changed since last check |
+| Idle    | ○    | No output change detected             |
 
 ## Dashboard UI Layout
 
@@ -114,18 +119,18 @@ Agent backend is auto-detected (Claude Code or Opencode) and can be overridden w
 
 ## Key Bindings
 
-| Key | Action |
-|-----|--------|
-| `↑/↓` or `j/k` | Navigate agents |
-| `→` or `Tab` | Drill into child agents |
-| `←` | Back to parent |
-| `Enter` | Attach to agent (tmux popup) |
-| `n` | Spawn new agent |
-| `d` | Delete agent (with confirmation) |
-| `p` | Add project |
-| `e` | Show events |
-| `r` | Refresh |
-| `z` | Detach from tmux |
-| `D` | Debug console |
-| `?` | Help |
-| `Q` | Quit (with confirmation) |
+| Key            | Action                           |
+| -------------- | -------------------------------- |
+| `↑/↓` or `j/k` | Navigate agents                  |
+| `→` or `Tab`   | Drill into child agents          |
+| `←`            | Back to parent                   |
+| `Enter`        | Attach to agent (tmux popup)     |
+| `n`            | Spawn new agent                  |
+| `d`            | Delete agent (with confirmation) |
+| `p`            | Add project                      |
+| `e`            | Show events                      |
+| `r`            | Refresh                          |
+| `z`            | Detach from tmux                 |
+| `D`            | Debug console                    |
+| `?`            | Help                             |
+| `Q`            | Quit (with confirmation)         |
