@@ -82,7 +82,7 @@ function getLangSwitchUrl() {
       >
         GitHub
       </a>
-      <a href={getLangSwitchUrl()} class="nav-link lang-switch">
+      <a href={getLangSwitchUrl()} class="nav-link nav-external">
         {isZh ? "EN" : "中文"}
       </a>
     </nav>
@@ -165,21 +165,6 @@ function getLangSwitchUrl() {
   .nav-external:hover {
     border-color: var(--accent);
     color: var(--accent);
-  }
-
-  .lang-switch {
-    padding: 0.35rem 0.75rem;
-    border: 1px solid var(--crimson);
-    border-radius: var(--radius);
-    color: var(--crimson);
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-
-  .lang-switch:hover {
-    background: var(--crimson);
-    color: #ffffff;
   }
 
   @media (max-width: 640px) {
