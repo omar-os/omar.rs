@@ -4,27 +4,39 @@ import BaseLayout from "./BaseLayout.astro";
 interface Props {
   title: string;
   description?: string;
+  lang?: string;
 }
 
-const { title, description } = Astro.props;
+const { title, description, lang = "en" } = Astro.props;
+const isZh = lang.startsWith("zh");
+const prefix = isZh ? "/zh" : "";
 
-const sidebarItems = [
-  { href: "/docs/", label: "Getting Started" },
-  { href: "/docs/architecture/", label: "Architecture & Design" },
-  { href: "/docs/implementation/", label: "Implementation" },
-  { href: "/docs/api-reference/", label: "HTTP API Reference" },
-  { href: "/docs/agent-orchestration/", label: "Agent Orchestration" },
-  { href: "/docs/distribution/", label: "Distribution" },
-];
+const sidebarItems = isZh
+  ? [
+      { href: "/zh/docs/", label: "快速开始" },
+      { href: "/zh/docs/architecture/", label: "架构与设计" },
+      { href: "/zh/docs/implementation/", label: "实现细节" },
+      { href: "/zh/docs/api-reference/", label: "HTTP API 参考" },
+      { href: "/zh/docs/agent-orchestration/", label: "智能体编排" },
+      { href: "/zh/docs/distribution/", label: "安装与分发" },
+    ]
+  : [
+      { href: "/docs/", label: "Getting Started" },
+      { href: "/docs/architecture/", label: "Architecture & Design" },
+      { href: "/docs/implementation/", label: "Implementation" },
+      { href: "/docs/api-reference/", label: "HTTP API Reference" },
+      { href: "/docs/agent-orchestration/", label: "Agent Orchestration" },
+      { href: "/docs/distribution/", label: "Distribution" },
+    ];
 
 const pathname = Astro.url.pathname;
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} lang={lang}>
   <div class="docs-layout container">
     <aside class="sidebar">
       <nav class="sidebar-nav">
-        <h4 class="sidebar-title">Documentation</h4>
+        <h4 class="sidebar-title">{isZh ? "文档" : "Documentation"}</h4>
         {
           sidebarItems.map((item) => (
             <a

@@ -1,15 +1,37 @@
 ---
+interface Props {
+  lang?: string;
+}
+
+const { lang = "en" } = Astro.props;
+const isZh = lang.startsWith("zh");
 const pathname = Astro.url.pathname;
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/docs/", label: "Docs" },
-  { href: "/blog/", label: "Blog" },
-];
+
+const navItems = isZh
+  ? [
+      { href: "/zh/", label: "首页" },
+      { href: "/zh/docs/", label: "文档" },
+      { href: "/zh/blog/", label: "博客" },
+    ]
+  : [
+      { href: "/", label: "Home" },
+      { href: "/docs/", label: "Docs" },
+      { href: "/blog/", label: "Blog" },
+    ];
+
+// Build language switch URL
+function getLangSwitchUrl() {
+  if (isZh) {
+    return pathname.replace(/^\/zh/, "") || "/";
+  } else {
+    return `/zh${pathname}`;
+  }
+}
 ---
 
 <header class="header">
   <div class="container header-inner">
-    <a href="/" class="logo">
+    <a href={isZh ? "/zh/" : "/"} class="logo">
       <span class="logo-text">one-man army</span>
       <span class="logo-cursor">_</span>
     </a>
@@ -23,7 +45,9 @@ const navItems = [
               {
                 active:
                   pathname === item.href ||
-                  (item.href !== "/" && pathname.startsWith(item.href)),
+                  (item.href !== "/" &&
+                    item.href !== "/zh/" &&
+                    pathname.startsWith(item.href)),
               },
             ]}
           >
@@ -38,8 +62,16 @@ const navItems = [
         rel="noopener"
         aria-label="Discord"
       >
-        <svg width="20" height="16" viewBox="0 0 71 55" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M60.1 4.9A58.5 58.5 0 0 0 45.4.2a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.4 37.4 0 0 0 25.4.3a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.5 5a.2.2 0 0 0-.1 0C1.5 17.2-.9 29.1.3 40.8v.1a58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .3-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.8 38.8 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.9a.2.2 0 0 1 .2 0 42 42 0 0 0 35.6 0 .2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .3 36.4 36.4 0 0 1-5.5 2.7.2.2 0 0 0-.1.3 47.2 47.2 0 0 0 3.6 5.8.2.2 0 0 0 .3.1A58.6 58.6 0 0 0 70.3 41v-.2C71.8 27.3 67.8 15.5 60.2 5a.2.2 0 0 0-.1 0ZM23.7 33.5c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.6 6.5-5.8 6.5Zm21.4 0c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.5 6.5-5.8 6.5Z"/>
+        <svg
+          width="20"
+          height="16"
+          viewBox="0 0 71 55"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M60.1 4.9A58.5 58.5 0 0 0 45.4.2a.2.2 0 0 0-.2.1 40.8 40.8 0 0 0-1.8 3.7 54 54 0 0 0-16.2 0A37.4 37.4 0 0 0 25.4.3a.2.2 0 0 0-.2-.1A58.4 58.4 0 0 0 10.5 5a.2.2 0 0 0-.1 0C1.5 17.2-.9 29.1.3 40.8v.1a58.8 58.8 0 0 0 17.7 9 .2.2 0 0 0 .3-.1 42 42 0 0 0 3.6-5.9.2.2 0 0 0-.1-.3 38.8 38.8 0 0 1-5.5-2.6.2.2 0 0 1 0-.4l1.1-.9a.2.2 0 0 1 .2 0 42 42 0 0 0 35.6 0 .2.2 0 0 1 .2 0l1.1.9a.2.2 0 0 1 0 .3 36.4 36.4 0 0 1-5.5 2.7.2.2 0 0 0-.1.3 47.2 47.2 0 0 0 3.6 5.8.2.2 0 0 0 .3.1A58.6 58.6 0 0 0 70.3 41v-.2C71.8 27.3 67.8 15.5 60.2 5a.2.2 0 0 0-.1 0ZM23.7 33.5c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.6 6.5-5.8 6.5Zm21.4 0c-3.2 0-5.8-2.9-5.8-6.5s2.6-6.5 5.8-6.5 5.9 2.9 5.8 6.5c0 3.6-2.5 6.5-5.8 6.5Z"
+          ></path>
         </svg>
       </a>
       <a
@@ -49,6 +81,9 @@ const navItems = [
         rel="noopener"
       >
         GitHub
+      </a>
+      <a href={getLangSwitchUrl()} class="nav-link lang-switch">
+        {isZh ? "EN" : "中文"}
       </a>
     </nav>
   </div>
@@ -130,6 +165,21 @@ const navItems = [
   .nav-external:hover {
     border-color: var(--accent);
     color: var(--accent);
+  }
+
+  .lang-switch {
+    padding: 0.35rem 0.75rem;
+    border: 1px solid var(--crimson);
+    border-radius: var(--radius);
+    color: var(--crimson);
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+  .lang-switch:hover {
+    background: var(--crimson);
+    color: #ffffff;
   }
 
   @media (max-width: 640px) {

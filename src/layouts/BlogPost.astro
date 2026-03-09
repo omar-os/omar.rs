@@ -6,17 +6,27 @@ interface Props {
   date: string;
   description?: string;
   author?: string;
+  lang?: string;
 }
 
-const { title, date, description, author = "OMAR Team" } = Astro.props;
+const {
+  title,
+  date,
+  description,
+  author = "OMAR Team",
+  lang = "en",
+} = Astro.props;
+const isZh = lang.startsWith("zh");
+const dateLocale = isZh ? "zh-CN" : "en-US";
+const blogHref = isZh ? "/zh/blog/" : "/blog/";
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} lang={lang}>
   <article class="blog-post container">
     <header class="post-header">
       <time class="post-date"
         >{
-          new Date(date).toLocaleDateString("en-US", {
+          new Date(date).toLocaleDateString(dateLocale, {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -25,13 +35,15 @@ const { title, date, description, author = "OMAR Team" } = Astro.props;
       >
       <h1 class="post-title">{title}</h1>
       {description && <p class="post-desc">{description}</p>}
-      <span class="post-author">by {author}</span>
+      <span class="post-author"
+        >{isZh ? `作者：${author}` : `by ${author}`}</span
+      >
     </header>
     <div class="post-body prose">
       <slot />
     </div>
     <footer class="post-footer">
-      <a href="/blog/">&larr; All posts</a>
+      <a href={blogHref}>&larr; {isZh ? "所有文章" : "All posts"}</a>
     </footer>
   </article>
 </BaseLayout>

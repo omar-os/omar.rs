@@ -6,16 +6,18 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description?: string;
+  lang?: string;
 }
 
 const {
   title,
   description = "TUI for creating powerful agentic organizations",
+  lang = "en",
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -24,10 +26,10 @@ const {
     <title>{title} | one-man army</title>
   </head>
   <body>
-    <Header />
+    <Header lang={lang} />
     <main>
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
   </body>
 </html>

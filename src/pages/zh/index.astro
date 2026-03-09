@@ -1,41 +1,39 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
 ---
 
 <BaseLayout
-  title="Home"
-  description="Lead an army of 300 agents to solve humanity's biggest problems. OMAR is a TUI for creating powerful agentic organizations."
+  title="首页"
+  description="率领 300 个智能体，解决人类最大的问题。OMAR 是一个用于创建强大智能体组织的 TUI 工具。"
+  lang="zh-CN"
 >
   <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-content">
         <h1 class="hero-title">
-          Lead an army of<br />
-          <span class="hero-accent">300 agents.</span>
+          指挥<br />
+          <span class="hero-accent">300 个智能体。</span>
         </h1>
         <p class="hero-subtitle">
-          <code>omar</code> is a TUI for creating powerful agentic organizations.
-          Command deep hierarchies of parallel AI agents from a single terminal.
+          <code>omar</code> 是一个用于创建强大智能体组织的 TUI 工具。 在一个终端内指挥深层并行
+          AI 智能体层级。
         </p>
         <div class="hero-install">
           <pre><code><span class="prompt">$</span> make install && omar</code></pre>
         </div>
         <div class="hero-actions">
-          <a href="/docs/" class="btn btn-primary">Get Started</a>
+          <a href="/zh/docs/" class="btn btn-primary">快速开始</a>
           <a
             href="https://github.com/lsk567/omar"
             class="btn btn-outline"
             target="_blank"
-            rel="noopener">View on GitHub</a
+            rel="noopener">GitHub 仓库</a
           >
         </div>
       </div>
       <div class="hero-image">
-        <img
-          src="/img/thermopylae.png"
-          alt="Thermopylae - Lead your army of agents"
-        />
+        <img src="/img/thermopylae.png" alt="温泉关 - 指挥你的智能体军团" />
       </div>
     </div>
   </section>
@@ -43,55 +41,37 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <!-- Features -->
   <section class="features">
     <div class="container">
-      <h2 class="section-title">Features</h2>
+      <h2 class="section-title">核心特性</h2>
       <div class="features-grid">
         <div class="feature-card">
           <div class="feature-icon">&#9632;</div>
-          <h3>Professional TUI Dashboard</h3>
-          <p>
-            Monitor all your agents in one place with a beautiful terminal
-            interface built on ratatui.
-          </p>
+          <h3>专业 TUI 仪表盘</h3>
+          <p>基于 ratatui 构建的精美终端界面，在一个地方监控所有智能体。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#9650;</div>
-          <h3>Deep Agent Hierarchy</h3>
-          <p>
-            Create parallel agent organizations, just like a company. Navigate
-            levels with arrow keys.
-          </p>
+          <h3>深层智能体层级</h3>
+          <p>创建并行的智能体组织，就像一家公司。用方向键在层级间导航。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#9654;</div>
-          <h3>Talk to Any Agent</h3>
-          <p>
-            Attach to any agent at any level. You are always in control of the
-            conversation.
-          </p>
+          <h3>对话任意智能体</h3>
+          <p>附加到任意层级的任意智能体。你始终掌控对话。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#9733;</div>
-          <h3>Slack Integration</h3>
-          <p>
-            Connect your agents to Slack channels. Bridge the gap between human
-            and AI workflows.
-          </p>
+          <h3>Slack 集成</h3>
+          <p>将智能体连接到 Slack 频道，打通人类与 AI 的工作流。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#9788;</div>
-          <h3>Computer Use</h3>
-          <p>
-            Agents can see and control your Linux desktop. Debug GUIs, interact
-            with applications.
-          </p>
+          <h3>桌面操控</h3>
+          <p>智能体可以看到并控制你的 Linux 桌面。调试 GUI，与应用交互。</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">&#9881;</div>
-          <h3>Highly Customizable</h3>
-          <p>
-            Built on tmux. Supports all tmux commands and key bindings for
-            maximum flexibility.
-          </p>
+          <h3>高度可定制</h3>
+          <p>基于 tmux 构建。支持所有 tmux 命令和快捷键，提供最大灵活性。</p>
         </div>
       </div>
     </div>
@@ -100,12 +80,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <!-- Quick Start -->
   <section class="quickstart">
     <div class="container">
-      <h2 class="section-title">Quick Start</h2>
+      <h2 class="section-title">快速开始</h2>
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-content">
-            <h3>Install Dependencies</h3>
+            <h3>安装依赖</h3>
             <ul>
               <li>tmux 3.0+</li>
               <li>Rust 1.70+</li>
@@ -114,7 +94,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                 <a
                   href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
                   >Claude Code</a
-                > or <a href="https://github.com/anomalyco/opencode">Opencode</a
+                > 或 <a href="https://github.com/anomalyco/opencode">Opencode</a
                 >
               </li>
             </ul>
@@ -123,7 +103,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-content">
-            <h3>Build &amp; Launch</h3>
+            <h3>编译并启动</h3>
             <pre><code><span class="prompt">$</span> make install
 <span class="prompt">$</span> omar</code></pre>
           </div>
@@ -131,11 +111,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-content">
-            <h3>Give Your EA a Task</h3>
-            <p>
-              Copy a prompt into your executive assistant window and watch
-              agents spawn.
-            </p>
+            <h3>给执行助理下达任务</h3>
+            <p>将提示词粘贴到执行助理窗口，观察智能体自动创建。</p>
             <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
           </div>
         </div>
@@ -146,13 +123,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <!-- Agent Backends -->
   <section class="backends">
     <div class="container">
-      <h2 class="section-title">Supported Agent Backends</h2>
+      <h2 class="section-title">支持的智能体后端</h2>
       <div class="backends-table">
         <table>
           <thead>
             <tr>
-              <th>Backend</th>
-              <th>How to launch</th>
+              <th>后端</th>
+              <th>启动方式</th>
             </tr>
           </thead>
           <tbody>
@@ -163,7 +140,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                   >Claude Code</a
                 ></td
               >
-              <td><code>omar</code> (default)</td>
+              <td><code>omar</code>（默认）</td>
             </tr>
             <tr>
               <td

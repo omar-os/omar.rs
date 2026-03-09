@@ -20,4 +20,23 @@ const blog = defineCollection({
   }),
 });
 
-export const collections = { docs, blog };
+const zhDocs = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/zh-docs" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    order: z.number(),
+  }),
+});
+
+const zhBlog = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/zh-blog" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    date: z.string(),
+    author: z.string().optional(),
+  }),
+});
+
+export const collections = { docs, blog, "zh-docs": zhDocs, "zh-blog": zhBlog };
