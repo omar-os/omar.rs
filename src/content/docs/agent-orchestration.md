@@ -41,6 +41,7 @@ EA aggregates results
 ## Parent-Child Hierarchy
 
 Agents track their parent via `~/.omar/agent_parents.json`. This enables:
+
 - Tree visualization in the TUI (command tree with box-drawing)
 - Navigation: `→/Tab` drills into children, `←` returns to parent
 - Hierarchical status monitoring
@@ -52,6 +53,7 @@ Any agent can spawn children, creating arbitrary depth.
 The EA communicates with OMAR via structured JSON in its output:
 
 ### Spawning agents
+
 ```json
 {
   "type": "plan",
@@ -67,6 +69,7 @@ The EA communicates with OMAR via structured JSON in its output:
 ```
 
 ### Messaging agents
+
 ```json
 {
   "type": "send",
@@ -76,6 +79,7 @@ The EA communicates with OMAR via structured JSON in its output:
 ```
 
 ### Querying status
+
 ```json
 {
   "type": "query",
@@ -84,6 +88,7 @@ The EA communicates with OMAR via structured JSON in its output:
 ```
 
 ### Signaling completion
+
 ```json
 {
   "type": "complete"

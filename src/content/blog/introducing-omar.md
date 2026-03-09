@@ -41,6 +41,7 @@ Navigate with arrow keys. Drill into agent hierarchies. Attach to any agent via 
 ## What's Next
 
 We're working on:
+
 - More agent backends beyond Claude Code and Opencode
 - Enhanced manager-worker orchestration protocols
 - Distribution via Homebrew, AUR, and Nix

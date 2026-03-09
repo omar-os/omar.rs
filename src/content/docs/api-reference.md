@@ -13,6 +13,7 @@ CORS is fully enabled (`Access-Control-Allow-Origin: *`).
 ## Agent Endpoints
 
 ### `POST /api/agents`
+
 Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its system prompt with the task injected.
 
 ```json
@@ -36,6 +37,7 @@ Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its s
 ```
 
 ### `GET /api/agents`
+
 List all agents with health and status.
 
 ```json
@@ -58,12 +60,15 @@ List all agents with health and status.
 ```
 
 ### `GET /api/agents/:id`
+
 Get agent details including recent output tail.
 
 ### `GET /api/agents/:id/summary`
+
 Lightweight card view: health, task, status, children.
 
 ### `PUT /api/agents/:id/status`
+
 Update an agent's self-reported status (stored in `~/.omar/status/<session>.md`).
 
 ```json
@@ -71,6 +76,7 @@ Update an agent's self-reported status (stored in `~/.omar/status/<session>.md`)
 ```
 
 ### `POST /api/agents/:id/send`
+
 Send text input to an agent's tmux session.
 
 ```json
@@ -78,6 +84,7 @@ Send text input to an agent's tmux session.
 ```
 
 ### `DELETE /api/agents/:id`
+
 Kill an agent session.
 
 **Note:** Session names accept both short form (`worker-1`) and full form (`omar-agent-worker-1`).
@@ -85,6 +92,7 @@ Kill an agent session.
 ## Event Endpoints
 
 ### `POST /api/events`
+
 Schedule an event for delivery to an agent.
 
 ```json
@@ -98,51 +106,65 @@ Schedule an event for delivery to an agent.
 ```
 
 ### `GET /api/events`
+
 List scheduled events. Supports `?receiver=<name>` query filter.
 
 ### `DELETE /api/events/:id`
+
 Cancel a scheduled event.
 
 ## Project Endpoints
 
 ### `GET /api/projects`
+
 List projects from `~/.omar/tasks.md`.
 
 ### `POST /api/projects`
+
 Add a new project.
 
 ### `DELETE /api/projects/:id`
+
 Complete/remove a project.
 
 ## Computer Use Endpoints
 
 ### `GET /api/computer/status`
+
 Check if computer use is available and who holds the lock.
 
 ### `POST /api/computer/lock`
+
 Acquire exclusive computer access (one agent at a time).
 
 ### `DELETE /api/computer/lock`
+
 Release computer lock.
 
 ### `POST /api/computer/screenshot`
+
 Take a screenshot (must hold lock). Returns base64-encoded image.
 
 ### `POST /api/computer/mouse`
+
 Mouse control: move, click, drag, scroll.
 
 ### `POST /api/computer/keyboard`
+
 Keyboard input: type text or press key combinations.
 
 ### `GET /api/computer/screen-size`
+
 Get display dimensions.
 
 ### `GET /api/computer/mouse-position`
+
 Get current cursor position.
 
 ## System Endpoints
 
 ### `GET /api/health`
+
 Health check.
 
 ```json
