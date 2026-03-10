@@ -16,8 +16,6 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
   <h2>前置依赖</h2>
   <ul>
     <li><strong>tmux 3.0+</strong> —— 终端复用器</li>
-    <li><strong>Rust 1.70+</strong> —— 从源码编译</li>
-    <li><strong>GNU Make</strong> —— 构建系统</li>
     <li>
       <strong>智能体后端</strong> —— <a
         href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
@@ -27,7 +25,18 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
   </ul>
 
   <h2>安装</h2>
-  <pre><code>$ make install</code></pre>
+  <h3>一键安装（推荐）</h3>
+  <pre><code>$ curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+  <p>支持 macOS 和 Linux，默认安装到 <code>/usr/local/bin</code>。</p>
+
+  <h3>Homebrew</h3>
+  <pre><code>$ brew install lsk567/omar/omar</code></pre>
+  <p>自动安装 tmux 依赖。</p>
+
+  <h3>从源码编译</h3>
+  <pre><code>$ git clone https://github.com/lsk567/omar.git
+$ cd omar && make install</code></pre>
+  <p>需要 Rust 1.70+ 和 GNU Make。</p>
 
   <h2>启动</h2>
   <pre><code>$ omar</code></pre>

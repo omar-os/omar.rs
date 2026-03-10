@@ -12,15 +12,16 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     <div class="container hero-inner">
       <div class="hero-content">
         <h1 class="hero-title">
-          指挥<br />
-          <span class="hero-accent">300 个智能体。</span>
+          一人成团，<br />
+          指挥 <span class="hero-accent">300 个智能体。</span>
         </h1>
         <p class="hero-subtitle">
           <code>omar</code> 是一个用于创建强大智能体组织的 TUI 工具。 在一个终端内指挥深层并行
           AI 智能体层级。
         </p>
         <div class="hero-install">
-          <pre><code><span class="prompt">$</span> make install && omar</code></pre>
+          <p class="hero-install-label">一键安装：</p>
+          <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
         </div>
         <div class="hero-actions">
           <a href="/zh/docs/" class="btn btn-primary">快速开始</a>
@@ -81,15 +82,33 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   <section class="quickstart">
     <div class="container">
       <h2 class="section-title">快速开始</h2>
+      <div class="install-methods">
+        <div class="install-tabs">
+          <button class="install-tab active" data-tab="oneliner">一键安装</button>
+          <button class="install-tab" data-tab="brew">Homebrew</button>
+          <button class="install-tab" data-tab="source">从源码编译</button>
+        </div>
+        <div class="install-panel active" id="panel-oneliner">
+          <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+          <p class="install-note">支持 macOS 和 Linux，默认安装到 <code>/usr/local/bin</code>。</p>
+        </div>
+        <div class="install-panel" id="panel-brew">
+          <pre><code><span class="prompt">$</span> brew install lsk567/omar/omar</code></pre>
+          <p class="install-note">自动安装 tmux 依赖。</p>
+        </div>
+        <div class="install-panel" id="panel-source">
+          <pre><code><span class="prompt">$</span> git clone https://github.com/lsk567/omar.git
+<span class="prompt">$</span> cd omar && make install</code></pre>
+          <p class="install-note">需要 Rust 1.70+ 和 GNU Make。</p>
+        </div>
+      </div>
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-content">
-            <h3>安装依赖</h3>
+            <h3>前置条件</h3>
             <ul>
               <li>tmux 3.0+</li>
-              <li>Rust 1.70+</li>
-              <li>GNU Make</li>
               <li>
                 <a
                   href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
@@ -103,9 +122,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-content">
-            <h3>编译并启动</h3>
-            <pre><code><span class="prompt">$</span> make install
-<span class="prompt">$</span> omar</code></pre>
+            <h3>启动</h3>
+            <pre><code><span class="prompt">$</span> omar</code></pre>
           </div>
         </div>
         <div class="step">
@@ -218,6 +236,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     margin-bottom: 2rem;
   }
 
+  .hero-install-label {
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
   .hero-install pre {
     display: inline-block;
     background: var(--bg-surface);
@@ -308,6 +335,60 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   .quickstart {
     padding: 5rem 0;
     border-top: 1px solid var(--border);
+  }
+
+  .install-methods {
+    max-width: 640px;
+    margin: 0 auto 3rem;
+  }
+
+  .install-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .install-tab {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .install-tab:hover {
+    color: var(--accent);
+  }
+
+  .install-tab.active {
+    color: var(--crimson);
+    border-bottom-color: var(--crimson);
+    font-weight: 600;
+  }
+
+  .install-panel {
+    display: none;
+  }
+
+  .install-panel.active {
+    display: block;
+  }
+
+  .install-note {
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-top: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .install-note code {
+    color: var(--accent);
+    font-size: 0.85rem;
   }
 
   .steps {
@@ -446,3 +527,14 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     }
   }
 </style>
+
+<script>
+  document.querySelectorAll('.install-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`panel-${tab.dataset.tab}`)?.classList.add('active');
+    });
+  });
+</script>
