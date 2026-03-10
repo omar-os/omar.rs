@@ -6,17 +6,43 @@ order: 6
 
 ## Project Overview
 
-OMAR is a Rust workspace with 3 crates:
+OMAR is a Rust workspace with 3 binaries:
 
-- `omar` (main binary) - the TUI dashboard
-- `omar-slack-bridge` - Slack bridge binary
-- `omar-computer-bridge` - computer-use bridge binary
+- `omar` — the TUI dashboard
+- `omar-slack` — Slack bridge
+- `omar-computer` — computer-use bridge
 
 Runtime dependency: **tmux 3.0+**
 
 ## Installation Methods
 
-### Build from Source (Recommended)
+### One-Liner (Recommended)
+
+```bash
+curl -fsSL https://omarmy.ai/install.sh | sh
+```
+
+Auto-detects OS (macOS/Linux) and architecture (amd64/arm64). Installs all 3 binaries to `/usr/local/bin`.
+
+Options:
+
+```bash
+# Pin a specific version
+OMAR_VERSION=0.1.0 curl -fsSL https://omarmy.ai/install.sh | sh
+
+# Custom install directory
+OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omarmy.ai/install.sh | sh
+```
+
+### Homebrew
+
+```bash
+brew install lsk567/omar/omar
+```
+
+Automatically installs tmux as a dependency.
+
+### From Source
 
 ```bash
 git clone https://github.com/lsk567/omar.git
@@ -24,40 +50,18 @@ cd omar
 make install
 ```
 
-### cargo install
-
-```bash
-cargo install omar
-```
-
-### Homebrew (macOS)
-
-```bash
-brew tap lsk567/tap
-brew install omar
-```
-
-## Distribution Priority
-
-| Priority | Platform                  | Reach             | Notes                           |
-| -------- | ------------------------- | ----------------- | ------------------------------- |
-| 1        | GitHub Releases           | High              | Foundation for everything else  |
-| 2        | cargo install (crates.io) | High (Rust users) | Trivial once metadata is ready  |
-| 3        | Homebrew tap              | High (macOS)      | Uses GitHub Release binaries    |
-| 4        | AUR                       | Medium (Arch)     | Community may create this       |
-| 5        | Nix                       | Medium            | Growing community               |
-| 6        | npm wrapper               | Low               | Only if targeting JS developers |
+Requires Rust 1.70+ and GNU Make.
 
 ## GitHub Releases
 
-Pre-built binaries for all major platforms are provided via GitHub Releases with automated cross-compilation:
+Pre-built binaries for all major platforms are provided via [GitHub Releases](https://github.com/lsk567/omar/releases):
 
-- `x86_64-unknown-linux-gnu`
-- `aarch64-unknown-linux-gnu`
-- `x86_64-apple-darwin`
-- `aarch64-apple-darwin`
+- `omar-linux-amd64.tar.gz`
+- `omar-linux-arm64.tar.gz`
+- `omar-darwin-amd64.tar.gz`
+- `omar-darwin-arm64.tar.gz`
 
-Each release includes `sha256sums.txt` for verification.
+Each release includes `checksums.txt` (SHA256) for verification.
 
 ### Creating a Release
 
@@ -66,29 +70,4 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The CI workflow builds binaries for all targets and creates a GitHub Release automatically.
-
-## AUR (Arch Linux)
-
-Available as `omar-bin` (pre-built binary) and `omar` (build from source).
-
-```bash
-# Using an AUR helper
-yay -S omar-bin
-```
-
-## Nix
-
-```bash
-nix profile install github:lsk567/omar
-# or run directly
-nix run github:lsk567/omar
-```
-
-## Docker
-
-```bash
-docker run --rm -it -v $(pwd):/workspace lsk567/omar
-```
-
-> Note: OMAR manages tmux sessions on the host, so Docker adds friction. Build from source is preferred.
+The CI workflow builds binaries for all targets, creates a GitHub Release, and auto-updates the Homebrew formula.

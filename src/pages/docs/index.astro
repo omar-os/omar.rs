@@ -16,8 +16,6 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
   <h2>Prerequisites</h2>
   <ul>
     <li><strong>tmux 3.0+</strong> &mdash; session multiplexer</li>
-    <li><strong>Rust 1.70+</strong> &mdash; for building from source</li>
-    <li><strong>GNU Make</strong> &mdash; build system</li>
     <li>
       <strong>An agent backend</strong> &mdash; <a
         href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
@@ -28,7 +26,18 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
   </ul>
 
   <h2>Installation</h2>
-  <pre><code>$ make install</code></pre>
+  <h3>One-Liner (Recommended)</h3>
+  <pre><code>$ curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+  <p>Works on macOS and Linux. Installs all binaries to <code>/usr/local/bin</code>.</p>
+
+  <h3>Homebrew</h3>
+  <pre><code>$ brew install lsk567/omar/omar</code></pre>
+  <p>Automatically installs tmux as a dependency.</p>
+
+  <h3>From Source</h3>
+  <pre><code>$ git clone https://github.com/lsk567/omar.git
+$ cd omar && make install</code></pre>
+  <p>Requires Rust 1.70+ and GNU Make.</p>
 
   <h2>Launch</h2>
   <pre><code>$ omar</code></pre>
