@@ -20,6 +20,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
           AI 智能体层级。
         </p>
         <div class="hero-install">
+          <p class="hero-install-label">一键安装</p>
           <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
         </div>
         <div class="hero-actions">
@@ -233,6 +234,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
   .hero-install {
     margin-bottom: 2rem;
+  }
+
+  .hero-install-label {
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
   }
 
   .hero-install pre {
