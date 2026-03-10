@@ -19,7 +19,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           Command deep hierarchies of parallel AI agents from a single terminal.
         </p>
         <div class="hero-install">
-          <pre><code><span class="prompt">$</span> make install && omar</code></pre>
+          <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
         </div>
         <div class="hero-actions">
           <a href="/docs/" class="btn btn-primary">Get Started</a>
@@ -101,15 +101,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <section class="quickstart">
     <div class="container">
       <h2 class="section-title">Quick Start</h2>
+      <div class="install-methods">
+        <div class="install-tabs">
+          <button class="install-tab active" data-tab="oneliner">One-Liner</button>
+          <button class="install-tab" data-tab="brew">Homebrew</button>
+          <button class="install-tab" data-tab="source">From Source</button>
+        </div>
+        <div class="install-panel active" id="panel-oneliner">
+          <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+          <p class="install-note">Works on macOS and Linux. Installs all binaries to <code>/usr/local/bin</code>.</p>
+        </div>
+        <div class="install-panel" id="panel-brew">
+          <pre><code><span class="prompt">$</span> brew install lsk567/omar/omar</code></pre>
+          <p class="install-note">Installs tmux automatically as a dependency.</p>
+        </div>
+        <div class="install-panel" id="panel-source">
+          <pre><code><span class="prompt">$</span> git clone https://github.com/lsk567/omar.git
+<span class="prompt">$</span> cd omar && make install</code></pre>
+          <p class="install-note">Requires Rust 1.70+ and GNU Make.</p>
+        </div>
+      </div>
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
           <div class="step-content">
-            <h3>Install Dependencies</h3>
+            <h3>Prerequisites</h3>
             <ul>
               <li>tmux 3.0+</li>
-              <li>Rust 1.70+</li>
-              <li>GNU Make</li>
               <li>
                 <a
                   href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
@@ -123,9 +141,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-content">
-            <h3>Build &amp; Launch</h3>
-            <pre><code><span class="prompt">$</span> make install
-<span class="prompt">$</span> omar</code></pre>
+            <h3>Launch</h3>
+            <pre><code><span class="prompt">$</span> omar</code></pre>
           </div>
         </div>
         <div class="step">
@@ -333,6 +350,60 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border-top: 1px solid var(--border);
   }
 
+  .install-methods {
+    max-width: 640px;
+    margin: 0 auto 3rem;
+  }
+
+  .install-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .install-tab {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 0.95rem;
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    font-family: inherit;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .install-tab:hover {
+    color: var(--accent);
+  }
+
+  .install-tab.active {
+    color: var(--crimson);
+    border-bottom-color: var(--crimson);
+    font-weight: 600;
+  }
+
+  .install-panel {
+    display: none;
+  }
+
+  .install-panel.active {
+    display: block;
+  }
+
+  .install-note {
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-top: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .install-note code {
+    color: var(--accent);
+    font-size: 0.85rem;
+  }
+
   .steps {
     max-width: 640px;
     margin: 0 auto;
@@ -469,3 +540,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     }
   }
 </style>
+
+<script>
+  document.querySelectorAll('.install-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`panel-${tab.dataset.tab}`)?.classList.add('active');
+    });
+  });
+</script>
