@@ -510,8 +510,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     letter-spacing: 0.03em;
   }
 
-  /* Responsive */
+  /* Responsive - Tablet */
   @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 0 2rem;
+    }
+
     .hero-inner {
       grid-template-columns: 1fr;
       gap: 2rem;
@@ -524,6 +528,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
     .hero-subtitle {
       margin: 0 auto 2rem;
+    }
+
+    .hero-install pre {
+      display: block;
+      overflow-x: auto;
     }
 
     .hero-actions {
@@ -540,13 +549,82 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     }
 
     .features-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .features {
+      padding: 3rem 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .quickstart {
+      padding: 3rem 0;
+    }
+
+    .backends {
+      padding: 2rem 0 3rem;
+    }
+
+    .backends-table {
+      max-width: 100%;
+      overflow-x: auto;
     }
 
     .step {
       flex-direction: column;
       align-items: center;
       text-align: center;
+    }
+  }
+
+  /* Responsive - Mobile */
+  @media (max-width: 480px) {
+    .hero {
+      padding: 2rem 0 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+      font-size: 0.95rem;
+    }
+
+    .hero-install pre {
+      font-size: 0.75rem;
+      padding: 0.6rem 0.75rem;
+    }
+
+    .hero-image img {
+      max-width: 100%;
+      width: 280px;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+      padding: 1.25rem;
+    }
+
+    .install-tab {
+      font-size: 0.8rem;
+      padding: 0.6rem 0.75rem;
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+    }
+
+    .step-content pre {
+      overflow-x: auto;
     }
   }
 </style>
