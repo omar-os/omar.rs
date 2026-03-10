@@ -29,6 +29,13 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
   <pre><code>$ curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
   <p>支持 macOS 和 Linux，默认安装到 <code>/usr/local/bin</code>。</p>
 
+  <p>选项：</p>
+  <pre><code># 指定特定版本
+$ OMAR_VERSION=0.1.0 curl -fsSL https://omarmy.ai/install.sh | sh
+
+# 自定义安装目录
+$ OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+
   <h3>Homebrew</h3>
   <pre><code>$ brew install lsk567/omar/omar</code></pre>
   <p>自动安装 tmux 依赖。</p>

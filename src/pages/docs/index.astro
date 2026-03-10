@@ -30,6 +30,13 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
   <pre><code>$ curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
   <p>Works on macOS and Linux. Installs all binaries to <code>/usr/local/bin</code>.</p>
 
+  <p>Options:</p>
+  <pre><code># Pin a specific version
+$ OMAR_VERSION=0.1.0 curl -fsSL https://omarmy.ai/install.sh | sh
+
+# Custom install directory
+$ OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
+
   <h3>Homebrew</h3>
   <pre><code>$ brew install lsk567/omar/omar</code></pre>
   <p>Automatically installs tmux as a dependency.</p>
