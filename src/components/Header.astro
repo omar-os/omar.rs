@@ -35,6 +35,14 @@ function getLangSwitchUrl() {
       <span class="logo-text">one-man army</span>
       <span class="logo-cursor">_</span>
     </a>
+
+    <!-- Hamburger button (mobile only) -->
+    <button class="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+
     <nav class="nav">
       {
         navItems.map((item) => (
@@ -110,6 +118,7 @@ function getLangSwitchUrl() {
     display: flex;
     align-items: center;
     text-decoration: none;
+    z-index: 101;
   }
 
   .logo-text {
@@ -128,6 +137,28 @@ function getLangSwitchUrl() {
     50% {
       opacity: 0;
     }
+  }
+
+  /* Hamburger button - hidden on desktop */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 101;
+  }
+
+  .hamburger-line {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 1px;
+    transition: transform 0.3s, opacity 0.3s;
   }
 
   .nav {
@@ -167,12 +198,80 @@ function getLangSwitchUrl() {
     color: var(--accent);
   }
 
-  @media (max-width: 640px) {
-    .nav {
-      gap: 1rem;
+  /* Mobile nav */
+  @media (max-width: 768px) {
+    .hamburger {
+      display: flex;
     }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(10, 10, 10, 0.97);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1.75rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+      z-index: 100;
+    }
+
+    .nav.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
     .nav-link {
-      font-size: 0.85rem;
+      font-size: 1.2rem;
+    }
+
+    .nav-external {
+      font-size: 1rem;
+    }
+
+    /* Hamburger X animation when open */
+    .hamburger.open .hamburger-line:nth-child(1) {
+      transform: translateY(6px) rotate(45deg);
+    }
+
+    .hamburger.open .hamburger-line:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.open .hamburger-line:nth-child(3) {
+      transform: translateY(-6px) rotate(-45deg);
+    }
+
+    .logo-text {
+      font-size: 1.1rem;
     }
   }
 </style>
+
+<script>
+  const hamburger = document.querySelector('.hamburger');
+  const nav = document.querySelector('.nav');
+
+  hamburger?.addEventListener('click', () => {
+    const isOpen = nav?.classList.toggle('open');
+    hamburger.classList.toggle('open');
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+    // Prevent body scroll when menu is open
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  });
+
+  // Close menu when a nav link is clicked
+  nav?.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      nav.classList.remove('open');
+      hamburger?.classList.remove('open');
+      hamburger?.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    });
+  });
+</script>

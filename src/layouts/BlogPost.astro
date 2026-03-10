@@ -101,4 +101,25 @@ const blogHref = isZh ? "/zh/blog/" : "/blog/";
   .post-title {
     color: var(--accent);
   }
+
+  @media (max-width: 768px) {
+    .blog-post {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .post-title {
+      font-size: 1.75rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .post-title {
+      font-size: 1.4rem;
+    }
+
+    .post-desc {
+      font-size: 1rem;
+    }
+  }
 </style>
