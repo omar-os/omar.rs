@@ -10,6 +10,31 @@ OMAR 在 9876 端口（可配置）运行 HTTP API，用于程序化管理智能
 
 CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
 
+## 后端端点
+
+### `GET /api/backends`
+
+列出已安装的智能体后端及其可用性。
+
+```json
+{
+  "backends": [
+    {
+      "name": "claude",
+      "command": "claude --dangerously-skip-permissions",
+      "available": true
+    },
+    {
+      "name": "codex",
+      "command": "codex --no-alt-screen ...",
+      "available": true
+    },
+    { "name": "cursor", "command": "cursor agent --yolo", "available": false },
+    { "name": "opencode", "command": "opencode", "available": false }
+  ]
+}
+```
+
 ## 智能体端点
 
 ### `POST /api/agents`
@@ -22,8 +47,8 @@ CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
   "name": "worker-1",
   "task": "实现功能 X",
   "workdir": "/path/to/project",
-  "command": "claude",
-  "depends_on": ["worker-0"],
+  "backend": "codex",
+  "model": "o3",
   "parent": "ea"
 }
 
@@ -35,6 +60,16 @@ CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
   "created_at": "2025-01-26T12:00:00Z"
 }
 ```
+
+字段说明：
+
+- `name` —— 智能体名称（省略时自动生成）
+- `task` —— 任务描述；触发 `agent.md` 提示词注入
+- `workdir` —— 工作目录
+- `backend` —— 后端简写：`"claude"`、`"codex"`、`"cursor"`、`"opencode"`。不能与 `command` 同时使用。
+- `model` —— 模型覆盖，以 `--model <value>` 附加到基础命令
+- `command` —— 显式命令。不能与 `backend` 同时使用。
+- `parent` —— 父智能体名称，用于层级追踪
 
 ### `GET /api/agents`
 

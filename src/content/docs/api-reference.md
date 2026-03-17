@@ -10,6 +10,31 @@ OMAR runs an HTTP API on port 9876 (configurable) for programmatic agent control
 
 CORS is fully enabled (`Access-Control-Allow-Origin: *`).
 
+## Backend Endpoints
+
+### `GET /api/backends`
+
+List installed agent backends and their availability.
+
+```json
+{
+  "backends": [
+    {
+      "name": "claude",
+      "command": "claude --dangerously-skip-permissions",
+      "available": true
+    },
+    {
+      "name": "codex",
+      "command": "codex --no-alt-screen ...",
+      "available": true
+    },
+    { "name": "cursor", "command": "cursor agent --yolo", "available": false },
+    { "name": "opencode", "command": "opencode", "available": false }
+  ]
+}
+```
+
 ## Agent Endpoints
 
 ### `POST /api/agents`
@@ -22,8 +47,8 @@ Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its s
   "name": "worker-1",
   "task": "Implement feature X",
   "workdir": "/path/to/project",
-  "command": "claude",
-  "depends_on": ["worker-0"],
+  "backend": "codex",
+  "model": "o3",
   "parent": "ea"
 }
 
@@ -35,6 +60,16 @@ Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its s
   "created_at": "2025-01-26T12:00:00Z"
 }
 ```
+
+Fields:
+
+- `name` — Agent name (auto-generated if omitted)
+- `task` — Task description; triggers `agent.md` prompt injection
+- `workdir` — Working directory
+- `backend` — Backend shorthand: `"claude"`, `"codex"`, `"cursor"`, `"opencode"`. Cannot be used with `command`.
+- `model` — Model override, appended as `--model <value>` to the base command
+- `command` — Explicit command to run. Cannot be used with `backend`.
+- `parent` — Parent agent name for hierarchy tracking
 
 ### `GET /api/agents`
 

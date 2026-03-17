@@ -10,9 +10,9 @@ OMAR uses a hierarchical agent model where an Executive Assistant (EA) orchestra
 
 ## Unified Agent Model
 
-All agents (except the EA) use the same role and prompt (`agent.md`). There is no PM/worker distinction - every spawned agent is a peer that receives a task and works independently.
+All agents (except the EA) use the same prompt (`agent.md`). There is no PM/worker distinction — every spawned agent is autonomous: it receives a task, decides whether to do the work itself or spawn sub-agents, and reports completion.
 
-The EA (`executive-assistant.md`) is special: it gets memory context prepended to its prompt, including active projects, running agents, and their tasks.
+The EA (`executive-assistant.md`) is special: it acts purely as a dispatcher — it never does work directly, only spawns agents, monitors them, and manages projects. It gets memory context prepended to its prompt.
 
 ## Agent Lifecycle
 
@@ -50,85 +50,97 @@ Any agent can spawn children, creating arbitrary depth.
 
 ## EA Protocol
 
-The EA communicates with OMAR via structured JSON in its output:
+The EA communicates with OMAR exclusively via the HTTP API. It never does work directly — it only spawns agents, monitors their output, and manages projects.
 
 ### Spawning agents
 
-```json
-{
-  "type": "plan",
-  "agents": [
-    {
-      "name": "api",
-      "role": "API Developer",
-      "task": "Create Express server with /users and /posts endpoints",
-      "depends_on": []
-    }
-  ]
-}
+```bash
+curl -X POST http://localhost:9876/api/agents \
+  -H "Content-Type: application/json" \
+  -d '{"name": "api", "task": "Create Express server with /users and /posts endpoints"}'
 ```
 
-### Messaging agents
+### Monitoring agents
 
-```json
-{
-  "type": "send",
-  "target": "api",
-  "message": "Also add /comments endpoint"
-}
+```bash
+# Check a specific agent's output
+curl http://localhost:9876/api/agents/api
+
+# List all agents with health status
+curl http://localhost:9876/api/agents
 ```
 
-### Querying status
+### Sending input to agents
 
-```json
-{
-  "type": "query",
-  "target": "all"
-}
+```bash
+curl -X POST http://localhost:9876/api/agents/api/send \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Also add /comments endpoint", "enter": true}'
 ```
 
-### Signaling completion
+### Killing agents on completion
 
-```json
-{
-  "type": "complete"
-}
+```bash
+curl -X DELETE http://localhost:9876/api/agents/api
 ```
 
-## Worker Context
+### Managing projects
 
-When spawning agents with a task, OMAR injects the unified `agent.md` prompt with context:
+```bash
+# Add a project
+curl -X POST http://localhost:9876/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Build REST API"}'
+
+# Complete a project
+curl -X DELETE http://localhost:9876/api/projects/<id>
+```
+
+## Agent Context
+
+When spawning agents with a task, OMAR injects the unified `agent.md` prompt. Each agent is autonomous — it decides whether to do the work itself or spawn sub-agents:
 
 ```
-You are a worker agent in a multi-agent project.
+You are an Agent in the OMAR (One-Man Army) system.
+You receive a task from your parent, assess it, and
+decide the best way to get it done — either by doing
+it yourself or by spawning sub-agents.
 
+YOUR NAME: api
+YOUR PARENT: ea
 YOUR TASK: Create Express server with /users and /posts endpoints
-
-INSTRUCTIONS:
-- Focus only on your assigned task
-- When done, end with: [TASK COMPLETE]
-- If blocked, say: [BLOCKED: reason]
-- If you need input, say: [NEED INPUT: question]
 ```
+
+Agents signal completion by outputting `[TASK COMPLETE]` followed by a summary.
 
 ## Event-Driven Coordination
 
 The scheduler enables timed coordination between agents:
 
-- **Status checks**: EA schedules recurring events to poll workers
+- **Wake-ups**: Agents schedule self-wake-ups to check on sub-agent progress
 - **Handoffs**: Agent A schedules an event for Agent B when a dependency is ready
-- **Reminders**: Agents can set future events for themselves
+- **Cron jobs**: Recurring events auto-reschedule after each delivery
 
 Events are delivered by injecting text into the target agent's tmux session.
 
 ```bash
-# Schedule a recurring status check every 5 minutes
+# Schedule a one-shot wake-up event
 curl -X POST http://localhost:9876/api/events \
   -H "Content-Type: application/json" \
   -d '{
     "sender": "ea",
     "receiver": "api",
-    "payload": "[STATUS CHECK] Report your progress",
+    "payload": "Check progress on API implementation",
+    "timestamp": 1772904000000000000
+  }'
+
+# Schedule a recurring cron job (every 5 minutes)
+curl -X POST http://localhost:9876/api/events \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sender": "ea",
+    "receiver": "api",
+    "payload": "Progress check",
     "recurring_ns": 300000000000
   }'
 ```

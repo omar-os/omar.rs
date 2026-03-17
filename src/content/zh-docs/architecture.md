@@ -115,7 +115,7 @@ host = "127.0.0.1"
 port = 9876
 ```
 
-智能体后端会自动检测（Claude Code 或 Opencode），也可通过 `--agent` 参数手动指定。
+智能体后端会自动检测已安装的工具（Claude Code、Codex、Cursor 或 Opencode），也可通过 `--agent` 参数手动指定。
 
 ## 快捷键
 
