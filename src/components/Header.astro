@@ -30,7 +30,10 @@ function getLangSwitchUrl() {
 
 <header class="header">
   <div class="container header-inner">
-    <a href={isZh ? "/zh/" : "/"} class="logo">one-man army</a>
+    <a href={isZh ? "/zh/" : "/"} class="logo">
+      <span class="brand-full">one-man army</span>
+      <span class="brand-short">omar</span>
+    </a>
     <nav class="nav">
       {
         navItems.map((item) => (
@@ -78,7 +81,8 @@ function getLangSwitchUrl() {
         >
       </a>
       <a href={getLangSwitchUrl()} class="nav-link lang-switch">
-        {isZh ? "EN" : "中文"}
+        <span class="lang-full">{isZh ? "EN" : "中文"}</span>
+        <span class="lang-short">{isZh ? "EN" : "中"}</span>
       </a>
     </nav>
   </div>
@@ -152,12 +156,25 @@ function getLangSwitchUrl() {
     border-color: var(--text-dim);
   }
 
+  .brand-short,
+  .lang-short {
+    display: none;
+  }
+
   @media (max-width: 640px) {
     .nav {
       gap: 1rem;
     }
     .nav-link {
       font-size: 0.8rem;
+    }
+    .brand-full,
+    .lang-full {
+      display: none;
+    }
+    .brand-short,
+    .lang-short {
+      display: inline;
     }
   }
 </style>
