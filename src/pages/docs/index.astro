@@ -8,27 +8,37 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 >
   <h2>What is OMAR?</h2>
   <p>
-    OMAR (one-man army) is a TUI dashboard for creating and managing powerful
-    agentic organizations. It runs on tmux and lets you orchestrate deep
-    hierarchies of parallel AI coding agents from a single terminal.
+    OMAR (one-man army) is a TUI for creating powerful agentic organizations. It
+    runs on tmux and lets you orchestrate deep hierarchies of parallel AI agents
+    from a single terminal.
   </p>
 
   <h2>Prerequisites</h2>
   <ul>
-    <li><strong>tmux 3.0+</strong> &mdash; session multiplexer</li>
     <li>
-      <strong>An agent backend</strong> &mdash; <a
+      <strong>tmux 3.0+</strong> &mdash; <code>brew install tmux</code> (macOS) or
+      <code>apt install tmux</code> (Debian/Ubuntu)
+    </li>
+    <li>
+      <strong>At least one agent backend:</strong>
+      <a
         href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
         >Claude Code</a
-      > (default) or <a href="https://github.com/anomalyco/opencode">Opencode</a
-      >
+      >,
+      <a href="https://developers.openai.com/codex/cli">Codex CLI</a>,
+      <a href="https://github.com/anomalyco/opencode">Opencode</a>, or
+      <a href="https://cursor.com/cli">Cursor CLI</a>
     </li>
   </ul>
 
   <h2>Installation</h2>
   <h3>One-Liner (Recommended)</h3>
   <pre><code>$ curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
-  <p>Works on macOS and Linux. Installs all binaries to <code>/usr/local/bin</code>.</p>
+  <p>
+    Works on macOS and Linux. Installs all binaries to <code
+      >/usr/local/bin</code
+    >.
+  </p>
 
   <h3>Homebrew</h3>
   <pre><code>$ brew install lsk567/omar/omar</code></pre>
@@ -43,19 +53,33 @@ $ cd omar && make install</code></pre>
   <pre><code>$ omar</code></pre>
   <p>
     This starts the OMAR dashboard with the default agent backend (Claude Code).
-    To use Opencode instead:
+    To use a different backend:
   </p>
-  <pre><code>$ omar --agent opencode</code></pre>
+  <table>
+    <thead>
+      <tr><th>Backend</th><th>Command</th></tr>
+    </thead>
+    <tbody>
+      <tr
+        ><td>Claude Code</td><td
+          ><code>omar</code> or <code>omar --agent claude</code></td
+        ></tr
+      >
+      <tr><td>Codex CLI</td><td><code>omar --agent codex</code></td></tr>
+      <tr><td>Opencode</td><td><code>omar --agent opencode</code></td></tr>
+      <tr><td>Cursor CLI</td><td><code>omar --agent cursor</code></td></tr>
+    </tbody>
+  </table>
 
   <h2>Your First Session</h2>
   <ol>
     <li>
-      Launch <code>omar</code> &mdash; you'll see the TUI dashboard with your executive
-      assistant (EA)
+      Launch <code>omar</code> &mdash; you'll see the TUI dashboard with your Executive
+      Assistant (EA)
     </li>
     <li>
-      Copy a prompt into your EA window:
-      <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
+      Copy a test prompt into your EA window:
+      <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
       Watch agents spawn. Use <strong>&uarr;&darr;</strong> to cycle agents, <strong
@@ -75,16 +99,26 @@ $ cd omar && make install</code></pre>
     </thead>
     <tbody>
       <tr
-        ><td><code>&uarr;/&darr;</code></td><td
-          >Navigate agents at current level</td
+        ><td><code>&uarr;/&darr;</code> or <code>j/k</code></td><td
+          >Navigate agents</td
         ></tr
       >
-      <tr><td><code>&rarr;</code></td><td>Drill into deeper level</td></tr>
-      <tr><td><code>&larr;</code></td><td>Back out to parent level</td></tr>
-      <tr><td><code>Enter</code></td><td>Attach to agent (popup)</td></tr>
+      <tr
+        ><td><code>&rarr;</code> or <code>Tab</code></td><td
+          >Drill into child agents</td
+        ></tr
+      >
+      <tr><td><code>&larr;</code></td><td>Back to parent level</td></tr>
+      <tr><td><code>Enter</code></td><td>Attach to agent (tmux popup)</td></tr>
       <tr><td><code>n</code></td><td>Spawn new agent</td></tr>
+      <tr><td><code>d</code></td><td>Delete agent (with confirmation)</td></tr>
+      <tr><td><code>p</code></td><td>Add project</td></tr>
+      <tr><td><code>e</code></td><td>Show events</td></tr>
       <tr><td><code>r</code></td><td>Refresh status</td></tr>
-      <tr><td><code>q</code></td><td>Quit dashboard</td></tr>
+      <tr><td><code>z</code></td><td>Detach from tmux</td></tr>
+      <tr><td><code>D</code></td><td>Debug console</td></tr>
+      <tr><td><code>?</code></td><td>Help</td></tr>
+      <tr><td><code>Q</code></td><td>Quit (with confirmation)</td></tr>
     </tbody>
   </table>
 

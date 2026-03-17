@@ -24,6 +24,9 @@ const blogHref = isZh ? "/zh/blog/" : "/blog/";
 <BaseLayout title={title} description={description} lang={lang}>
   <article class="blog-post container">
     <header class="post-header">
+      <a href={blogHref} class="post-back"
+        >&larr; {isZh ? "所有文章" : "All posts"}</a
+      >
       <time class="post-date"
         >{
           new Date(date).toLocaleDateString(dateLocale, {
@@ -42,63 +45,56 @@ const blogHref = isZh ? "/zh/blog/" : "/blog/";
     <div class="post-body prose">
       <slot />
     </div>
-    <footer class="post-footer">
-      <a href={blogHref}>&larr; {isZh ? "所有文章" : "All posts"}</a>
-    </footer>
   </article>
 </BaseLayout>
 
 <style>
   .blog-post {
-    max-width: 48rem;
-    padding-top: 3rem;
+    max-width: 42rem;
+    padding-top: 2.5rem;
     padding-bottom: 4rem;
+  }
+
+  .post-back {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .post-back:hover {
+    color: var(--text-bright);
   }
 
   .post-header {
     margin-bottom: 2.5rem;
-    border-bottom: 1px solid var(--border);
     padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
   }
 
   .post-date {
-    font-size: 0.85rem;
+    font-size: 0.825rem;
     color: var(--text-dim);
-    font-family: var(--font-mono);
   }
 
   .post-title {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     margin: 0.5rem 0;
+    color: var(--text-bright);
   }
 
   .post-desc {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     color: var(--text-dim);
     margin-bottom: 0.5rem;
+    line-height: 1.6;
   }
 
   .post-author {
-    font-size: 0.85rem;
+    font-size: 0.825rem;
     color: var(--text-dim);
-  }
-
-  .post-footer {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .post-footer a {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-  }
-
-  .post-footer a:hover {
-    color: var(--accent);
-  }
-
-  .post-title {
-    color: var(--accent);
   }
 </style>

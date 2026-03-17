@@ -4,38 +4,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="Home"
-  description="Lead an army of 300 agents to solve humanity's biggest problems. OMAR is a TUI for creating powerful agentic organizations."
+  description="Lead an army of 100 agents to solve humanity's biggest problems. OMAR is a TUI for creating powerful agentic organizations."
 >
   <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
-      <div class="hero-content">
+      <div class="hero-text">
         <h1 class="hero-title">
-          Lead an army of<br />
-          <span class="hero-accent">300 agents.</span>
+          Lead an army of<br /><span class="hero-accent">100 agents</span><br
+          />from a single terminal.
         </h1>
         <p class="hero-subtitle">
           <code>omar</code> is a TUI for creating powerful agentic organizations.
-          Command deep hierarchies of parallel AI agents from a single terminal.
+          Deep hierarchies of parallel AI agents, managed like a company.
         </p>
-        <div class="hero-install">
-          <p class="hero-install-label">One-line install:</p>
-          <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
-        </div>
         <div class="hero-actions">
           <a href="/docs/" class="btn btn-primary">Get Started</a>
           <a
             href="https://github.com/lsk567/omar"
             class="btn btn-outline"
             target="_blank"
-            rel="noopener">View on GitHub</a
+            rel="noopener">GitHub</a
           >
         </div>
       </div>
       <div class="hero-image">
         <img
           src="/img/thermopylae.png"
-          alt="Thermopylae - Lead your army of agents"
+          alt="OMAR TUI dashboard showing agents in action"
         />
       </div>
     </div>
@@ -47,51 +43,45 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <h2 class="section-title">Features</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <div class="feature-icon">&#9632;</div>
-          <h3>Professional TUI Dashboard</h3>
+          <h3>Deep hierarchies</h3>
           <p>
-            Monitor all your agents in one place with a beautiful terminal
-            interface built on ratatui.
+            Agents managing agents, just like a company. Create parallel
+            organizations of arbitrary depth.
           </p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#9650;</div>
-          <h3>Deep Agent Hierarchy</h3>
+          <h3>Heterogeneous backends</h3>
           <p>
-            Create parallel agent organizations, just like a company. Navigate
-            levels with arrow keys.
+            Let Claude, Codex, Cursor, and Opencode collaborate as a team. Mix
+            and match the best model for each task.
           </p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#9654;</div>
-          <h3>Talk to Any Agent</h3>
+          <h3>Full control</h3>
           <p>
-            Attach to any agent at any level. You are always in control of the
-            conversation.
+            Talk to and control any subagent you want. Navigate hierarchies with
+            arrow keys and attach via popup.
           </p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#9733;</div>
-          <h3>Slack Integration</h3>
+          <h3>Flexible lifespans</h3>
           <p>
-            Connect your agents to Slack channels. Bridge the gap between human
-            and AI workflows.
+            Long-running or ephemeral agents, your choice. Persistent state
+            across sessions with memory snapshots.
           </p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#9788;</div>
-          <h3>Computer Use</h3>
+          <h3>Messaging &amp; integrations</h3>
           <p>
-            Agents can see and control your Linux desktop. Debug GUIs, interact
-            with applications.
+            Connect agents to Slack channels. Bridge the gap between human and
+            AI workflows seamlessly.
           </p>
         </div>
         <div class="feature-card">
-          <div class="feature-icon">&#9881;</div>
-          <h3>Highly Customizable</h3>
+          <h3>Built on tmux</h3>
           <p>
-            Built on tmux. Supports all tmux commands and key bindings for
-            maximum flexibility.
+            Supports all tmux commands and key bindings. Highly customizable
+            with battle-tested session management.
           </p>
         </div>
       </div>
@@ -104,17 +94,25 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       <h2 class="section-title">Quick Start</h2>
       <div class="install-methods">
         <div class="install-tabs">
-          <button class="install-tab active" data-tab="oneliner">One-Liner</button>
+          <button class="install-tab active" data-tab="oneliner"
+            >One-Liner</button
+          >
           <button class="install-tab" data-tab="brew">Homebrew</button>
           <button class="install-tab" data-tab="source">From Source</button>
         </div>
         <div class="install-panel active" id="panel-oneliner">
           <pre><code><span class="prompt">$</span> curl -fsSL https://omarmy.ai/install.sh | sh</code></pre>
-          <p class="install-note">Works on macOS and Linux. Installs all binaries to <code>/usr/local/bin</code>.</p>
+          <p class="install-note">
+            Works on macOS and Linux. Installs all binaries to <code
+              >/usr/local/bin</code
+            >.
+          </p>
         </div>
         <div class="install-panel" id="panel-brew">
           <pre><code><span class="prompt">$</span> brew install lsk567/omar/omar</code></pre>
-          <p class="install-note">Installs tmux automatically as a dependency.</p>
+          <p class="install-note">
+            Automatically installs tmux as a dependency.
+          </p>
         </div>
         <div class="install-panel" id="panel-source">
           <pre><code><span class="prompt">$</span> git clone https://github.com/lsk567/omar.git
@@ -127,16 +125,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <div class="step-num">1</div>
           <div class="step-content">
             <h3>Prerequisites</h3>
-            <ul>
-              <li>tmux 3.0+</li>
-              <li>
-                <a
-                  href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-                  >Claude Code</a
-                > or <a href="https://github.com/anomalyco/opencode">Opencode</a
-                >
-              </li>
-            </ul>
+            <p>
+              tmux 3.0+ and at least one agent backend:
+              <a
+                href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+                >Claude Code</a
+              >,
+              <a href="https://developers.openai.com/codex/cli">Codex CLI</a>,
+              <a href="https://github.com/anomalyco/opencode">Opencode</a>, or
+              <a href="https://cursor.com/cli">Cursor CLI</a>.
+            </p>
           </div>
         </div>
         <div class="step">
@@ -149,12 +147,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-content">
-            <h3>Give Your EA a Task</h3>
+            <h3>Give your EA a task</h3>
             <p>
-              Copy a prompt into your executive assistant window and watch
+              Copy a prompt into your Executive Assistant window and watch
               agents spawn.
             </p>
-            <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
           </div>
         </div>
       </div>
@@ -164,7 +161,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <!-- Agent Backends -->
   <section class="backends">
     <div class="container">
-      <h2 class="section-title">Supported Agent Backends</h2>
+      <h2 class="section-title">Supported Backends</h2>
       <div class="backends-table">
         <table>
           <thead>
@@ -181,7 +178,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                   >Claude Code</a
                 ></td
               >
-              <td><code>omar</code> (default)</td>
+              <td><code>omar</code> or <code>omar --agent claude</code></td>
+            </tr>
+            <tr>
+              <td
+                ><a href="https://developers.openai.com/codex/cli">Codex CLI</a
+                ></td
+              >
+              <td><code>omar --agent codex</code></td>
             </tr>
             <tr>
               <td
@@ -189,6 +193,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                 ></td
               >
               <td><code>omar --agent opencode</code></td>
+            </tr>
+            <tr>
+              <td><a href="https://cursor.com/cli">Cursor CLI</a></td>
+              <td><code>omar --agent cursor</code></td>
             </tr>
           </tbody>
         </table>
@@ -200,119 +208,95 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 <style>
   /* Hero */
   .hero {
-    padding: 6rem 0 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-      ellipse at 30% 20%,
-      rgba(201, 168, 76, 0.08) 0%,
-      transparent 50%
-    );
-    pointer-events: none;
+    padding: 5rem 0 4rem;
   }
 
   .hero-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    max-width: 1100px;
+    display: flex;
     align-items: center;
-    position: relative;
+    gap: 3rem;
+  }
+
+  .hero-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .hero-tag {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
   }
 
   .hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    margin-bottom: 1.5rem;
-    text-transform: uppercase;
-    color: #ffffff;
+    font-size: 2.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    line-height: 1.15;
+    color: var(--text-bright);
   }
 
   .hero-accent {
-    color: var(--crimson);
-    text-shadow: 0 0 40px var(--crimson-glow);
+    color: #dc143c;
   }
 
   .hero-subtitle {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     color: var(--text);
     margin-bottom: 2rem;
-    max-width: 700px;
+    max-width: 560px;
     line-height: 1.7;
   }
 
   .hero-subtitle code {
-    color: var(--accent);
     font-weight: 600;
   }
 
   .hero-install {
-    margin-bottom: 2rem;
-  }
-
-  .hero-install-label {
-    font-size: 0.85rem;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
   }
 
   .hero-install pre {
     display: inline-block;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--radius);
   }
 
   .prompt {
-    color: var(--accent);
+    color: var(--text-dim);
     user-select: none;
   }
 
   .hero-actions {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
   }
 
   .hero-image {
-    display: flex;
-    justify-content: center;
+    flex: 1;
+    min-width: 0;
   }
 
   .hero-image img {
     max-width: 100%;
-    width: 600px;
     border-radius: var(--radius);
-    opacity: 0.9;
     border: 1px solid var(--border);
+    opacity: 0.9;
   }
 
   /* Features */
   .features {
-    padding: 5rem 0;
+    padding: 4rem 0;
     border-top: 1px solid var(--border);
   }
 
   .section-title {
-    font-size: 2rem;
-    text-align: center;
-    margin-bottom: 3rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 1.5rem;
+    margin-bottom: 2.5rem;
+    font-weight: 600;
+    color: var(--text-bright);
   }
 
   .features-grid {
@@ -322,76 +306,69 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .feature-card {
-    background: var(--bg-surface);
+    padding: 1.5rem;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 1.75rem;
-    transition:
-      border-color 0.2s,
-      transform 0.2s;
+    transition: border-color 0.15s;
   }
 
   .feature-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .feature-icon {
-    font-size: 1.5rem;
-    color: var(--crimson);
-    margin-bottom: 0.75rem;
+    border-color: var(--border-hover);
   }
 
   .feature-card h3 {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     margin-bottom: 0.5rem;
-    color: var(--accent);
+    color: var(--text-bright);
   }
 
   .feature-card p {
-    font-size: 0.9rem;
-    color: var(--text);
+    font-size: 0.875rem;
+    color: var(--text-dim);
     line-height: 1.6;
   }
 
   /* Quick Start */
   .quickstart {
-    padding: 5rem 0;
+    padding: 4rem 0;
     border-top: 1px solid var(--border);
   }
 
   .install-methods {
-    max-width: 640px;
-    margin: 0 auto 3rem;
+    max-width: 600px;
+    margin-bottom: 3rem;
   }
 
   .install-tabs {
     display: flex;
     gap: 0;
     border-bottom: 1px solid var(--border);
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .install-tab {
     background: none;
     border: none;
-    color: var(--text);
-    font-size: 0.95rem;
-    padding: 0.75rem 1.25rem;
+    color: var(--text-dim);
+    font-size: 0.875rem;
+    padding: 0.6rem 1rem;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     font-family: inherit;
-    transition: color 0.2s, border-color 0.2s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
   }
 
   .install-tab:hover {
-    color: var(--accent);
+    color: var(--text-bright);
   }
 
   .install-tab.active {
-    color: var(--crimson);
-    border-bottom-color: var(--crimson);
-    font-weight: 600;
+    color: var(--text-bright);
+    border-bottom-color: var(--text-bright);
+    font-weight: 500;
   }
 
   .install-panel {
@@ -403,44 +380,37 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .install-note {
-    font-size: 0.85rem;
-    color: var(--text);
+    font-size: 0.825rem;
+    color: var(--text-dim);
     margin-top: 0.75rem;
-    opacity: 0.7;
-  }
-
-  .install-note code {
-    color: var(--accent);
-    font-size: 0.85rem;
   }
 
   .steps {
-    max-width: 640px;
-    margin: 0 auto;
+    max-width: 600px;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.75rem;
   }
 
   .step {
     display: flex;
-    gap: 1.5rem;
+    gap: 1.25rem;
     align-items: flex-start;
   }
 
   .step-num {
     flex-shrink: 0;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--crimson);
-    color: #ffffff;
-    font-weight: 700;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-weight: 600;
     border-radius: 50%;
-    font-size: 1.1rem;
-    box-shadow: 0 0 15px var(--crimson-glow);
+    font-size: 0.85rem;
   }
 
   .step-content {
@@ -448,45 +418,30 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .step-content h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    color: var(--accent);
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+    color: var(--text-bright);
+    font-weight: 600;
   }
 
-  .step-content ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .step-content li {
+  .step-content p {
     color: var(--text);
-    font-size: 0.9rem;
-    padding: 0.15rem 0;
-  }
-
-  .step-content li::before {
-    content: "- ";
-    color: var(--crimson);
+    font-size: 0.875rem;
+    line-height: 1.6;
   }
 
   .step-content pre {
     margin-top: 0.5rem;
   }
 
-  .step-content p {
-    color: var(--text);
-    font-size: 0.9rem;
-  }
-
   /* Backends */
   .backends {
-    padding: 3rem 0 5rem;
+    padding: 3rem 0 4rem;
     border-top: 1px solid var(--border);
   }
 
   .backends-table {
-    max-width: 500px;
-    margin: 0 auto;
+    max-width: 520px;
   }
 
   .backends-table table {
@@ -496,16 +451,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   .backends-table th,
   .backends-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 1rem;
     border: 1px solid var(--border);
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
   }
 
   .backends-table th {
     background: var(--bg-surface);
-    color: var(--accent);
+    color: var(--text-bright);
     font-weight: 600;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
@@ -513,30 +469,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   /* Responsive */
   @media (max-width: 768px) {
     .hero-inner {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      text-align: center;
+      flex-direction: column;
     }
 
     .hero-title {
-      font-size: 2.5rem;
-    }
-
-    .hero-subtitle {
-      margin: 0 auto 2rem;
-    }
-
-    .hero-actions {
-      justify-content: center;
-    }
-
-    .hero-image {
-      order: -1;
-    }
-
-    .hero-image img {
-      max-width: 90%;
-      width: 400px;
+      font-size: 2rem;
     }
 
     .features-grid {
@@ -545,19 +482,24 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
     .step {
       flex-direction: column;
-      align-items: center;
-      text-align: center;
+      align-items: flex-start;
     }
   }
 </style>
 
 <script>
-  document.querySelectorAll('.install-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById(`panel-${tab.dataset.tab}`)?.classList.add('active');
+  document.querySelectorAll(".install-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document
+        .querySelectorAll(".install-tab")
+        .forEach((t) => t.classList.remove("active"));
+      document
+        .querySelectorAll(".install-panel")
+        .forEach((p) => p.classList.remove("active"));
+      tab.classList.add("active");
+      document
+        .getElementById(`panel-${tab.dataset.tab}`)
+        ?.classList.add("active");
     });
   });
 </script>

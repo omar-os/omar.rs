@@ -115,7 +115,7 @@ host = "127.0.0.1"
 port = 9876
 ```
 
-Agent backend is auto-detected (Claude Code or Opencode) and can be overridden with `--agent`.
+Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor, or Opencode) and can be overridden with `--agent`.
 
 ## Key Bindings
 

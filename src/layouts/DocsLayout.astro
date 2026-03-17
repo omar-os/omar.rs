@@ -9,7 +9,6 @@ interface Props {
 
 const { title, description, lang = "en" } = Astro.props;
 const isZh = lang.startsWith("zh");
-const prefix = isZh ? "/zh" : "";
 
 const sidebarItems = isZh
   ? [
@@ -36,7 +35,7 @@ const pathname = Astro.url.pathname;
   <div class="docs-layout container">
     <aside class="sidebar">
       <nav class="sidebar-nav">
-        <h4 class="sidebar-title">{isZh ? "文档" : "Documentation"}</h4>
+        <p class="sidebar-title">{isZh ? "文档" : "Documentation"}</p>
         {
           sidebarItems.map((item) => (
             <a
@@ -59,7 +58,7 @@ const pathname = Astro.url.pathname;
 <style>
   .docs-layout {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 220px 1fr;
     gap: 3rem;
     padding-top: 2.5rem;
     padding-bottom: 4rem;
@@ -73,12 +72,13 @@ const pathname = Astro.url.pathname;
   }
 
   .sidebar-title {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--text-dim);
     margin-bottom: 0.75rem;
     padding-left: 0.75rem;
+    font-weight: 500;
   }
 
   .sidebar-nav {
@@ -87,23 +87,24 @@ const pathname = Astro.url.pathname;
   }
 
   .sidebar-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-dim);
-    border-radius: 6px;
-    transition: all 0.15s;
+    border-radius: 4px;
+    transition: all 0.1s;
+    text-decoration: none;
     border-left: 2px solid transparent;
   }
 
   .sidebar-link:hover {
     color: var(--text-bright);
-    background: var(--bg-surface);
   }
 
   .sidebar-link.active {
-    color: var(--accent);
-    background: var(--accent-glow);
-    border-left-color: var(--accent);
+    color: var(--text-bright);
+    background: var(--bg-surface);
+    border-left-color: var(--text-bright);
+    font-weight: 500;
   }
 
   @media (max-width: 768px) {
@@ -126,8 +127,8 @@ const pathname = Astro.url.pathname;
 
     .sidebar-link {
       border-left: none;
-      font-size: 0.85rem;
-      padding: 0.35rem 0.6rem;
+      font-size: 0.825rem;
+      padding: 0.3rem 0.6rem;
     }
   }
 </style>

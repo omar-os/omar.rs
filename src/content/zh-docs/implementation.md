@@ -30,35 +30,41 @@ omar/
 │   ├── computer.rs         # X11 桌面操控集成
 │   ├── projects.rs         # 项目增删改查
 │   ├── api/
-│   │   └── handlers.rs     # HTTP API 端点（axum）
+│   │   ├── mod.rs          # 路由设置
+│   │   ├── handlers.rs     # HTTP API 端点（axum）
+│   │   └── models.rs       # 请求/响应类型
 │   ├── tmux/
+│   │   ├── mod.rs          # 模块根
 │   │   ├── client.rs       # tmux 命令封装
 │   │   ├── session.rs      # 会话类型
 │   │   └── health.rs       # 健康检查
 │   ├── manager/
 │   │   └── mod.rs          # 执行助理会话生命周期
 │   ├── scheduler/
-│   │   └── mod.rs          # 事件调度 + 投递
+│   │   ├── mod.rs          # 事件调度 + 投递
+│   │   └── event.rs        # ScheduledEvent 类型 + 排序
 │   └── ui/
+│       ├── mod.rs          # 模块根
 │       └── dashboard.rs    # TUI 渲染
-├── omar-slack-bridge/      # Slack 桥接 crate
-├── omar-computer-bridge/   # 桌面操控桥接 crate
+├── bridges/
+│   ├── omar-slack-bridge/  # Slack 桥接 crate
+│   └── omar-computer-bridge/ # 桌面操控桥接 crate
 └── prompts/                # 内嵌的提示词模板
 ```
 
 ## 关键模块
 
-### main.rs（约 743 行）
+### main.rs（约 833 行）
 
 入口点，使用 clap 解析 CLI。如果当前不在 tmux 会话中，会自动在 tmux 内重新启动。管理守护进程生命周期、桥接自动启动，以及优雅关闭（先 SIGTERM 后 SIGKILL）。
 
-### app.rs（约 1,298 行）
+### app.rs（约 1,460 行）
 
 核心应用状态机。管理智能体列表、选择、焦点、项目和 UI 状态。处理刷新周期，轮询 tmux 获取会话更新。构建层级命令树以可视化智能体。
 
-### api/handlers.rs（约 859 行）
+### api/handlers.rs（约 1,039 行）
 
-基于 axum 的完整 REST API，启用了 CORS。包含智能体增删改查、事件调度、桌面操控和项目管理端点。支持会话名称规范化（短名称如 "auth" 会解析为 "omar-agent-auth"）。
+基于 axum 的完整 REST API，启用了 CORS。包含智能体增删改查（支持 `backend` 和 `model` 字段实现异构创建）、事件调度、桌面操控和项目管理端点。支持会话名称规范化（短名称如 "auth" 会解析为 "omar-agent-auth"）。
 
 ### scheduler/mod.rs
 
@@ -100,10 +106,11 @@ omar setup-tmux
 
 启动时，OMAR 会自动检测可用的智能体后端：
 
-1. 检查 PATH 中是否有 `claude`（v1+）
-2. 回退到 `opencode`（如果可用）
-3. 默认使用 `claude --dangerously-skip-permissions`
-4. 可通过 `--agent <name>` 手动覆盖
+1. 检查 PATH 中是否有 `claude` → `claude --dangerously-skip-permissions`
+2. 回退到 `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
+3. 回退到 `cursor` → `cursor agent --yolo`
+4. 回退到 `opencode`
+5. 可通过 `--agent <name>` 手动覆盖（支持：claude、codex、cursor、opencode）
 
 ## 桥接
 

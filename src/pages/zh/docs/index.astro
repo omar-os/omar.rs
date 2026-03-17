@@ -9,18 +9,26 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
 >
   <h2>什么是 OMAR？</h2>
   <p>
-    OMAR（one-man army）是一个用于创建和管理智能体组织的 TUI 仪表盘。 它运行在
-    tmux 之上，让你在一个终端内编排深层并行 AI 编程智能体。
+    OMAR（one-man army）是一个用于创建强大智能体组织的 TUI 工具。 它运行在 tmux
+    之上，让你在一个终端内编排深层并行 AI 智能体。
   </p>
 
   <h2>前置依赖</h2>
   <ul>
-    <li><strong>tmux 3.0+</strong> —— 终端复用器</li>
     <li>
-      <strong>智能体后端</strong> —— <a
+      <strong>tmux 3.0+</strong> —— <code>brew install tmux</code>（macOS）或 <code
+        >apt install tmux</code
+      >（Debian/Ubuntu）
+    </li>
+    <li>
+      <strong>至少一个智能体后端：</strong>
+      <a
         href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
         >Claude Code</a
-      >（默认）或 <a href="https://github.com/anomalyco/opencode">Opencode</a>
+      >、
+      <a href="https://developers.openai.com/codex/cli">Codex CLI</a>、
+      <a href="https://github.com/anomalyco/opencode">Opencode</a> 或
+      <a href="https://cursor.com/cli">Cursor CLI</a>
     </li>
   </ul>
 
@@ -40,10 +48,22 @@ $ cd omar && make install</code></pre>
 
   <h2>启动</h2>
   <pre><code>$ omar</code></pre>
-  <p>
-    这会使用默认智能体后端（Claude Code）启动 OMAR 仪表盘。 如需使用 Opencode：
-  </p>
-  <pre><code>$ omar --agent opencode</code></pre>
+  <p>这会使用默认智能体后端（Claude Code）启动 OMAR 仪表盘。使用其他后端：</p>
+  <table>
+    <thead>
+      <tr><th>后端</th><th>命令</th></tr>
+    </thead>
+    <tbody>
+      <tr
+        ><td>Claude Code</td><td
+          ><code>omar</code> 或 <code>omar --agent claude</code></td
+        ></tr
+      >
+      <tr><td>Codex CLI</td><td><code>omar --agent codex</code></td></tr>
+      <tr><td>Opencode</td><td><code>omar --agent opencode</code></td></tr>
+      <tr><td>Cursor CLI</td><td><code>omar --agent cursor</code></td></tr>
+    </tbody>
+  </table>
 
   <h2>第一次使用</h2>
   <ol>
@@ -51,8 +71,8 @@ $ cd omar && make install</code></pre>
       运行 <code>omar</code> —— 你会看到 TUI 仪表盘和你的执行助理（EA）
     </li>
     <li>
-      将提示词粘贴到 EA 窗口：
-      <pre><code>Load and run &lt;omar-root&gt;/prompts/tests/project-factory.md</code></pre>
+      将测试提示词粘贴到 EA 窗口：
+      <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
       观察智能体自动创建。用 <strong>&uarr;&darr;</strong> 切换智能体，<strong
@@ -71,13 +91,26 @@ $ cd omar && make install</code></pre>
       <tr><th>按键</th><th>操作</th></tr>
     </thead>
     <tbody>
-      <tr><td><code>&uarr;/&darr;</code></td><td>在当前层级切换智能体</td></tr>
-      <tr><td><code>&rarr;</code></td><td>深入下一层级</td></tr>
-      <tr><td><code>&larr;</code></td><td>返回上一层级</td></tr>
+      <tr
+        ><td><code>&uarr;/&darr;</code> 或 <code>j/k</code></td><td
+          >切换智能体</td
+        ></tr
+      >
+      <tr
+        ><td><code>&rarr;</code> 或 <code>Tab</code></td><td>深入子智能体</td
+        ></tr
+      >
+      <tr><td><code>&larr;</code></td><td>返回上层</td></tr>
       <tr><td><code>Enter</code></td><td>附加到智能体（弹窗）</td></tr>
       <tr><td><code>n</code></td><td>创建新智能体</td></tr>
+      <tr><td><code>d</code></td><td>删除智能体（需确认）</td></tr>
+      <tr><td><code>p</code></td><td>添加项目</td></tr>
+      <tr><td><code>e</code></td><td>显示事件</td></tr>
       <tr><td><code>r</code></td><td>刷新状态</td></tr>
-      <tr><td><code>q</code></td><td>退出仪表盘</td></tr>
+      <tr><td><code>z</code></td><td>脱离 tmux</td></tr>
+      <tr><td><code>D</code></td><td>调试控制台</td></tr>
+      <tr><td><code>?</code></td><td>帮助</td></tr>
+      <tr><td><code>Q</code></td><td>退出（需确认）</td></tr>
     </tbody>
   </table>
 

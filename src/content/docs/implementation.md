@@ -30,35 +30,41 @@ omar/
 │   ├── computer.rs         # X11 computer use integration
 │   ├── projects.rs         # Project CRUD
 │   ├── api/
-│   │   └── handlers.rs     # HTTP API endpoints (axum)
+│   │   ├── mod.rs          # Router setup
+│   │   ├── handlers.rs     # HTTP API endpoints (axum)
+│   │   └── models.rs       # Request/response types
 │   ├── tmux/
+│   │   ├── mod.rs          # Module root
 │   │   ├── client.rs       # tmux command wrapper
 │   │   ├── session.rs      # Session types
 │   │   └── health.rs       # Health checking
 │   ├── manager/
 │   │   └── mod.rs          # EA session lifecycle
 │   ├── scheduler/
-│   │   └── mod.rs          # Event scheduling + delivery
+│   │   ├── mod.rs          # Event scheduling + delivery
+│   │   └── event.rs        # ScheduledEvent type + ordering
 │   └── ui/
+│       ├── mod.rs          # Module root
 │       └── dashboard.rs    # TUI rendering
-├── omar-slack-bridge/      # Slack bridge crate
-├── omar-computer-bridge/   # Computer use bridge crate
+├── bridges/
+│   ├── omar-slack-bridge/  # Slack bridge crate
+│   └── omar-computer-bridge/ # Computer use bridge crate
 └── prompts/                # Embedded prompt templates
 ```
 
 ## Key Modules
 
-### main.rs (~743 lines)
+### main.rs (~833 lines)
 
 Entry point with CLI parsing (clap). Auto-relaunches inside tmux if not already in a tmux session. Manages daemon lifecycle, bridge auto-spawning, and graceful shutdown (SIGTERM then SIGKILL).
 
-### app.rs (~1,298 lines)
+### app.rs (~1,460 lines)
 
 Core application state machine. Manages agent list, selection, focus, projects, and UI state. Handles refresh cycles that poll tmux for session updates. Builds the hierarchical command tree for agent visualization.
 
-### api/handlers.rs (~859 lines)
+### api/handlers.rs (~1,039 lines)
 
-Full REST API on axum with CORS. Endpoints for agent CRUD, event scheduling, computer use, and project management. Supports session name normalization (short names like "auth" resolve to "omar-agent-auth").
+Full REST API on axum with CORS. Endpoints for agent CRUD (with `backend` and `model` fields for heterogeneous spawning), event scheduling, computer use, and project management. Supports session name normalization (short names like "auth" resolve to "omar-agent-auth").
 
 ### scheduler/mod.rs
 
@@ -100,10 +106,11 @@ omar setup-tmux
 
 On startup, OMAR auto-detects available agent backends:
 
-1. Checks for `claude` (v1+) in PATH
-2. Falls back to `opencode` if available
-3. Defaults to `claude --dangerously-skip-permissions`
-4. Override with `--agent <name>`
+1. Checks for `claude` in PATH → `claude --dangerously-skip-permissions`
+2. Falls back to `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
+3. Falls back to `cursor` → `cursor agent --yolo`
+4. Falls back to `opencode`
+5. Override with `--agent <name>` (supports: claude, codex, cursor, opencode)
 
 ## Bridges
 
