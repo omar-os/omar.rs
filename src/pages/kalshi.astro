@@ -135,19 +135,21 @@ const DATA_BASE =
     charset="utf-8"></script>
 
   <script is:inline define:vars={{ DATA_BASE }}>
-    // ── CSV parser (handles quoted fields with commas) ──
+    // ── CSV parser (handles quoted fields, and mid-file format changes) ──
     function parseCSV(text) {
       const lines = text.trim().split("\n");
       const headers = lines[0].split(",").map((h) => h.trim());
+      const numHeaderCols = headers.length;
       const rows = [];
       for (let i = 1; i < lines.length; i++) {
-        const row = {};
-        let col = 0;
-        let pos = 0;
         const line = lines[i];
-        while (col < headers.length && pos < line.length) {
+        if (!line.trim()) continue;
+
+        // Split fields respecting quotes
+        const fields = [];
+        let pos = 0;
+        while (pos < line.length) {
           if (line[pos] === '"') {
-            // quoted field
             let end = pos + 1;
             while (end < line.length) {
               if (line[end] === '"' && line[end + 1] === '"') {
@@ -158,18 +160,30 @@ const DATA_BASE =
                 end++;
               }
             }
-            row[headers[col]] = line
-              .substring(pos + 1, end)
-              .replace(/""/g, '"');
-            pos = end + 2; // skip closing quote + comma
+            fields.push(line.substring(pos + 1, end).replace(/""/g, '"'));
+            pos = end + 2;
           } else {
             let end = line.indexOf(",", pos);
             if (end === -1) end = line.length;
-            row[headers[col]] = line.substring(pos, end);
+            fields.push(line.substring(pos, end));
             pos = end + 1;
           }
-          col++;
         }
+
+        const row = {};
+        if (fields.length === numHeaderCols) {
+          // Standard format: matches header columns
+          for (let c = 0; c < numHeaderCols; c++) {
+            row[headers[c]] = fields[c];
+          }
+        } else if (fields.length === 7) {
+          // New 7-col format: timestamp,cash,positions,total,pnl,return_pct,num_positions
+          row.timestamp = fields[0];
+          row.total_account_value = fields[3]; // total = cash + positions
+        } else {
+          continue; // skip malformed lines
+        }
+
         if (row.timestamp && row.total_account_value) {
           rows.push(row);
         }
