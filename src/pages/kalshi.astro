@@ -64,40 +64,9 @@ const DATA_BASE =
     <div class="container">
       <h2 class="chart-title">Quant Firm: Org Structure Changes</h2>
       <p class="chart-desc">
-        The quant firm evolved from 4 persistent agents to a solo operator in 5
-        days.
+        How the quant firm's agent organization evolved over time.
       </p>
-      <div class="org-timeline">
-        <div class="org-version">
-          <div class="org-badge" style="background: #C62828">v1</div>
-          <div class="org-detail">
-            <strong>Full Team</strong> — 4 agents, terminal send (unreliable)
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #F57F17; color: #333">
-            v2
-          </div>
-          <div class="org-detail">
-            <strong>Event-Based</strong> — 4 agents, OMAR events (reliable)
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #2E7D32">v3</div>
-          <div class="org-detail">
-            <strong>Lean Team</strong> — 2 persistent, 1 on-demand
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #6A1B9A">v4</div>
-          <div class="org-detail">
-            <strong>Solo Operator</strong> — 0 persistent, all on-demand
-          </div>
-        </div>
-      </div>
+      <div class="org-timeline" id="org-timeline"></div>
     </div>
   </section>
 
@@ -199,29 +168,8 @@ const DATA_BASE =
       return parseCSV(await resp.text());
     }
 
-    // ── Org structure transition timestamps ──
-    const ORG_TRANSITIONS = [
-      {
-        ts: "2026-03-09T03:36:00Z",
-        label: "v1: Full Team",
-        color: "rgba(198,40,40,0.12)",
-      },
-      {
-        ts: "2026-03-09T18:00:00Z",
-        label: "v2: Event-Based",
-        color: "rgba(245,127,23,0.12)",
-      },
-      {
-        ts: "2026-03-11T10:44:00Z",
-        label: "v3: Lean Team",
-        color: "rgba(46,125,50,0.12)",
-      },
-      {
-        ts: "2026-03-14T00:00:00Z",
-        label: "v4: Solo Operator",
-        color: "rgba(106,27,154,0.12)",
-      },
-    ];
+    // ── Org transitions: loaded from data repo ──
+    let ORG_TRANSITIONS = [];
 
     // ── Trade log parser ──
     function parseTradeLog(text) {
@@ -310,13 +258,56 @@ const DATA_BASE =
     }
 
     // ── Main ──
+    function renderOrgTimeline(versions, lang) {
+      const container = document.getElementById("org-timeline");
+      if (!container) return;
+      container.innerHTML = "";
+      const isLight = (hex) =>
+        ["#F57F17", "#FFF9C4", "#FFD54F"].some((l) => hex.includes(l.slice(1)));
+      versions.forEach((v, i) => {
+        if (i > 0) {
+          const arrow = document.createElement("div");
+          arrow.className = "org-arrow";
+          arrow.textContent = "→";
+          container.appendChild(arrow);
+        }
+        const div = document.createElement("div");
+        div.className = "org-version";
+        const badge = document.createElement("div");
+        badge.className = "org-badge";
+        badge.style.background = v.border_color;
+        if (isLight(v.border_color)) badge.style.color = "#333";
+        badge.textContent = v.version;
+        const detail = document.createElement("div");
+        detail.className = "org-detail";
+        const label = lang === "zh" ? v.label.zh : v.label.en;
+        const summary = lang === "zh" ? v.summary.zh : v.summary.en;
+        detail.innerHTML = `<strong>${label}</strong> — ${summary}`;
+        div.appendChild(badge);
+        div.appendChild(detail);
+        container.appendChild(div);
+      });
+    }
+
     async function init() {
       try {
-        const [baselineData, quantData, tradeLogText] = await Promise.all([
-          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
-          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
-          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
-        ]);
+        const [baselineData, quantData, tradeLogText, orgVersions] =
+          await Promise.all([
+            fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+            fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+            fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
+            fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
+          ]);
+
+        // Populate org transitions from data
+        ORG_TRANSITIONS = orgVersions.map((v) => ({
+          ts: v.date,
+          label: `${v.version}: ${v.label.en}`,
+          color: v.color,
+        }));
+
+        // Render org timeline badges
+        renderOrgTimeline(orgVersions, "en");
 
         const trades = parseTradeLog(tradeLogText);
 
