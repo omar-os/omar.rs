@@ -102,11 +102,12 @@ const DATA_BASE =
 
   <section class="kalshi-chart-section">
     <div class="container">
-      <h2 class="chart-title">Return Comparison</h2>
+      <h2 class="chart-title">Key Events & Trades</h2>
       <p class="chart-desc">
-        Percentage return from the $200 starting balance.
+        Account value with trade markers and key events. Click a marker to see
+        details. Toggle layers in the legend.
       </p>
-      <div id="chart-returns" class="chart-container">
+      <div id="chart-events" class="chart-container">
         <div class="chart-loading">Loading chart data…</div>
       </div>
     </div>
@@ -221,19 +222,109 @@ const DATA_BASE =
       },
     ];
 
+    // ── Trade log parser ──
+    function parseTradeLog(text) {
+      const lines = text.trim().split("\n");
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+        // Split respecting quotes
+        const fields = [];
+        let pos = 0;
+        while (pos < line.length) {
+          if (line[pos] === '"') {
+            let end = pos + 1;
+            while (end < line.length) {
+              if (line[end] === '"' && line[end + 1] === '"') {
+                end += 2;
+              } else if (line[end] === '"') {
+                break;
+              } else {
+                end++;
+              }
+            }
+            fields.push(line.substring(pos + 1, end).replace(/""/g, '"'));
+            pos = end + 2;
+          } else {
+            let end = line.indexOf(",", pos);
+            if (end === -1) end = line.length;
+            fields.push(line.substring(pos, end));
+            pos = end + 1;
+          }
+        }
+        // timestamp,team,market,direction,quantity,price,rationale
+        if (fields.length >= 7) {
+          rows.push({
+            timestamp: fields[0],
+            team: fields[1],
+            market: fields[2],
+            direction: fields[3],
+            quantity: parseInt(fields[4]) || 0,
+            price: parseFloat(fields[5]) || 0,
+            rationale: fields[6] || "",
+          });
+        }
+      }
+      return rows;
+    }
+
+    // ── Extract key events from portfolio notes ──
+    function extractKeyEvents(portfolioData) {
+      const events = [];
+      const keywords = [
+        "SURGE",
+        "CRASH",
+        "SETTLED",
+        "OIL",
+        "CPI",
+        "BIG MOVE",
+        "NEW HIGH",
+        "ATH",
+        "ATL",
+        "LOSS",
+        "WON",
+        "PIVOT",
+        "Iran",
+        "Trump",
+        "FOMC",
+        "EVENT COORDINATION",
+        "bug",
+        "BUG",
+      ];
+      for (const row of portfolioData) {
+        const note = row.notes || "";
+        if (
+          note.length > 30 &&
+          keywords.some((kw) => note.toUpperCase().includes(kw.toUpperCase()))
+        ) {
+          events.push({
+            ts: new Date(row.timestamp),
+            val: parseFloat(row.total_account_value),
+            note: note,
+          });
+        }
+      }
+      return events;
+    }
+
     // ── Main ──
     async function init() {
       try {
-        const [baselineData, quantData] = await Promise.all([
+        const [baselineData, quantData, tradeLogText] = await Promise.all([
           fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
           fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
         ]);
+
+        const trades = parseTradeLog(tradeLogText);
 
         // Parse and sort
         const baseline = baselineData
           .map((r) => ({
             ts: new Date(r.timestamp),
             val: parseFloat(r.total_account_value),
+            notes: r.notes || "",
           }))
           .filter((r) => !isNaN(r.val))
           .sort((a, b) => a.ts - b.ts);
@@ -242,6 +333,7 @@ const DATA_BASE =
           .map((r) => ({
             ts: new Date(r.timestamp),
             val: parseFloat(r.total_account_value),
+            notes: r.notes || "",
           }))
           .filter((r) => !isNaN(r.val))
           .sort((a, b) => a.ts - b.ts);
@@ -251,7 +343,7 @@ const DATA_BASE =
 
         // Build charts
         buildPerformanceChart(baseline, quant);
-        buildReturnsChart(baseline, quant);
+        buildEventsChart(baseline, quant, trades);
       } catch (err) {
         console.error("Failed to load data:", err);
         document.querySelectorAll(".chart-loading").forEach((el) => {
@@ -414,38 +506,172 @@ const DATA_BASE =
       Plotly.newPlot("chart-performance", traces, layout, config);
     }
 
-    function buildReturnsChart(baseline, quant) {
-      const bDates = baseline.map((r) => r.ts);
-      const bReturns = baseline.map((r) => ((r.val - 200) / 200) * 100);
-      const qDates = quant.map((r) => r.ts);
-      const qReturns = quant.map((r) => ((r.val - 200) / 200) * 100);
-
+    function buildEventsChart(baseline, quant, trades) {
+      // Account value lines (thinner, as background context)
       const traces = [
         {
-          x: bDates,
-          y: bReturns,
-          name: "Baseline Trader",
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
+          name: "Baseline Value",
           type: "scatter",
           mode: "lines",
-          line: { color: "#1565C0", width: 2 },
-          fill: "tozeroy",
-          fillcolor: "rgba(21,101,192,0.08)",
+          line: { color: "#1565C0", width: 1.5 },
+          opacity: 0.5,
           hovertemplate:
-            "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>%{y:+.1f}%<extra></extra>",
+            "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
         {
-          x: qDates,
-          y: qReturns,
-          name: "Quant Firm",
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
+          name: "Quant Value",
           type: "scatter",
           mode: "lines",
-          line: { color: "#E65100", width: 2 },
-          fill: "tozeroy",
-          fillcolor: "rgba(230,81,0,0.08)",
+          line: { color: "#E65100", width: 1.5 },
+          opacity: 0.5,
           hovertemplate:
-            "<b>Quant Firm</b><br>%{x|%b %d, %H:%M}<br>%{y:+.1f}%<extra></extra>",
+            "<b>Quant</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
       ];
+
+      // ── Quant trades as markers ──
+      // Filter out CYCLE-LOG / HOLD entries, keep actual trades
+      const actualTrades = trades.filter(
+        (t) => t.market !== "CYCLE-LOG" && t.quantity > 0,
+      );
+
+      // Find nearest quant value for each trade timestamp
+      function nearestVal(arr, ts) {
+        let best = arr[0];
+        let bestDiff = Math.abs(arr[0].ts - ts);
+        for (const r of arr) {
+          const diff = Math.abs(r.ts - ts);
+          if (diff < bestDiff) {
+            best = r;
+            bestDiff = diff;
+          }
+        }
+        return best.val;
+      }
+
+      const buyTrades = actualTrades.filter((t) =>
+        t.direction.toUpperCase().includes("BUY"),
+      );
+      const sellTrades = actualTrades.filter((t) =>
+        t.direction.toUpperCase().includes("SELL"),
+      );
+
+      if (buyTrades.length > 0) {
+        traces.push({
+          x: buyTrades.map((t) => new Date(t.timestamp)),
+          y: buyTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          name: "Quant BUY",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "triangle-up",
+            size: 10,
+            color: "#2E7D32",
+            line: { color: "white", width: 1 },
+          },
+          text: buyTrades.map(
+            (t) =>
+              `<b>${t.direction}</b> ${t.quantity}x ${t.market}<br>@ ${t.price}¢<br>${t.rationale.substring(0, 120)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      if (sellTrades.length > 0) {
+        traces.push({
+          x: sellTrades.map((t) => new Date(t.timestamp)),
+          y: sellTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          name: "Quant SELL",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "triangle-down",
+            size: 10,
+            color: "#C62828",
+            line: { color: "white", width: 1 },
+          },
+          text: sellTrades.map(
+            (t) =>
+              `<b>${t.direction}</b> ${t.quantity}x ${t.market}<br>@ ${t.price}¢<br>${t.rationale.substring(0, 120)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      // ── Key events from baseline notes ──
+      const baselineEvents = extractKeyEvents(
+        baseline.map((r) => ({
+          timestamp: r.ts.toISOString(),
+          total_account_value: r.val,
+          notes: r.notes,
+        })),
+      );
+      if (baselineEvents.length > 0) {
+        // Deduplicate: keep only events >30min apart
+        const deduped = [baselineEvents[0]];
+        for (let i = 1; i < baselineEvents.length; i++) {
+          const last = deduped[deduped.length - 1];
+          if (baselineEvents[i].ts - last.ts > 30 * 60 * 1000) {
+            deduped.push(baselineEvents[i]);
+          }
+        }
+        traces.push({
+          x: deduped.map((e) => e.ts),
+          y: deduped.map((e) => e.val),
+          name: "Baseline Events",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "star",
+            size: 11,
+            color: "#1565C0",
+            line: { color: "white", width: 1 },
+          },
+          text: deduped.map(
+            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      // ── Key events from quant notes ──
+      const quantEvents = extractKeyEvents(
+        quant.map((r) => ({
+          timestamp: r.ts.toISOString(),
+          total_account_value: r.val,
+          notes: r.notes,
+        })),
+      );
+      if (quantEvents.length > 0) {
+        const deduped = [quantEvents[0]];
+        for (let i = 1; i < quantEvents.length; i++) {
+          const last = deduped[deduped.length - 1];
+          if (quantEvents[i].ts - last.ts > 30 * 60 * 1000) {
+            deduped.push(quantEvents[i]);
+          }
+        }
+        traces.push({
+          x: deduped.map((e) => e.ts),
+          y: deduped.map((e) => e.val),
+          name: "Quant Events",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "diamond",
+            size: 10,
+            color: "#E65100",
+            line: { color: "white", width: 1 },
+          },
+          text: deduped.map(
+            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
 
       const layout = {
         xaxis: {
@@ -454,18 +680,27 @@ const DATA_BASE =
           tickformat: "%b %d",
         },
         yaxis: {
-          title: "Return (%)",
+          title: "Account Value ($)",
           gridcolor: "#eee",
-          zeroline: true,
-          zerolinecolor: "#999",
-          zerolinewidth: 1.5,
         },
-        hovermode: "x unified",
-        legend: { orientation: "h", y: -0.15 },
-        margin: { t: 20, r: 20, b: 60, l: 60 },
+        hovermode: "closest",
+        legend: { orientation: "h", y: -0.15, traceorder: "normal" },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
         plot_bgcolor: "#fafafa",
         paper_bgcolor: "white",
         font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1, dash: "dash" },
+          },
+        ],
       };
 
       const config = {
@@ -475,8 +710,8 @@ const DATA_BASE =
         displaylogo: false,
       };
 
-      document.getElementById("chart-returns").innerHTML = "";
-      Plotly.newPlot("chart-returns", traces, layout, config);
+      document.getElementById("chart-events").innerHTML = "";
+      Plotly.newPlot("chart-events", traces, layout, config);
     }
 
     // Run on load
