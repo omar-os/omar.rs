@@ -1,0 +1,644 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const DATA_BASE =
+  "https://raw.githubusercontent.com/lsk567/omar-data/main/kalshi";
+---
+
+<BaseLayout
+  title="Kalshi Trading Experiment"
+  description="Live dashboard comparing two OMAR-managed Kalshi trading accounts — a baseline trader vs a quant firm of AI agents."
+>
+  <section class="kalshi-hero">
+    <div class="container">
+      <h1 class="kalshi-title">Kalshi Trading Experiment</h1>
+      <p class="kalshi-subtitle">
+        Two OMAR-managed trading accounts on <a
+          href="https://kalshi.com"
+          target="_blank"
+          rel="noopener">Kalshi</a
+        >, starting with $200 each. One baseline trader agent. One quant firm of
+        AI agents. Updated periodically by OMAR agents.
+      </p>
+    </div>
+  </section>
+
+  <section class="kalshi-stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card" id="stat-baseline">
+          <div class="stat-label">Baseline Trader</div>
+          <div class="stat-value" id="val-baseline">Loading…</div>
+          <div class="stat-change" id="chg-baseline"></div>
+        </div>
+        <div class="stat-card" id="stat-quant">
+          <div class="stat-label">Quant Firm</div>
+          <div class="stat-value" id="val-quant">Loading…</div>
+          <div class="stat-change" id="chg-quant"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Initial Investment</div>
+          <div class="stat-value">$200.00</div>
+          <div class="stat-change" style="color: var(--text-dim)">
+            per account
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">Account Value Over Time</h2>
+      <p class="chart-desc">
+        Interactive — hover for values, drag to zoom, double-click to reset.
+      </p>
+      <div id="chart-performance" class="chart-container">
+        <div class="chart-loading">Loading chart data…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">Quant Firm: Org Structure Changes</h2>
+      <p class="chart-desc">
+        The quant firm evolved from 4 persistent agents to a solo operator in 5
+        days.
+      </p>
+      <div class="org-timeline">
+        <div class="org-version">
+          <div class="org-badge" style="background: #C62828">v1</div>
+          <div class="org-detail">
+            <strong>Full Team</strong> — 4 agents, terminal send (unreliable)
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #F57F17; color: #333">
+            v2
+          </div>
+          <div class="org-detail">
+            <strong>Event-Based</strong> — 4 agents, OMAR events (reliable)
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #2E7D32">v3</div>
+          <div class="org-detail">
+            <strong>Lean Team</strong> — 2 persistent, 1 on-demand
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #6A1B9A">v4</div>
+          <div class="org-detail">
+            <strong>Solo Operator</strong> — 0 persistent, all on-demand
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">Return Comparison</h2>
+      <p class="chart-desc">
+        Percentage return from the $200 starting balance.
+      </p>
+      <div id="chart-returns" class="chart-container">
+        <div class="chart-loading">Loading chart data…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-footer-note">
+    <div class="container">
+      <p>
+        Data source: <a
+          href="https://github.com/lsk567/omar-data/tree/main/kalshi"
+          target="_blank"
+          rel="noopener">omar-data/kalshi</a
+        > · Charts rendered client-side with <a
+          href="https://plotly.com/javascript/"
+          target="_blank"
+          rel="noopener">Plotly.js</a
+        >
+      </p>
+    </div>
+  </section>
+
+  <!-- Plotly.js from CDN -->
+  <script
+    is:inline
+    src="https://cdn.plot.ly/plotly-2.35.0.min.js"
+    charset="utf-8"></script>
+
+  <script is:inline define:vars={{ DATA_BASE }}>
+    // ── CSV parser (handles quoted fields with commas) ──
+    function parseCSV(text) {
+      const lines = text.trim().split("\n");
+      const headers = lines[0].split(",").map((h) => h.trim());
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = {};
+        let col = 0;
+        let pos = 0;
+        const line = lines[i];
+        while (col < headers.length && pos < line.length) {
+          if (line[pos] === '"') {
+            // quoted field
+            let end = pos + 1;
+            while (end < line.length) {
+              if (line[end] === '"' && line[end + 1] === '"') {
+                end += 2;
+              } else if (line[end] === '"') {
+                break;
+              } else {
+                end++;
+              }
+            }
+            row[headers[col]] = line
+              .substring(pos + 1, end)
+              .replace(/""/g, '"');
+            pos = end + 2; // skip closing quote + comma
+          } else {
+            let end = line.indexOf(",", pos);
+            if (end === -1) end = line.length;
+            row[headers[col]] = line.substring(pos, end);
+            pos = end + 1;
+          }
+          col++;
+        }
+        if (row.timestamp && row.total_account_value) {
+          rows.push(row);
+        }
+      }
+      return rows;
+    }
+
+    async function fetchCSV(url) {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`);
+      return parseCSV(await resp.text());
+    }
+
+    // ── Org structure transition timestamps ──
+    const ORG_TRANSITIONS = [
+      {
+        ts: "2026-03-09T03:36:00Z",
+        label: "v1: Full Team",
+        color: "rgba(198,40,40,0.12)",
+      },
+      {
+        ts: "2026-03-09T18:00:00Z",
+        label: "v2: Event-Based",
+        color: "rgba(245,127,23,0.12)",
+      },
+      {
+        ts: "2026-03-11T10:44:00Z",
+        label: "v3: Lean Team",
+        color: "rgba(46,125,50,0.12)",
+      },
+      {
+        ts: "2026-03-14T00:00:00Z",
+        label: "v4: Solo Operator",
+        color: "rgba(106,27,154,0.12)",
+      },
+    ];
+
+    // ── Main ──
+    async function init() {
+      try {
+        const [baselineData, quantData] = await Promise.all([
+          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+        ]);
+
+        // Parse and sort
+        const baseline = baselineData
+          .map((r) => ({
+            ts: new Date(r.timestamp),
+            val: parseFloat(r.total_account_value),
+          }))
+          .filter((r) => !isNaN(r.val))
+          .sort((a, b) => a.ts - b.ts);
+
+        const quant = quantData
+          .map((r) => ({
+            ts: new Date(r.timestamp),
+            val: parseFloat(r.total_account_value),
+          }))
+          .filter((r) => !isNaN(r.val))
+          .sort((a, b) => a.ts - b.ts);
+
+        // Update stat cards
+        updateStats(baseline, quant);
+
+        // Build charts
+        buildPerformanceChart(baseline, quant);
+        buildReturnsChart(baseline, quant);
+      } catch (err) {
+        console.error("Failed to load data:", err);
+        document.querySelectorAll(".chart-loading").forEach((el) => {
+          el.textContent = "Failed to load data. Check console for details.";
+          el.style.color = "#dc2626";
+        });
+      }
+    }
+
+    function updateStats(baseline, quant) {
+      const bLatest = baseline[baseline.length - 1].val;
+      const qLatest = quant[quant.length - 1].val;
+      const bPct = ((bLatest - 200) / 200) * 100;
+      const qPct = ((qLatest - 200) / 200) * 100;
+
+      document.getElementById("val-baseline").textContent =
+        `$${bLatest.toFixed(2)}`;
+      document.getElementById("val-quant").textContent =
+        `$${qLatest.toFixed(2)}`;
+
+      const bChg = document.getElementById("chg-baseline");
+      bChg.textContent = `${bPct >= 0 ? "+" : ""}${bPct.toFixed(1)}%`;
+      bChg.style.color = bPct >= 0 ? "#16a34a" : "#dc2626";
+
+      const qChg = document.getElementById("chg-quant");
+      qChg.textContent = `${qPct >= 0 ? "+" : ""}${qPct.toFixed(1)}%`;
+      qChg.style.color = qPct >= 0 ? "#16a34a" : "#dc2626";
+    }
+
+    function buildPerformanceChart(baseline, quant) {
+      const bDates = baseline.map((r) => r.ts);
+      const bVals = baseline.map((r) => r.val);
+      const qDates = quant.map((r) => r.ts);
+      const qVals = quant.map((r) => r.val);
+
+      // Find end date for org regions
+      const endDate = new Date(
+        Math.max(bDates[bDates.length - 1], qDates[qDates.length - 1]),
+      );
+
+      // Org structure shaded regions
+      const shapes = ORG_TRANSITIONS.map((t, i) => {
+        const x1 =
+          i < ORG_TRANSITIONS.length - 1
+            ? ORG_TRANSITIONS[i + 1].ts
+            : endDate.toISOString();
+        return {
+          type: "rect",
+          xref: "x",
+          yref: "paper",
+          x0: t.ts,
+          x1: x1,
+          y0: 0,
+          y1: 1,
+          fillcolor: t.color,
+          line: { width: 0 },
+          layer: "below",
+        };
+      });
+
+      // Vertical lines at transitions
+      const vlines = ORG_TRANSITIONS.map((t) => ({
+        type: "line",
+        xref: "x",
+        yref: "paper",
+        x0: t.ts,
+        x1: t.ts,
+        y0: 0,
+        y1: 1,
+        line: { color: "#999", width: 1, dash: "dot" },
+        layer: "below",
+      }));
+
+      // Annotations for org versions
+      const annotations = ORG_TRANSITIONS.map((t, i) => {
+        const x1 =
+          i < ORG_TRANSITIONS.length - 1
+            ? new Date(ORG_TRANSITIONS[i + 1].ts)
+            : endDate;
+        const mid = new Date((new Date(t.ts).getTime() + x1.getTime()) / 2);
+        return {
+          x: mid.toISOString(),
+          y: 1,
+          xref: "x",
+          yref: "paper",
+          text: t.label,
+          showarrow: false,
+          font: { size: 11, color: "#666" },
+          yanchor: "bottom",
+          yshift: 5,
+        };
+      });
+
+      const traces = [
+        {
+          x: bDates,
+          y: bVals,
+          name: "Baseline Trader",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          hovertemplate:
+            "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: qDates,
+          y: qVals,
+          name: "Quant Firm",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          hovertemplate:
+            "<b>Quant Firm</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+
+      const layout = {
+        shapes: [...shapes, ...vlines],
+        annotations: annotations,
+        xaxis: {
+          title: "Date",
+          gridcolor: "#eee",
+          tickformat: "%b %d",
+        },
+        yaxis: {
+          title: "Account Value ($)",
+          gridcolor: "#eee",
+        },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        // Initial investment reference line
+        shapes: [
+          ...shapes,
+          ...vlines,
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1.5, dash: "dash" },
+          },
+        ],
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+
+      document.getElementById("chart-performance").innerHTML = "";
+      Plotly.newPlot("chart-performance", traces, layout, config);
+    }
+
+    function buildReturnsChart(baseline, quant) {
+      const bDates = baseline.map((r) => r.ts);
+      const bReturns = baseline.map((r) => ((r.val - 200) / 200) * 100);
+      const qDates = quant.map((r) => r.ts);
+      const qReturns = quant.map((r) => ((r.val - 200) / 200) * 100);
+
+      const traces = [
+        {
+          x: bDates,
+          y: bReturns,
+          name: "Baseline Trader",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          fill: "tozeroy",
+          fillcolor: "rgba(21,101,192,0.08)",
+          hovertemplate:
+            "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>%{y:+.1f}%<extra></extra>",
+        },
+        {
+          x: qDates,
+          y: qReturns,
+          name: "Quant Firm",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          fill: "tozeroy",
+          fillcolor: "rgba(230,81,0,0.08)",
+          hovertemplate:
+            "<b>Quant Firm</b><br>%{x|%b %d, %H:%M}<br>%{y:+.1f}%<extra></extra>",
+        },
+      ];
+
+      const layout = {
+        xaxis: {
+          title: "Date",
+          gridcolor: "#eee",
+          tickformat: "%b %d",
+        },
+        yaxis: {
+          title: "Return (%)",
+          gridcolor: "#eee",
+          zeroline: true,
+          zerolinecolor: "#999",
+          zerolinewidth: 1.5,
+        },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 20, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+
+      document.getElementById("chart-returns").innerHTML = "";
+      Plotly.newPlot("chart-returns", traces, layout, config);
+    }
+
+    // Run on load
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .kalshi-hero {
+    padding: 3rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kalshi-title {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .kalshi-subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .kalshi-stats {
+    padding: 2rem 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  .stat-change {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+
+  .kalshi-chart-section {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-desc {
+    font-size: 0.875rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .chart-container {
+    width: 100%;
+    min-height: 420px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 420px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .org-timeline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+  }
+
+  .org-version {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .org-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .org-detail {
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .org-arrow {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+  }
+
+  .kalshi-footer-note {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .kalshi-footer-note p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .kalshi-title {
+      font-size: 1.5rem;
+    }
+
+    .org-timeline {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .org-arrow {
+      transform: rotate(90deg);
+      margin-left: 1rem;
+    }
+  }
+</style>
