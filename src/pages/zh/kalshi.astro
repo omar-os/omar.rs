@@ -21,6 +21,7 @@ const DATA_BASE =
         > 交易账户，各以 $200 起步。一个基准交易员智能体，一个由 AI 智能体组成的量化公司。数据由
         OMAR 智能体定期更新。
       </p>
+      <p class="kalshi-updated" id="last-updated"></p>
     </div>
   </section>
 
@@ -324,6 +325,14 @@ const DATA_BASE =
           .sort((a, b) => a.ts - b.ts);
 
         updateStats(baseline, quant);
+
+        const allTimestamps = [...baseline, ...quant].map((r) => r.ts);
+        const latest = new Date(Math.max(...allTimestamps));
+        const el = document.getElementById("last-updated");
+        if (el) {
+          el.textContent = `数据最后更新：${latest.toLocaleString("zh-CN")}`;
+        }
+
         buildPerformanceChart(baseline, quant);
         buildEventsChart(baseline, quant, trades);
       } catch (err) {
@@ -699,6 +708,13 @@ const DATA_BASE =
     font-size: 1rem;
     max-width: 700px;
     line-height: 1.6;
+  }
+
+  .kalshi-updated {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
   }
 
   .kalshi-stats {

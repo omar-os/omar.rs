@@ -20,6 +20,7 @@ const DATA_BASE =
         >, starting with $200 each. One baseline trader agent. One quant firm of
         AI agents. Updated periodically by OMAR agents.
       </p>
+      <p class="kalshi-updated" id="last-updated"></p>
     </div>
   </section>
 
@@ -340,6 +341,14 @@ const DATA_BASE =
 
         // Update stat cards
         updateStats(baseline, quant);
+
+        // Update last-updated timestamp
+        const allTimestamps = [...baseline, ...quant].map((r) => r.ts);
+        const latest = new Date(Math.max(...allTimestamps));
+        const el = document.getElementById("last-updated");
+        if (el) {
+          el.textContent = `Data last updated: ${latest.toLocaleString()}`;
+        }
 
         // Build charts
         buildPerformanceChart(baseline, quant);
@@ -743,6 +752,13 @@ const DATA_BASE =
     font-size: 1rem;
     max-width: 700px;
     line-height: 1.6;
+  }
+
+  .kalshi-updated {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
   }
 
   .kalshi-stats {
