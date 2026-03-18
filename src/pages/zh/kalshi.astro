@@ -1,0 +1,865 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const DATA_BASE =
+  "https://raw.githubusercontent.com/lsk567/omar-data/main/kalshi";
+---
+
+<BaseLayout
+  title="Kalshi 交易实验"
+  description="实时仪表盘：对比两个由 OMAR 管理的 Kalshi 交易账户——基准交易员 vs 量化公司（AI 智能体团队）。"
+  lang="zh-CN"
+>
+  <section class="kalshi-hero">
+    <div class="container">
+      <h1 class="kalshi-title">Kalshi 交易实验</h1>
+      <p class="kalshi-subtitle">
+        两个由 OMAR 管理的 <a
+          href="https://kalshi.com"
+          target="_blank"
+          rel="noopener">Kalshi</a
+        > 交易账户，各以 $200 起步。一个基准交易员智能体，一个由 AI 智能体组成的量化公司。数据由
+        OMAR 智能体定期更新。
+      </p>
+      <p class="kalshi-updated" id="last-updated"></p>
+    </div>
+  </section>
+
+  <section class="kalshi-stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card" id="stat-baseline">
+          <div class="stat-label">基准交易员</div>
+          <div class="stat-value" id="val-baseline">加载中…</div>
+          <div class="stat-change" id="chg-baseline"></div>
+        </div>
+        <div class="stat-card" id="stat-quant">
+          <div class="stat-label">量化公司</div>
+          <div class="stat-value" id="val-quant">加载中…</div>
+          <div class="stat-change" id="chg-quant"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">初始投资</div>
+          <div class="stat-value">$200.00</div>
+          <div class="stat-change" style="color: var(--text-dim)">每个账户</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">账户价值走势</h2>
+      <p class="chart-desc">可交互 —— 悬停查看数值，拖拽缩放，双击重置视图。</p>
+      <div id="chart-performance" class="chart-container">
+        <div class="chart-loading">正在加载图表数据…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">量化公司：组织架构演变</h2>
+      <p class="chart-desc">
+        量化公司在 5 天内从 4 个常驻智能体演变为独立运营模式。
+      </p>
+      <div class="org-timeline">
+        <div class="org-version">
+          <div class="org-badge" style="background: #C62828">v1</div>
+          <div class="org-detail">
+            <strong>全员团队</strong> — 4 个智能体，终端发送（不可靠）
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #F57F17; color: #333">
+            v2
+          </div>
+          <div class="org-detail">
+            <strong>事件驱动</strong> — 4 个智能体，OMAR 事件系统（可靠）
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #2E7D32">v3</div>
+          <div class="org-detail">
+            <strong>精简团队</strong> — 2 个常驻，1 个按需
+          </div>
+        </div>
+        <div class="org-arrow">→</div>
+        <div class="org-version">
+          <div class="org-badge" style="background: #6A1B9A">v4</div>
+          <div class="org-detail">
+            <strong>独立运营</strong> — 0 个常驻，全部按需
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-chart-section">
+    <div class="container">
+      <h2 class="chart-title">关键事件与交易</h2>
+      <p class="chart-desc">
+        账户价值叠加交易标记和关键事件。点击标记查看详情，通过图例切换图层。
+      </p>
+      <div id="chart-events" class="chart-container">
+        <div class="chart-loading">正在加载图表数据…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="kalshi-footer-note">
+    <div class="container">
+      <p>
+        数据来源：<a
+          href="https://github.com/lsk567/omar-data/tree/main/kalshi"
+          target="_blank"
+          rel="noopener">omar-data/kalshi</a
+        > · 图表由 <a
+          href="https://plotly.com/javascript/"
+          target="_blank"
+          rel="noopener">Plotly.js</a
+        > 在客户端渲染
+      </p>
+    </div>
+  </section>
+
+  <!-- Plotly.js from CDN -->
+  <script
+    is:inline
+    src="https://cdn.plot.ly/plotly-2.35.0.min.js"
+    charset="utf-8"></script>
+
+  <script is:inline define:vars={{ DATA_BASE }}>
+    // ── CSV parser (handles quoted fields, and mid-file format changes) ──
+    function parseCSV(text) {
+      const lines = text.trim().split("\n");
+      const headers = lines[0].split(",").map((h) => h.trim());
+      const numHeaderCols = headers.length;
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+
+        const fields = [];
+        let pos = 0;
+        while (pos < line.length) {
+          if (line[pos] === '"') {
+            let end = pos + 1;
+            while (end < line.length) {
+              if (line[end] === '"' && line[end + 1] === '"') {
+                end += 2;
+              } else if (line[end] === '"') {
+                break;
+              } else {
+                end++;
+              }
+            }
+            fields.push(line.substring(pos + 1, end).replace(/""/g, '"'));
+            pos = end + 2;
+          } else {
+            let end = line.indexOf(",", pos);
+            if (end === -1) end = line.length;
+            fields.push(line.substring(pos, end));
+            pos = end + 1;
+          }
+        }
+
+        const row = {};
+        if (fields.length === numHeaderCols) {
+          for (let c = 0; c < numHeaderCols; c++) {
+            row[headers[c]] = fields[c];
+          }
+        } else if (fields.length === 7) {
+          row.timestamp = fields[0];
+          row.total_account_value = fields[3];
+        } else {
+          continue;
+        }
+
+        if (row.timestamp && row.total_account_value) {
+          rows.push(row);
+        }
+      }
+      return rows;
+    }
+
+    async function fetchCSV(url) {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`);
+      return parseCSV(await resp.text());
+    }
+
+    const ORG_TRANSITIONS = [
+      {
+        ts: "2026-03-09T03:36:00Z",
+        label: "v1: 全员团队",
+        color: "rgba(198,40,40,0.12)",
+      },
+      {
+        ts: "2026-03-09T18:00:00Z",
+        label: "v2: 事件驱动",
+        color: "rgba(245,127,23,0.12)",
+      },
+      {
+        ts: "2026-03-11T10:44:00Z",
+        label: "v3: 精简团队",
+        color: "rgba(46,125,50,0.12)",
+      },
+      {
+        ts: "2026-03-14T00:00:00Z",
+        label: "v4: 独立运营",
+        color: "rgba(106,27,154,0.12)",
+      },
+    ];
+
+    function parseTradeLog(text) {
+      const lines = text.trim().split("\n");
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line.trim()) continue;
+        const fields = [];
+        let pos = 0;
+        while (pos < line.length) {
+          if (line[pos] === '"') {
+            let end = pos + 1;
+            while (end < line.length) {
+              if (line[end] === '"' && line[end + 1] === '"') {
+                end += 2;
+              } else if (line[end] === '"') {
+                break;
+              } else {
+                end++;
+              }
+            }
+            fields.push(line.substring(pos + 1, end).replace(/""/g, '"'));
+            pos = end + 2;
+          } else {
+            let end = line.indexOf(",", pos);
+            if (end === -1) end = line.length;
+            fields.push(line.substring(pos, end));
+            pos = end + 1;
+          }
+        }
+        if (fields.length >= 7) {
+          rows.push({
+            timestamp: fields[0],
+            team: fields[1],
+            market: fields[2],
+            direction: fields[3],
+            quantity: parseInt(fields[4]) || 0,
+            price: parseFloat(fields[5]) || 0,
+            rationale: fields[6] || "",
+          });
+        }
+      }
+      return rows;
+    }
+
+    function extractKeyEvents(portfolioData) {
+      const events = [];
+      const keywords = [
+        "SURGE",
+        "CRASH",
+        "SETTLED",
+        "OIL",
+        "CPI",
+        "BIG MOVE",
+        "NEW HIGH",
+        "ATH",
+        "ATL",
+        "LOSS",
+        "WON",
+        "PIVOT",
+        "Iran",
+        "Trump",
+        "FOMC",
+        "EVENT COORDINATION",
+        "bug",
+        "BUG",
+      ];
+      for (const row of portfolioData) {
+        const note = row.notes || "";
+        if (
+          note.length > 30 &&
+          keywords.some((kw) => note.toUpperCase().includes(kw.toUpperCase()))
+        ) {
+          events.push({
+            ts: new Date(row.timestamp),
+            val: parseFloat(row.total_account_value),
+            note: note,
+          });
+        }
+      }
+      return events;
+    }
+
+    async function init() {
+      try {
+        const [baselineData, quantData, tradeLogText] = await Promise.all([
+          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
+        ]);
+
+        const trades = parseTradeLog(tradeLogText);
+
+        const baseline = baselineData
+          .map((r) => ({
+            ts: new Date(r.timestamp),
+            val: parseFloat(r.total_account_value),
+            notes: r.notes || "",
+          }))
+          .filter((r) => !isNaN(r.val))
+          .sort((a, b) => a.ts - b.ts);
+
+        const quant = quantData
+          .map((r) => ({
+            ts: new Date(r.timestamp),
+            val: parseFloat(r.total_account_value),
+            notes: r.notes || "",
+          }))
+          .filter((r) => !isNaN(r.val))
+          .sort((a, b) => a.ts - b.ts);
+
+        updateStats(baseline, quant);
+
+        const allTimestamps = [...baseline, ...quant].map((r) => r.ts);
+        const latest = new Date(Math.max(...allTimestamps));
+        const el = document.getElementById("last-updated");
+        if (el) {
+          el.textContent = `数据最后更新：${latest.toLocaleString("zh-CN")}`;
+        }
+
+        buildPerformanceChart(baseline, quant);
+        buildEventsChart(baseline, quant, trades);
+      } catch (err) {
+        console.error("Failed to load data:", err);
+        document.querySelectorAll(".chart-loading").forEach((el) => {
+          el.textContent = "数据加载失败，请查看控制台。";
+          el.style.color = "#dc2626";
+        });
+      }
+    }
+
+    function updateStats(baseline, quant) {
+      const bLatest = baseline[baseline.length - 1].val;
+      const qLatest = quant[quant.length - 1].val;
+      const bPct = ((bLatest - 200) / 200) * 100;
+      const qPct = ((qLatest - 200) / 200) * 100;
+
+      document.getElementById("val-baseline").textContent =
+        `$${bLatest.toFixed(2)}`;
+      document.getElementById("val-quant").textContent =
+        `$${qLatest.toFixed(2)}`;
+
+      const bChg = document.getElementById("chg-baseline");
+      bChg.textContent = `${bPct >= 0 ? "+" : ""}${bPct.toFixed(1)}%`;
+      bChg.style.color = bPct >= 0 ? "#16a34a" : "#dc2626";
+
+      const qChg = document.getElementById("chg-quant");
+      qChg.textContent = `${qPct >= 0 ? "+" : ""}${qPct.toFixed(1)}%`;
+      qChg.style.color = qPct >= 0 ? "#16a34a" : "#dc2626";
+    }
+
+    function buildPerformanceChart(baseline, quant) {
+      const bDates = baseline.map((r) => r.ts);
+      const bVals = baseline.map((r) => r.val);
+      const qDates = quant.map((r) => r.ts);
+      const qVals = quant.map((r) => r.val);
+
+      const endDate = new Date(
+        Math.max(bDates[bDates.length - 1], qDates[qDates.length - 1]),
+      );
+
+      const shapes = ORG_TRANSITIONS.map((t, i) => {
+        const x1 =
+          i < ORG_TRANSITIONS.length - 1
+            ? ORG_TRANSITIONS[i + 1].ts
+            : endDate.toISOString();
+        return {
+          type: "rect",
+          xref: "x",
+          yref: "paper",
+          x0: t.ts,
+          x1: x1,
+          y0: 0,
+          y1: 1,
+          fillcolor: t.color,
+          line: { width: 0 },
+          layer: "below",
+        };
+      });
+
+      const vlines = ORG_TRANSITIONS.map((t) => ({
+        type: "line",
+        xref: "x",
+        yref: "paper",
+        x0: t.ts,
+        x1: t.ts,
+        y0: 0,
+        y1: 1,
+        line: { color: "#999", width: 1, dash: "dot" },
+        layer: "below",
+      }));
+
+      const annotations = ORG_TRANSITIONS.map((t, i) => {
+        const x1 =
+          i < ORG_TRANSITIONS.length - 1
+            ? new Date(ORG_TRANSITIONS[i + 1].ts)
+            : endDate;
+        const mid = new Date((new Date(t.ts).getTime() + x1.getTime()) / 2);
+        return {
+          x: mid.toISOString(),
+          y: 1,
+          xref: "x",
+          yref: "paper",
+          text: t.label,
+          showarrow: false,
+          font: { size: 11, color: "#666" },
+          yanchor: "bottom",
+          yshift: 5,
+        };
+      });
+
+      const traces = [
+        {
+          x: bDates,
+          y: bVals,
+          name: "基准交易员",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          hovertemplate:
+            "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: qDates,
+          y: qVals,
+          name: "量化公司",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          hovertemplate:
+            "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+
+      const layout = {
+        annotations: annotations,
+        xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          ...shapes,
+          ...vlines,
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1.5, dash: "dash" },
+          },
+        ],
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+
+      document.getElementById("chart-performance").innerHTML = "";
+      Plotly.newPlot("chart-performance", traces, layout, config);
+    }
+
+    function buildEventsChart(baseline, quant, trades) {
+      const traces = [
+        {
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
+          name: "基准价值",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 1.5 },
+          opacity: 0.5,
+          hovertemplate:
+            "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
+          name: "量化价值",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 1.5 },
+          opacity: 0.5,
+          hovertemplate:
+            "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+
+      const actualTrades = trades.filter(
+        (t) => t.market !== "CYCLE-LOG" && t.quantity > 0,
+      );
+
+      function nearestVal(arr, ts) {
+        let best = arr[0];
+        let bestDiff = Math.abs(arr[0].ts - ts);
+        for (const r of arr) {
+          const diff = Math.abs(r.ts - ts);
+          if (diff < bestDiff) {
+            best = r;
+            bestDiff = diff;
+          }
+        }
+        return best.val;
+      }
+
+      const buyTrades = actualTrades.filter((t) =>
+        t.direction.toUpperCase().includes("BUY"),
+      );
+      const sellTrades = actualTrades.filter((t) =>
+        t.direction.toUpperCase().includes("SELL"),
+      );
+
+      if (buyTrades.length > 0) {
+        traces.push({
+          x: buyTrades.map((t) => new Date(t.timestamp)),
+          y: buyTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          name: "量化买入",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "triangle-up",
+            size: 10,
+            color: "#2E7D32",
+            line: { color: "white", width: 1 },
+          },
+          text: buyTrades.map(
+            (t) =>
+              `<b>${t.direction}</b> ${t.quantity}x ${t.market}<br>@ ${t.price}¢<br>${t.rationale.substring(0, 120)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      if (sellTrades.length > 0) {
+        traces.push({
+          x: sellTrades.map((t) => new Date(t.timestamp)),
+          y: sellTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          name: "量化卖出",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "triangle-down",
+            size: 10,
+            color: "#C62828",
+            line: { color: "white", width: 1 },
+          },
+          text: sellTrades.map(
+            (t) =>
+              `<b>${t.direction}</b> ${t.quantity}x ${t.market}<br>@ ${t.price}¢<br>${t.rationale.substring(0, 120)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      const baselineEvents = extractKeyEvents(
+        baseline.map((r) => ({
+          timestamp: r.ts.toISOString(),
+          total_account_value: r.val,
+          notes: r.notes,
+        })),
+      );
+      if (baselineEvents.length > 0) {
+        const deduped = [baselineEvents[0]];
+        for (let i = 1; i < baselineEvents.length; i++) {
+          if (
+            baselineEvents[i].ts - deduped[deduped.length - 1].ts >
+            30 * 60 * 1000
+          )
+            deduped.push(baselineEvents[i]);
+        }
+        traces.push({
+          x: deduped.map((e) => e.ts),
+          y: deduped.map((e) => e.val),
+          name: "基准事件",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "star",
+            size: 11,
+            color: "#1565C0",
+            line: { color: "white", width: 1 },
+          },
+          text: deduped.map(
+            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      const quantEvents = extractKeyEvents(
+        quant.map((r) => ({
+          timestamp: r.ts.toISOString(),
+          total_account_value: r.val,
+          notes: r.notes,
+        })),
+      );
+      if (quantEvents.length > 0) {
+        const deduped = [quantEvents[0]];
+        for (let i = 1; i < quantEvents.length; i++) {
+          if (
+            quantEvents[i].ts - deduped[deduped.length - 1].ts >
+            30 * 60 * 1000
+          )
+            deduped.push(quantEvents[i]);
+        }
+        traces.push({
+          x: deduped.map((e) => e.ts),
+          y: deduped.map((e) => e.val),
+          name: "量化事件",
+          type: "scatter",
+          mode: "markers",
+          marker: {
+            symbol: "diamond",
+            size: 10,
+            color: "#E65100",
+            line: { color: "white", width: 1 },
+          },
+          text: deduped.map(
+            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
+          ),
+          hovertemplate: "%{text}<extra></extra>",
+        });
+      }
+
+      const layout = {
+        xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
+        hovermode: "closest",
+        legend: { orientation: "h", y: -0.15, traceorder: "normal" },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1, dash: "dash" },
+          },
+        ],
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+
+      document.getElementById("chart-events").innerHTML = "";
+      Plotly.newPlot("chart-events", traces, layout, config);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  </script>
+</BaseLayout>
+
+<style>
+  .kalshi-hero {
+    padding: 3rem 0 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kalshi-title {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+  }
+
+  .kalshi-subtitle {
+    color: var(--text-dim);
+    font-size: 1rem;
+    max-width: 700px;
+    line-height: 1.6;
+  }
+
+  .kalshi-updated {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+  }
+
+  .kalshi-stats {
+    padding: 2rem 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  .stat-change {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.15rem;
+  }
+
+  .kalshi-chart-section {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .chart-title {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 0.25rem;
+  }
+
+  .chart-desc {
+    font-size: 0.875rem;
+    color: var(--text-dim);
+    margin-bottom: 1rem;
+  }
+
+  .chart-container {
+    width: 100%;
+    min-height: 420px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 420px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .org-timeline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+  }
+
+  .org-version {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .org-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .org-detail {
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .org-arrow {
+    color: var(--text-dim);
+    font-size: 1.1rem;
+  }
+
+  .kalshi-footer-note {
+    padding: 2rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .kalshi-footer-note p {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .kalshi-title {
+      font-size: 1.5rem;
+    }
+
+    .org-timeline {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .org-arrow {
+      transform: rotate(90deg);
+      margin-left: 1rem;
+    }
+  }
+</style>
