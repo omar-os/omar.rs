@@ -60,40 +60,8 @@ const DATA_BASE =
   <section class="kalshi-chart-section">
     <div class="container">
       <h2 class="chart-title">量化公司：组织架构演变</h2>
-      <p class="chart-desc">
-        量化公司在 5 天内从 4 个常驻智能体演变为独立运营模式。
-      </p>
-      <div class="org-timeline">
-        <div class="org-version">
-          <div class="org-badge" style="background: #C62828">v1</div>
-          <div class="org-detail">
-            <strong>全员团队</strong> — 4 个智能体，终端发送（不可靠）
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #F57F17; color: #333">
-            v2
-          </div>
-          <div class="org-detail">
-            <strong>事件驱动</strong> — 4 个智能体，OMAR 事件系统（可靠）
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #2E7D32">v3</div>
-          <div class="org-detail">
-            <strong>精简团队</strong> — 2 个常驻，1 个按需
-          </div>
-        </div>
-        <div class="org-arrow">→</div>
-        <div class="org-version">
-          <div class="org-badge" style="background: #6A1B9A">v4</div>
-          <div class="org-detail">
-            <strong>独立运营</strong> — 0 个常驻，全部按需
-          </div>
-        </div>
-      </div>
+      <p class="chart-desc">量化公司的智能体组织架构随时间的演变历程。</p>
+      <div class="org-timeline" id="org-timeline"></div>
     </div>
   </section>
 
@@ -191,28 +159,7 @@ const DATA_BASE =
       return parseCSV(await resp.text());
     }
 
-    const ORG_TRANSITIONS = [
-      {
-        ts: "2026-03-09T03:36:00Z",
-        label: "v1: 全员团队",
-        color: "rgba(198,40,40,0.12)",
-      },
-      {
-        ts: "2026-03-09T18:00:00Z",
-        label: "v2: 事件驱动",
-        color: "rgba(245,127,23,0.12)",
-      },
-      {
-        ts: "2026-03-11T10:44:00Z",
-        label: "v3: 精简团队",
-        color: "rgba(46,125,50,0.12)",
-      },
-      {
-        ts: "2026-03-14T00:00:00Z",
-        label: "v4: 独立运营",
-        color: "rgba(106,27,154,0.12)",
-      },
-    ];
+    let ORG_TRANSITIONS = [];
 
     function parseTradeLog(text) {
       const lines = text.trim().split("\n");
@@ -296,13 +243,54 @@ const DATA_BASE =
       return events;
     }
 
+    function renderOrgTimeline(versions, lang) {
+      const container = document.getElementById("org-timeline");
+      if (!container) return;
+      container.innerHTML = "";
+      const isLight = (hex) =>
+        ["#F57F17", "#FFF9C4", "#FFD54F"].some((l) => hex.includes(l.slice(1)));
+      versions.forEach((v, i) => {
+        if (i > 0) {
+          const arrow = document.createElement("div");
+          arrow.className = "org-arrow";
+          arrow.textContent = "→";
+          container.appendChild(arrow);
+        }
+        const div = document.createElement("div");
+        div.className = "org-version";
+        const badge = document.createElement("div");
+        badge.className = "org-badge";
+        badge.style.background = v.border_color;
+        if (isLight(v.border_color)) badge.style.color = "#333";
+        badge.textContent = v.version;
+        const detail = document.createElement("div");
+        detail.className = "org-detail";
+        const label = lang === "zh" ? v.label.zh : v.label.en;
+        const summary = lang === "zh" ? v.summary.zh : v.summary.en;
+        detail.innerHTML = `<strong>${label}</strong> — ${summary}`;
+        div.appendChild(badge);
+        div.appendChild(detail);
+        container.appendChild(div);
+      });
+    }
+
     async function init() {
       try {
-        const [baselineData, quantData, tradeLogText] = await Promise.all([
-          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
-          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
-          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
-        ]);
+        const [baselineData, quantData, tradeLogText, orgVersions] =
+          await Promise.all([
+            fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+            fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+            fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
+            fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
+          ]);
+
+        ORG_TRANSITIONS = orgVersions.map((v) => ({
+          ts: v.date,
+          label: `${v.version}: ${v.label.zh}`,
+          color: v.color,
+        }));
+
+        renderOrgTimeline(orgVersions, "zh");
 
         const trades = parseTradeLog(tradeLogText);
 
