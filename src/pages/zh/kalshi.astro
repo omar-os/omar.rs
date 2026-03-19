@@ -62,6 +62,13 @@ const DATA_BASE =
       <h2 class="chart-title">量化公司：组织架构演变</h2>
       <p class="chart-desc">量化公司的智能体组织架构随时间的演变历程。</p>
       <div class="org-timeline" id="org-timeline"></div>
+      <div
+        id="chart-org-overlay"
+        class="chart-container"
+        style="margin-top: 1rem"
+      >
+        <div class="chart-loading">正在加载图表数据…</div>
+      </div>
     </div>
   </section>
 
@@ -296,6 +303,7 @@ const DATA_BASE =
         }
 
         buildPerformanceChart(baseline, quant);
+        buildOrgOverlayChart(baseline, quant);
         buildEventsChart(
           baseline,
           quant,
@@ -332,17 +340,8 @@ const DATA_BASE =
       qChg.style.color = qPct >= 0 ? "#16a34a" : "#dc2626";
     }
 
-    function buildPerformanceChart(baseline, quant) {
-      const bDates = baseline.map((r) => r.ts);
-      const bVals = baseline.map((r) => r.val);
-      const qDates = quant.map((r) => r.ts);
-      const qVals = quant.map((r) => r.val);
-
-      const endDate = new Date(
-        Math.max(bDates[bDates.length - 1], qDates[qDates.length - 1]),
-      );
-
-      const shapes = ORG_TRANSITIONS.map((t, i) => {
+    function orgShapes(endDate) {
+      const rects = ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? ORG_TRANSITIONS[i + 1].ts
@@ -360,7 +359,6 @@ const DATA_BASE =
           layer: "below",
         };
       });
-
       const vlines = ORG_TRANSITIONS.map((t) => ({
         type: "line",
         xref: "x",
@@ -372,8 +370,11 @@ const DATA_BASE =
         line: { color: "#999", width: 1, dash: "dot" },
         layer: "below",
       }));
+      return [...rects, ...vlines];
+    }
 
-      const annotations = ORG_TRANSITIONS.map((t, i) => {
+    function orgAnnotations(endDate) {
+      return ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? new Date(ORG_TRANSITIONS[i + 1].ts)
@@ -391,11 +392,13 @@ const DATA_BASE =
           yshift: 5,
         };
       });
+    }
 
+    function buildPerformanceChart(baseline, quant) {
       const traces = [
         {
-          x: bDates,
-          y: bVals,
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
           name: "基准交易员",
           type: "scatter",
           mode: "lines",
@@ -404,8 +407,8 @@ const DATA_BASE =
             "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
         {
-          x: qDates,
-          y: qVals,
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
           name: "量化公司",
           type: "scatter",
           mode: "lines",
@@ -414,9 +417,7 @@ const DATA_BASE =
             "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
       ];
-
       const layout = {
-        annotations: annotations,
         xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
         yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
         hovermode: "x unified",
@@ -426,8 +427,6 @@ const DATA_BASE =
         paper_bgcolor: "white",
         font: { family: "Inter, sans-serif", size: 13 },
         shapes: [
-          ...shapes,
-          ...vlines,
           {
             type: "line",
             xref: "paper",
@@ -440,16 +439,76 @@ const DATA_BASE =
           },
         ],
       };
-
       const config = {
         responsive: true,
         displayModeBar: true,
         modeBarButtonsToRemove: ["lasso2d", "select2d"],
         displaylogo: false,
       };
-
       document.getElementById("chart-performance").innerHTML = "";
       Plotly.newPlot("chart-performance", traces, layout, config);
+    }
+
+    function buildOrgOverlayChart(baseline, quant) {
+      const allDates = [
+        ...baseline.map((r) => r.ts),
+        ...quant.map((r) => r.ts),
+      ];
+      const endDate = new Date(Math.max(...allDates));
+      const traces = [
+        {
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
+          name: "基准交易员",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          hovertemplate:
+            "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
+          name: "量化公司",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          hovertemplate:
+            "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+      const layout = {
+        annotations: orgAnnotations(endDate),
+        xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          ...orgShapes(endDate),
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1.5, dash: "dash" },
+          },
+        ],
+      };
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+      document.getElementById("chart-org-overlay").innerHTML = "";
+      Plotly.newPlot("chart-org-overlay", traces, layout, config);
     }
 
     function buildEventsChart(

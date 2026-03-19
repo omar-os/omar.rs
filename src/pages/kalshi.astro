@@ -67,6 +67,13 @@ const DATA_BASE =
         How the quant firm's agent organization evolved over time.
       </p>
       <div class="org-timeline" id="org-timeline"></div>
+      <div
+        id="chart-org-overlay"
+        class="chart-container"
+        style="margin-top: 1rem"
+      >
+        <div class="chart-loading">Loading chart data…</div>
+      </div>
     </div>
   </section>
 
@@ -316,6 +323,7 @@ const DATA_BASE =
 
         // Build charts
         buildPerformanceChart(baseline, quant);
+        buildOrgOverlayChart(baseline, quant);
         buildEventsChart(
           baseline,
           quant,
@@ -352,19 +360,9 @@ const DATA_BASE =
       qChg.style.color = qPct >= 0 ? "#16a34a" : "#dc2626";
     }
 
-    function buildPerformanceChart(baseline, quant) {
-      const bDates = baseline.map((r) => r.ts);
-      const bVals = baseline.map((r) => r.val);
-      const qDates = quant.map((r) => r.ts);
-      const qVals = quant.map((r) => r.val);
-
-      // Find end date for org regions
-      const endDate = new Date(
-        Math.max(bDates[bDates.length - 1], qDates[qDates.length - 1]),
-      );
-
-      // Org structure shaded regions
-      const shapes = ORG_TRANSITIONS.map((t, i) => {
+    // ── Helpers for org shading (reused by org overlay chart) ──
+    function orgShapes(endDate) {
+      const rects = ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? ORG_TRANSITIONS[i + 1].ts
@@ -382,8 +380,6 @@ const DATA_BASE =
           layer: "below",
         };
       });
-
-      // Vertical lines at transitions
       const vlines = ORG_TRANSITIONS.map((t) => ({
         type: "line",
         xref: "x",
@@ -395,9 +391,11 @@ const DATA_BASE =
         line: { color: "#999", width: 1, dash: "dot" },
         layer: "below",
       }));
+      return [...rects, ...vlines];
+    }
 
-      // Annotations for org versions
-      const annotations = ORG_TRANSITIONS.map((t, i) => {
+    function orgAnnotations(endDate) {
+      return ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? new Date(ORG_TRANSITIONS[i + 1].ts)
@@ -415,11 +413,13 @@ const DATA_BASE =
           yshift: 5,
         };
       });
+    }
 
+    function buildPerformanceChart(baseline, quant) {
       const traces = [
         {
-          x: bDates,
-          y: bVals,
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
           name: "Baseline Trader",
           type: "scatter",
           mode: "lines",
@@ -428,8 +428,8 @@ const DATA_BASE =
             "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
         {
-          x: qDates,
-          y: qVals,
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
           name: "Quant Firm",
           type: "scatter",
           mode: "lines",
@@ -440,27 +440,15 @@ const DATA_BASE =
       ];
 
       const layout = {
-        shapes: [...shapes, ...vlines],
-        annotations: annotations,
-        xaxis: {
-          title: "Date",
-          gridcolor: "#eee",
-          tickformat: "%b %d",
-        },
-        yaxis: {
-          title: "Account Value ($)",
-          gridcolor: "#eee",
-        },
+        xaxis: { title: "Date", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "Account Value ($)", gridcolor: "#eee" },
         hovermode: "x unified",
         legend: { orientation: "h", y: -0.15 },
         margin: { t: 30, r: 20, b: 60, l: 60 },
         plot_bgcolor: "#fafafa",
         paper_bgcolor: "white",
         font: { family: "Inter, sans-serif", size: 13 },
-        // Initial investment reference line
         shapes: [
-          ...shapes,
-          ...vlines,
           {
             type: "line",
             xref: "paper",
@@ -483,6 +471,72 @@ const DATA_BASE =
 
       document.getElementById("chart-performance").innerHTML = "";
       Plotly.newPlot("chart-performance", traces, layout, config);
+    }
+
+    function buildOrgOverlayChart(baseline, quant) {
+      const allDates = [
+        ...baseline.map((r) => r.ts),
+        ...quant.map((r) => r.ts),
+      ];
+      const endDate = new Date(Math.max(...allDates));
+
+      const traces = [
+        {
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
+          name: "Baseline Trader",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          hovertemplate:
+            "<b>Baseline</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
+          name: "Quant Firm",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          hovertemplate:
+            "<b>Quant Firm</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+
+      const layout = {
+        annotations: orgAnnotations(endDate),
+        xaxis: { title: "Date", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "Account Value ($)", gridcolor: "#eee" },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          ...orgShapes(endDate),
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1.5, dash: "dash" },
+          },
+        ],
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+
+      document.getElementById("chart-org-overlay").innerHTML = "";
+      Plotly.newPlot("chart-org-overlay", traces, layout, config);
     }
 
     function buildEventsChart(
