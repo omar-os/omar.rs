@@ -599,13 +599,21 @@ const DATA_BASE =
         });
       }
 
-      const quantEvents = extractKeyEvents(
-        quant.map((r) => ({
+      const quantNotesData = quant
+        .filter((r) => r.notes)
+        .map((r) => ({
           timestamp: r.ts.toISOString(),
           total_account_value: r.val,
           notes: r.notes,
-        })),
-      );
+        }));
+      const cycleLogs = trades
+        .filter((t) => t.market === "CYCLE-LOG" && t.rationale.length > 30)
+        .map((t) => ({
+          timestamp: t.timestamp,
+          total_account_value: nearestVal(quant, new Date(t.timestamp)),
+          notes: t.rationale,
+        }));
+      const quantEvents = extractKeyEvents([...quantNotesData, ...cycleLogs]);
       if (quantEvents.length > 0) {
         const deduped = [quantEvents[0]];
         for (let i = 1; i < quantEvents.length; i++) {
