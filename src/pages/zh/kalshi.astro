@@ -62,6 +62,13 @@ const DATA_BASE =
       <h2 class="chart-title">量化公司：组织架构演变</h2>
       <p class="chart-desc">量化公司的智能体组织架构随时间的演变历程。</p>
       <div class="org-timeline" id="org-timeline"></div>
+      <div
+        id="chart-org-overlay"
+        class="chart-container"
+        style="margin-top: 1rem"
+      >
+        <div class="chart-loading">正在加载图表数据…</div>
+      </div>
     </div>
   </section>
 
@@ -205,44 +212,6 @@ const DATA_BASE =
       return rows;
     }
 
-    function extractKeyEvents(portfolioData) {
-      const events = [];
-      const keywords = [
-        "SURGE",
-        "CRASH",
-        "SETTLED",
-        "OIL",
-        "CPI",
-        "BIG MOVE",
-        "NEW HIGH",
-        "ATH",
-        "ATL",
-        "LOSS",
-        "WON",
-        "PIVOT",
-        "Iran",
-        "Trump",
-        "FOMC",
-        "EVENT COORDINATION",
-        "bug",
-        "BUG",
-      ];
-      for (const row of portfolioData) {
-        const note = row.notes || "";
-        if (
-          note.length > 30 &&
-          keywords.some((kw) => note.toUpperCase().includes(kw.toUpperCase()))
-        ) {
-          events.push({
-            ts: new Date(row.timestamp),
-            val: parseFloat(row.total_account_value),
-            note: note,
-          });
-        }
-      }
-      return events;
-    }
-
     function renderOrgTimeline(versions, lang) {
       const container = document.getElementById("org-timeline");
       if (!container) return;
@@ -276,13 +245,25 @@ const DATA_BASE =
 
     async function init() {
       try {
-        const [baselineData, quantData, tradeLogText, orgVersions] =
-          await Promise.all([
-            fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
-            fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
-            fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
-            fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
-          ]);
+        const [
+          baselineData,
+          quantData,
+          tradeLogText,
+          orgVersions,
+          baselineEventsJson,
+          quantEventsJson,
+        ] = await Promise.all([
+          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
+          fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
+          fetch(`${DATA_BASE}/baseline/events.json`)
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch(`${DATA_BASE}/quant/events.json`)
+            .then((r) => r.json())
+            .catch(() => []),
+        ]);
 
         ORG_TRANSITIONS = orgVersions.map((v) => ({
           ts: v.date,
@@ -322,7 +303,14 @@ const DATA_BASE =
         }
 
         buildPerformanceChart(baseline, quant);
-        buildEventsChart(baseline, quant, trades);
+        buildOrgOverlayChart(baseline, quant);
+        buildEventsChart(
+          baseline,
+          quant,
+          trades,
+          baselineEventsJson,
+          quantEventsJson,
+        );
       } catch (err) {
         console.error("Failed to load data:", err);
         document.querySelectorAll(".chart-loading").forEach((el) => {
@@ -352,17 +340,8 @@ const DATA_BASE =
       qChg.style.color = qPct >= 0 ? "#16a34a" : "#dc2626";
     }
 
-    function buildPerformanceChart(baseline, quant) {
-      const bDates = baseline.map((r) => r.ts);
-      const bVals = baseline.map((r) => r.val);
-      const qDates = quant.map((r) => r.ts);
-      const qVals = quant.map((r) => r.val);
-
-      const endDate = new Date(
-        Math.max(bDates[bDates.length - 1], qDates[qDates.length - 1]),
-      );
-
-      const shapes = ORG_TRANSITIONS.map((t, i) => {
+    function orgShapes(endDate) {
+      const rects = ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? ORG_TRANSITIONS[i + 1].ts
@@ -380,7 +359,6 @@ const DATA_BASE =
           layer: "below",
         };
       });
-
       const vlines = ORG_TRANSITIONS.map((t) => ({
         type: "line",
         xref: "x",
@@ -392,8 +370,11 @@ const DATA_BASE =
         line: { color: "#999", width: 1, dash: "dot" },
         layer: "below",
       }));
+      return [...rects, ...vlines];
+    }
 
-      const annotations = ORG_TRANSITIONS.map((t, i) => {
+    function orgAnnotations(endDate) {
+      return ORG_TRANSITIONS.map((t, i) => {
         const x1 =
           i < ORG_TRANSITIONS.length - 1
             ? new Date(ORG_TRANSITIONS[i + 1].ts)
@@ -411,11 +392,13 @@ const DATA_BASE =
           yshift: 5,
         };
       });
+    }
 
+    function buildPerformanceChart(baseline, quant) {
       const traces = [
         {
-          x: bDates,
-          y: bVals,
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
           name: "基准交易员",
           type: "scatter",
           mode: "lines",
@@ -424,8 +407,8 @@ const DATA_BASE =
             "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
         {
-          x: qDates,
-          y: qVals,
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
           name: "量化公司",
           type: "scatter",
           mode: "lines",
@@ -434,9 +417,7 @@ const DATA_BASE =
             "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
         },
       ];
-
       const layout = {
-        annotations: annotations,
         xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
         yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
         hovermode: "x unified",
@@ -446,8 +427,6 @@ const DATA_BASE =
         paper_bgcolor: "white",
         font: { family: "Inter, sans-serif", size: 13 },
         shapes: [
-          ...shapes,
-          ...vlines,
           {
             type: "line",
             xref: "paper",
@@ -460,19 +439,85 @@ const DATA_BASE =
           },
         ],
       };
-
       const config = {
         responsive: true,
         displayModeBar: true,
         modeBarButtonsToRemove: ["lasso2d", "select2d"],
         displaylogo: false,
       };
-
       document.getElementById("chart-performance").innerHTML = "";
       Plotly.newPlot("chart-performance", traces, layout, config);
     }
 
-    function buildEventsChart(baseline, quant, trades) {
+    function buildOrgOverlayChart(baseline, quant) {
+      const allDates = [
+        ...baseline.map((r) => r.ts),
+        ...quant.map((r) => r.ts),
+      ];
+      const endDate = new Date(Math.max(...allDates));
+      const traces = [
+        {
+          x: baseline.map((r) => r.ts),
+          y: baseline.map((r) => r.val),
+          name: "基准交易员",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#1565C0", width: 2 },
+          hovertemplate:
+            "<b>基准</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+        {
+          x: quant.map((r) => r.ts),
+          y: quant.map((r) => r.val),
+          name: "量化公司",
+          type: "scatter",
+          mode: "lines",
+          line: { color: "#E65100", width: 2 },
+          hovertemplate:
+            "<b>量化</b><br>%{x|%b %d, %H:%M}<br>$%{y:.2f}<extra></extra>",
+        },
+      ];
+      const layout = {
+        annotations: orgAnnotations(endDate),
+        xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
+        yaxis: { title: "账户价值 ($)", gridcolor: "#eee" },
+        hovermode: "x unified",
+        legend: { orientation: "h", y: -0.15 },
+        margin: { t: 30, r: 20, b: 60, l: 60 },
+        plot_bgcolor: "#fafafa",
+        paper_bgcolor: "white",
+        font: { family: "Inter, sans-serif", size: 13 },
+        shapes: [
+          ...orgShapes(endDate),
+          {
+            type: "line",
+            xref: "paper",
+            yref: "y",
+            x0: 0,
+            x1: 1,
+            y0: 200,
+            y1: 200,
+            line: { color: "#9E9E9E", width: 1.5, dash: "dash" },
+          },
+        ],
+      };
+      const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["lasso2d", "select2d"],
+        displaylogo: false,
+      };
+      document.getElementById("chart-org-overlay").innerHTML = "";
+      Plotly.newPlot("chart-org-overlay", traces, layout, config);
+    }
+
+    function buildEventsChart(
+      baseline,
+      quant,
+      trades,
+      baselineEventsJson,
+      quantEventsJson,
+    ) {
       const traces = [
         {
           x: baseline.map((r) => r.ts),
@@ -564,75 +609,57 @@ const DATA_BASE =
         });
       }
 
-      const baselineEvents = extractKeyEvents(
-        baseline.map((r) => ({
-          timestamp: r.ts.toISOString(),
-          total_account_value: r.val,
-          notes: r.notes,
-        })),
-      );
-      if (baselineEvents.length > 0) {
-        const deduped = [baselineEvents[0]];
-        for (let i = 1; i < baselineEvents.length; i++) {
-          if (
-            baselineEvents[i].ts - deduped[deduped.length - 1].ts >
-            30 * 60 * 1000
-          )
-            deduped.push(baselineEvents[i]);
+      const EVENT_COLORS = {
+        trade: "#1E88E5",
+        macro: "#8E24AA",
+        crash: "#D32F2F",
+        loss: "#E65100",
+        win: "#2E7D32",
+        milestone: "#F9A825",
+        org: "#00695C",
+      };
+      const EVENT_SYMBOLS = {
+        trade: "circle",
+        macro: "hexagram",
+        crash: "x",
+        loss: "triangle-down",
+        win: "star",
+        milestone: "diamond",
+        org: "square",
+      };
+
+      function addEventTrace(eventsJson, dataArr, namePrefix, defaultColor) {
+        if (!eventsJson || eventsJson.length === 0) return;
+        const byType = {};
+        for (const e of eventsJson) {
+          const type = e.type || "other";
+          if (!byType[type]) byType[type] = [];
+          byType[type].push(e);
         }
-        traces.push({
-          x: deduped.map((e) => e.ts),
-          y: deduped.map((e) => e.val),
-          name: "基准事件",
-          type: "scatter",
-          mode: "markers",
-          marker: {
-            symbol: "star",
-            size: 11,
-            color: "#1565C0",
-            line: { color: "white", width: 1 },
-          },
-          text: deduped.map(
-            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
-          ),
-          hovertemplate: "%{text}<extra></extra>",
-        });
+        for (const [type, events] of Object.entries(byType)) {
+          traces.push({
+            x: events.map((e) => new Date(e.timestamp)),
+            y: events.map((e) => nearestVal(dataArr, new Date(e.timestamp))),
+            name: `${namePrefix}: ${type}`,
+            type: "scatter",
+            mode: "markers",
+            marker: {
+              symbol: EVENT_SYMBOLS[type] || "circle",
+              size: 11,
+              color: EVENT_COLORS[type] || defaultColor,
+              line: { color: "white", width: 1.5 },
+            },
+            text: events.map(
+              (e) =>
+                `<b>${e.title}</b><br>${(e.detail || "").substring(0, 150)}`,
+            ),
+            hovertemplate: "%{text}<extra></extra>",
+          });
+        }
       }
 
-      const quantEvents = extractKeyEvents(
-        quant.map((r) => ({
-          timestamp: r.ts.toISOString(),
-          total_account_value: r.val,
-          notes: r.notes,
-        })),
-      );
-      if (quantEvents.length > 0) {
-        const deduped = [quantEvents[0]];
-        for (let i = 1; i < quantEvents.length; i++) {
-          if (
-            quantEvents[i].ts - deduped[deduped.length - 1].ts >
-            30 * 60 * 1000
-          )
-            deduped.push(quantEvents[i]);
-        }
-        traces.push({
-          x: deduped.map((e) => e.ts),
-          y: deduped.map((e) => e.val),
-          name: "量化事件",
-          type: "scatter",
-          mode: "markers",
-          marker: {
-            symbol: "diamond",
-            size: 10,
-            color: "#E65100",
-            line: { color: "white", width: 1 },
-          },
-          text: deduped.map(
-            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
-          ),
-          hovertemplate: "%{text}<extra></extra>",
-        });
-      }
+      addEventTrace(baselineEventsJson, baseline, "基准", "#1565C0");
+      addEventTrace(quantEventsJson, quant, "量化", "#E65100");
 
       const layout = {
         xaxis: { title: "日期", gridcolor: "#eee", tickformat: "%b %d" },
