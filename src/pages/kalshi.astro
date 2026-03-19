@@ -218,45 +218,6 @@ const DATA_BASE =
       return rows;
     }
 
-    // ── Extract key events from portfolio notes ──
-    function extractKeyEvents(portfolioData) {
-      const events = [];
-      const keywords = [
-        "SURGE",
-        "CRASH",
-        "SETTLED",
-        "OIL",
-        "CPI",
-        "BIG MOVE",
-        "NEW HIGH",
-        "ATH",
-        "ATL",
-        "LOSS",
-        "WON",
-        "PIVOT",
-        "Iran",
-        "Trump",
-        "FOMC",
-        "EVENT COORDINATION",
-        "bug",
-        "BUG",
-      ];
-      for (const row of portfolioData) {
-        const note = row.notes || "";
-        if (
-          note.length > 30 &&
-          keywords.some((kw) => note.toUpperCase().includes(kw.toUpperCase()))
-        ) {
-          events.push({
-            ts: new Date(row.timestamp),
-            val: parseFloat(row.total_account_value),
-            note: note,
-          });
-        }
-      }
-      return events;
-    }
-
     // ── Main ──
     function renderOrgTimeline(versions, lang) {
       const container = document.getElementById("org-timeline");
@@ -291,13 +252,25 @@ const DATA_BASE =
 
     async function init() {
       try {
-        const [baselineData, quantData, tradeLogText, orgVersions] =
-          await Promise.all([
-            fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
-            fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
-            fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
-            fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
-          ]);
+        const [
+          baselineData,
+          quantData,
+          tradeLogText,
+          orgVersions,
+          baselineEventsJson,
+          quantEventsJson,
+        ] = await Promise.all([
+          fetchCSV(`${DATA_BASE}/baseline/portfolio-history.csv`),
+          fetchCSV(`${DATA_BASE}/quant/portfolio-history.csv`),
+          fetch(`${DATA_BASE}/quant/trade-log.csv`).then((r) => r.text()),
+          fetch(`${DATA_BASE}/quant/org-versions.json`).then((r) => r.json()),
+          fetch(`${DATA_BASE}/baseline/events.json`)
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch(`${DATA_BASE}/quant/events.json`)
+            .then((r) => r.json())
+            .catch(() => []),
+        ]);
 
         // Populate org transitions from data
         ORG_TRANSITIONS = orgVersions.map((v) => ({
@@ -343,7 +316,13 @@ const DATA_BASE =
 
         // Build charts
         buildPerformanceChart(baseline, quant);
-        buildEventsChart(baseline, quant, trades);
+        buildEventsChart(
+          baseline,
+          quant,
+          trades,
+          baselineEventsJson,
+          quantEventsJson,
+        );
       } catch (err) {
         console.error("Failed to load data:", err);
         document.querySelectorAll(".chart-loading").forEach((el) => {
@@ -506,7 +485,13 @@ const DATA_BASE =
       Plotly.newPlot("chart-performance", traces, layout, config);
     }
 
-    function buildEventsChart(baseline, quant, trades) {
+    function buildEventsChart(
+      baseline,
+      quant,
+      trades,
+      baselineEventsJson,
+      quantEventsJson,
+    ) {
       // Account value lines (thinner, as background context)
       const traces = [
         {
@@ -602,76 +587,59 @@ const DATA_BASE =
         });
       }
 
-      // ── Key events from baseline notes ──
-      const baselineEvents = extractKeyEvents(
-        baseline.map((r) => ({
-          timestamp: r.ts.toISOString(),
-          total_account_value: r.val,
-          notes: r.notes,
-        })),
-      );
-      if (baselineEvents.length > 0) {
-        // Deduplicate: keep only events >30min apart
-        const deduped = [baselineEvents[0]];
-        for (let i = 1; i < baselineEvents.length; i++) {
-          const last = deduped[deduped.length - 1];
-          if (baselineEvents[i].ts - last.ts > 30 * 60 * 1000) {
-            deduped.push(baselineEvents[i]);
-          }
+      // ── Key events from events.json (structured, primary source) ──
+      const EVENT_COLORS = {
+        trade: "#1E88E5",
+        macro: "#8E24AA",
+        crash: "#D32F2F",
+        loss: "#E65100",
+        win: "#2E7D32",
+        milestone: "#F9A825",
+        org: "#00695C",
+      };
+      const EVENT_SYMBOLS = {
+        trade: "circle",
+        macro: "hexagram",
+        crash: "x",
+        loss: "triangle-down",
+        win: "star",
+        milestone: "diamond",
+        org: "square",
+      };
+
+      function addEventTrace(eventsJson, dataArr, namePrefix, defaultColor) {
+        if (!eventsJson || eventsJson.length === 0) return;
+        // Group by type for cleaner legend
+        const byType = {};
+        for (const e of eventsJson) {
+          const type = e.type || "other";
+          if (!byType[type]) byType[type] = [];
+          byType[type].push(e);
         }
-        traces.push({
-          x: deduped.map((e) => e.ts),
-          y: deduped.map((e) => e.val),
-          name: "Baseline Events",
-          type: "scatter",
-          mode: "markers",
-          marker: {
-            symbol: "star",
-            size: 11,
-            color: "#1565C0",
-            line: { color: "white", width: 1 },
-          },
-          text: deduped.map(
-            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
-          ),
-          hovertemplate: "%{text}<extra></extra>",
-        });
+        for (const [type, events] of Object.entries(byType)) {
+          traces.push({
+            x: events.map((e) => new Date(e.timestamp)),
+            y: events.map((e) => nearestVal(dataArr, new Date(e.timestamp))),
+            name: `${namePrefix}: ${type}`,
+            type: "scatter",
+            mode: "markers",
+            marker: {
+              symbol: EVENT_SYMBOLS[type] || "circle",
+              size: 11,
+              color: EVENT_COLORS[type] || defaultColor,
+              line: { color: "white", width: 1.5 },
+            },
+            text: events.map(
+              (e) =>
+                `<b>${e.title}</b><br>${(e.detail || "").substring(0, 150)}`,
+            ),
+            hovertemplate: "%{text}<extra></extra>",
+          });
+        }
       }
 
-      // ── Key events from quant notes ──
-      const quantEvents = extractKeyEvents(
-        quant.map((r) => ({
-          timestamp: r.ts.toISOString(),
-          total_account_value: r.val,
-          notes: r.notes,
-        })),
-      );
-      if (quantEvents.length > 0) {
-        const deduped = [quantEvents[0]];
-        for (let i = 1; i < quantEvents.length; i++) {
-          const last = deduped[deduped.length - 1];
-          if (quantEvents[i].ts - last.ts > 30 * 60 * 1000) {
-            deduped.push(quantEvents[i]);
-          }
-        }
-        traces.push({
-          x: deduped.map((e) => e.ts),
-          y: deduped.map((e) => e.val),
-          name: "Quant Events",
-          type: "scatter",
-          mode: "markers",
-          marker: {
-            symbol: "diamond",
-            size: 10,
-            color: "#E65100",
-            line: { color: "white", width: 1 },
-          },
-          text: deduped.map(
-            (e) => `<b>$${e.val.toFixed(2)}</b><br>${e.note.substring(0, 150)}`,
-          ),
-          hovertemplate: "%{text}<extra></extra>",
-        });
-      }
+      addEventTrace(baselineEventsJson, baseline, "Baseline", "#1565C0");
+      addEventTrace(quantEventsJson, quant, "Quant", "#E65100");
 
       const layout = {
         xaxis: {
