@@ -1,51 +1,246 @@
 ---
-title: "Introducing OMAR"
-description: "A TUI for creating powerful agentic organizations, built on Rust and tmux."
-date: "2026-03-07"
-author: "OMAR Team"
+title: "Introducing One-Man Army"
+description: ""
+date: "2026-03-20"
+author: "Shaokai Lin, Karim Elmaaroufi"
 ---
 
-We're introducing **OMAR** (one-man army) — a TUI for creating powerful agentic organizations.
+## Can one person run a unicorn company in the future?
 
-## Why OMAR?
+Imagine, you are the CEO, leading hundreds of non-stop AI agents to solve humanity's biggest problems.
 
-AI coding agents are powerful individually, but real-world projects need teams. You need agents that can work in parallel, specialize in different areas, and coordinate — just like a company.
+That is the vision we have for **one-man army** (`omar`), a TUI for creating powerful agentic organizations.
 
-OMAR gives you a terminal dashboard to orchestrate all of this from one place.
+## The 10,000x engineer
 
-## What Can You Do?
+<blockquote class="twitter-tweet" data-media-max-width="560"><p lang="et" dir="ltr">10000x Engineer <a href="https://t.co/zLwGV3q7a9">pic.twitter.com/zLwGV3q7a9</a></p>&mdash; shafu (@shafu0x) <a href="https://twitter.com/shafu0x/status/2019854429848236051?ref_src=twsrc%5Etfw">February 6, 2026</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
-- **Deep hierarchies** — Create parallel organizations with managers and workers, to any depth
-- **Heterogeneous backends** — Let Claude, Codex, Cursor, and Opencode collaborate as a team
-- **Full control** — Navigate to any agent at any level and interact directly
-- **Integrations** — Connect agents to Slack channels or give them computer use capabilities
-- **Event-driven coordination** — Schedule status checks, handoffs, and reminders between agents
+## One-Man Army
 
-## How It Works
+While the 10,000x engineer is clearly productive beyond our wildest dreams, they remain elusive and difficult for the average engineer to ever match in skills. Today, we significantly close the gap between the average engineer and the 10,000x engineer by introducing **O**ne **M**an **Ar**my (`omar`).
 
-OMAR runs on tmux. Each agent gets its own tmux session, and OMAR's TUI dashboard monitors them all. You start with an Executive Assistant (EA), give it a high-level task, and watch as it spawns worker agents in parallel.
+`omar` is a multi-agent orchestration system managed through an easy to use text user interface (TUI) built on top of `tmux`, the powerful terminal multiplexer tool you probably already know and love. With `omar`, you can tackle massive problems that are easily solved by multi-agent systems without ever having to manually handle orchestration, `Ctrl+Tab` to cycle and context switch through terminals, or directly manage the consoles of tens of Claude Code screens like our 10,000x engineer.
 
-```bash
-$ curl -fsSL https://omarmy.ai/install.sh | sh
-$ omar
+We demonstrate `omar` on several problems and find that `omar` can perform tasks that often are not trivial or even possible for a single agent. With `omar`, you benefit from:
+*(ideally these are each hyperlinks to the sections of the blog down below that definitevely show that omar can do this)*
+- **Deep hierarchies**: Agents managing agents, teams, and organizations just like a company.
+- **Scalability**: create or remove teams of tens or hundreds of agents without the need of direct human interaction
+- **Heterogeneity**: Let different agent backends collaborate as a team.
+- **Full control**: Talk to, monitor, and control any agent in any level of the hierarchy you want.
+- **Life span**: Long-running or ephemeral agents, your choice.
+
+Other features include messaging system integrations (e.g., Slack), computer use, support for classic `tmux` commands, and several existing agent coding tools (e.g., Claude Code, Codex, etc.). 
+
+## Demo
+
+Enjoy a demo of `claude`, `opencode`, `codex`, and `cursor` agents working together as a team. 
+
+[![asciicast](https://asciinema.org/a/836739.svg)](https://asciinema.org/a/836739)
+
+Try out this demo by sending the following prompt to the Executive Assistant (requires more than one agent backends installed):
+```
+Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
 ```
 
-Navigate with arrow keys. Drill into agent hierarchies. Attach to any agent via popup. Keyboard-driven and fast.
+## How omar works
 
-## Built With
+At it's core, `omar` is a TUI that begins with one agent the **Executive Assistant** (EA). This agent is the main point of contact for a user interacting with an army of agents, hence One Man Army. While `omar` allows users to manually create their own agents, the real force multiplier kicks in when our EA can spawn several agents which inturn can spawn their own teams of agents quickly leading to hundreds of agents working towards solving the user's goal.
 
-- **Rust** — Fast, safe, single binary
-- **ratatui** — TUI framework
-- **tmux** — Battle-tested session management
-- **HTTP API** — Agent-agnostic orchestration on port 9876
+### User interface
 
-## Supported Backends
+`omar` has two kinds of entry points: (1) a TUI that serves as the "mission control" (shown in the demo above), (2) messaging apps, e.g. Slack, that relay messages to the Executive Assistant.
 
-| Backend                                                                                 | How to launch                   |
-| --------------------------------------------------------------------------------------- | ------------------------------- |
-| [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview) | `omar` or `omar --agent claude` |
-| [Codex CLI](https://developers.openai.com/codex/cli)                                    | `omar --agent codex`            |
-| [Opencode](https://github.com/anomalyco/opencode)                                       | `omar --agent opencode`         |
-| [Cursor CLI](https://cursor.com/cli)                                                    | `omar --agent cursor`           |
+The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. We realized that, in a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was built with navigating hierarchy in mind (*not sure about this sentance*).
+
+### Communication and scheduling
+
+Communication between agents is orchestrated by the `omar` server, which has an internal event queue. When agent `A` sends a message to agent `B`, agent `A` sends an HTTP POST request to the `omar` server with the following format:
+```json 
+{
+    "sender": "A",
+    "receiver": "B",
+    "timestamp": 1773768458704306000,
+    "payload": "Execute the following task: ..."
+}
+```
+
+Upon receiving the message, the server inserts a new event into its event queue, which globally orders events in timestamp order. When it's time to deliver the message, the server pops the event from the queue and executes `tmux send-keys` to type the message into the target agent's session.
+
+The same event queue is used for scheduling future tasks, which are highly useful for implementing *cron jobs* in `omar`. Cron jobs are essentially a special type of event that carries a predefined period. When a cron job fires, the `omar` server automatically reschedules it based on its period.
+
+## omar in action
+
+### Tracking agents' ability to trade on prediction markets
+
+Project site: [https://omarmy.ai/kalshi](https://omarmy.ai/kalshi)
+
+One of the most exciting (and somewhat scary) questions is: Can agents make money on their own? The prerequisite of becoming an agentic unicorn is the ability to bring in some positive cashflow. In addition, can a team of agents outperform a single agent? 
+
+#### Setting up agents in `omar`
+
+To answer these questions, we created two teams of agents: a single-agent "baseline trader" and a multi-agent "quant firm." Both teams use the Claude Code backend with Opus 4.6. Both teams started out with $200 each and an independent Kalshi account.
+
+Every hour, both teams are woken up by `omar` cron jobs and each executes a trading loop, which includes doing research, identifying trade opportunities, and executing trades using Kalshi APIs. `omar`'s support for deep hierarchy made it possible to spawn two independent teams of agents under the top-level Executive Assistant, who delivers an experiment report on slack every six hours.
+
+<figure style="text-align: center;">
+  <img src="https://hackmd.io/_uploads/Bk7UH6D9bx.png" alt="description">
+  <figcaption>Figure 1: Both teams running on omar  (March 9, 2026).</figcaption>
+</figure>
+
+The baseline trader was launched on March 7, 2026. Without explicit prompting, the baseline trader (Claude Code with Opus 4.6) chose a strategy focusing on macro bets, in particular, WTI oil prices and CPI in February/March. The quant firm, on the other hand, started on March 9, 2026, and chose to bet on GDP and NYC/Miami weather the next day.
+
+#### Performance comparison
+
+We have been running the experiment for a week and observed some surprising results. Overall, the solo trader has been outperforming the quant firm significantly. The figure below shows the total account value of both teams with key events annotated.
+
+<figure style="text-align: center;">
+  <img src="https://hackmd.io/_uploads/r1ucfe99Wx.png" alt="description">
+  <figcaption>Figure 2: Performance comparison as of March 19, 2026.</figcaption>
+</figure>
+
+Here is an agent summarizing what happened based on both teams' trading data and reflections:
+
+>  The quant firm's story is a cautionary tale about concentration risk in binary prediction markets. On day one, the firm's researcher spotted what looked like a slam-dunk: NWS forecast Miami at 89-90°F, well above the 87°F threshold on Kalshi's weather contracts priced at just 1-6¢. The firm went all in, accumulating 2,100 contracts — 43% of its $200 capital on a single city's temperature. As Miami warmed through the morning, the market repriced and the portfolio exploded to $292, up 46% in hours. Then the fog rolled in. Miami's actual high peaked at 84.2°F — just 3 degrees short. In binary markets, close doesn't count. The 2,100 contracts collapsed, whipsawing the portfolio between $292 and $142 within hours as thin order books amplified the chaos, before settling as a total loss: $57 gone, account at $108.77, down 45.6%. The firm pivoted to macro markets — CPI, GDP, government cuts — but with depleted capital and shaken confidence, it held just 2-3 positions for most of the next week, cycling through 20+ "nothing to do" conclusions while its 4-agent team burned compute for no alpha. A CPI settlement won back $20, and the firm went through four organizational restructurings — from a full team down to a solo operator, then back up to parallel research desks — but as of March 19, the account sits at $118.47, still 40.8% below where it started.
+
+>  Meanwhile, the baseline trader quietly built a diversified portfolio of 13 small positions — CPI contracts across multiple strikes and months, WTI oil at various thresholds, and GDP bets — many as tiny lottery tickets (50 contracts at 1¢). When the Iran-driven oil shock hit and CPI volatility exploded, the baseline had exposure everywhere: its CPI T1.2 position returned +600%, and every single position turned green simultaneously.
+
+>  The key lesson: the quant firm's underperformance wasn't caused by bad AI agents — it was caused by *concentration risk* and *tunnel vision*. A solo agent scanning broadly found 13 ideas across multiple themes. An organization of 4 agents fixated on a single weather thesis, bet the farm, lost, and never recovered the breadth.
+
+#### Quant firm's dynamic restructures
+
+To prevent the weather bet debacle from happening again, we stepped in and instructed the quant firm head, a Claude Code agent, to change the trading strategy to focus on macros where agents' research can bring information edge, rather than trading on coin-flipping events like weather. We gave the head of the quant firm the authority to adjust the firm's organizational structure anytime, i.e., "firing" or "hiring" agents, similar to what a real company would do.
+
+The firm head agent has evolved the organizational structure four times since launch. All organizational decisions were made by the agent without human intervention.
+
+> • v1: Full Team (Mar 7, Cycle 1) — 4 persistent agents (researcher, risk mgr, executor, bookkeeper). Coordinated via terminal send (incorrect and unreliable API), which dropped ~80% of messages.
+>
+> • v2: Event-Based (Mar 9, Cycle 17) — Same 4 agents, switched to `omar` event system after the weather crash. Message delivery went from ~20% to 100%. Post-crash pivot to macro markets.
+>
+> • v3: Lean Team (Mar 11, Cycle 65) — Killed executor + bookkeeper (idle 95% of cycles). 2 persistent agents. Firm head absorbed bookkeeping. Executor spawned on-demand only when trades approved.
+>
+> • v4: Solo Operator (Mar 14) — Zero persistent sub-agents. Firm head operates solo by default, spawning task forces only on catalyst days (CPI releases, FOMC, big orderbook moves). Quiet cycles dropped from ~3 min to ~2 min.
+>
+> • v5: Parallel Research Desks (Mar 18) — 3 ephemeral sector-specialist researchers spawned in parallel per cycle: oil-desk (claude), cpi-desk (claude), macro-desk (codex/o3). Key insight: the baseline's advantage wasn't better AI — it was broader scanning. Solo operator created tunnel vision. Parallel desks fix this with 3x market coverage and model diversity.
+
+<figure style="text-align: center;">
+  <img src="https://hackmd.io/_uploads/rkF2Mxc9-l.png" alt="description">
+  <figcaption>Figure 3: Quant firm's organizational restructures.</figcaption>
+</figure>
+
+Figure 3 shows the performance curve with an overlay of organizational restructures. After our intervention and the head agent's restructures, the quant firm's performance has stablized. We are curious to see whether the quant firm can eventually outperform the baseline through continuous evolution of the team structure and changes of strategy.
+
+#### An ongoing experiment
+
+Back to the first question: Can agents make money on their own? The answer is "yes and no." While the baseline agent was up ~20% after one week, the quant firm agents collectively were down ~40%.
+
+Also, can a team of agents outperform a single agent? Our data so far seem negative, but this is too soon to tell. In the `lesson_learned.md` maintained by the quant firm periodically, a entry entered on March 14 says:
+
+> **Diverse models for high-stakes decisions.** When conviction is borderline, get a second opinion from a different model (e.g., o3 via opencode). Two independent analyses > one deeper analysis.
+
+We are cautiously optimistic that, with heterogeneous backend models triangulating for better insights and a functional organizational structure, the quant firm could outperform the baseline eventually.
+
+At the time this blog is written, the experiment is still running live. Check out agents' live trading data at [omarmy.ai/kalshi](https://omarmy.ai/kalshi).
+
+### Creating infinite robotics data
+
+Large Language Models (LLMs) have seen much success partly because scaling laws (Kaplan et al. 2020, Hoffmann et al. 2022) have delivered their promise of improved performance as we have scaled up data. According to [Epoch AI](https://epoch.ai/data-insights/dataset-size-trend), dataset sizes have doubled roughly every six months and are currently at 10<sup>14</sup> - 10^<sup>15</sup> tokens of text. 
+
+In contrast, even the largest robot datasets such as Open X‑Embodiment, and the real‑robot data behind models like RT‑1 and π₀ contain at most 10<sup>6</sup>–10<sup>8</sup> action‑labeled interaction steps. 
+
+To put this into a physical perspective, consider the sun which is about one million times the volume of the Earth. If LLM training text were the Sun, all current real‑robot interaction data for manipulation would easily fit inside a single Earth. 
+
+Even with this massive scale advantage, LLMs are still scaling up further. Consider the latest popular open source models like Minimax, Kimi 2.5, Trinity, Qwen 3 and Nemotron-3 which all credit synthetic data generation as a significant reason for unlocking next-level capabilties. 
+
+With `omar`, we can ask, how can we scale up robotics data in a similar manner? 
+
+#### Introducing [LIBERO-Infinity](https://github.com/KE7/libero-infinity)
+
+LIBERO is a popular robotics learning benchmark that was initially centered on lifelong, sequential knowledge transfer in manipulation tasks but later became popular for evaluating and eventually training Vision Language Action (VLA) models. Recently models like SmolVLA and 𝜋<sub>0.5</sub> easily score above 90% on LIBERO, so are we ready for VLA-powered robots? Not quite. 
+
+Works such as, [LIBERO-Pro](https://arxiv.org/abs/2510.03827) by Zhou et al., recently found that these VLAs are mearly memorizing the trajectries packaged with the benchmarks. When you perturb (i.e., change) something seemingly pointless like the color of a mug or where the mug is initially placed, these state-of-the-art VLAs often drop to 0% success. Prior work from NVIDIA (COLOSSUEM benchmark 2024) also found that similar collapses of success rates occur in non-VLA robotics models and ultimately, the models that did do well across pertubations also better bridge the sim-to-real gap. Given that, in both cases, these pertubations were hand designed and finite in size, how can we scale to practically infinitly many while doing so with just one engineer and `omar`?
+
+##### [Scenic](https://scenic-lang.org)
+
+Scenic is "a domain-specific probabilistic programming language for modeling the environments of cyber-physical systems". Perfect for robots! It's also been used by Boeing, Meta, Toyota, and many others for testing autonomous systems. The problem is that Scenic is domain specific and thus it's often out of distribution for LLMs. [ScenicNL](https://arxiv.org/abs/2405.03709) by Elmaaroufi et al. demonstrated that while LLMs cannot write domain specific languages, compound AI systems can. 
+
+Inspired by ScenicNL, we ask `omar` to similarly create a team of role playing agents to go through Scenic's public documentation and code to produce a [Claude skill](https://github.com/KE7/scenic-skills). This skill is all that we use to enable agents in `omar` to implement and use Scenic code which powers LIBERO-Infinity. In other words, a team of ~10 agents orchestrated by `omar` produced an artifact that allows a single agent to now write Scenic code. This whole process took less than an hour and is more capable than the ScenicNL system which took academic researchers several months to implement. 
+
+##### Scaling LIBERO up to Infinity
+
+We ask `omar` to explain the 130 base BDDL or tasks of LIBERO, the five environments, and then propose ideas for how we can generalize them. `omar` on it's own proposes a team of 9 agents: 5 for each LIBERO env, and 4 for the LIBERO subtasks.
+
+With that context and a few rounds of back and forth with my EA, we settled on the following perubations:
+  - position - randomizes object (x, y) placement over the workspace
+  - object - swaps the object’s mesh/texture using the variant pool
+  - camera - perturbs the agentview camera pose and tilt
+  - lighting - perturbs light intensity, position, and ambient level
+  - texture - changes the table-surface texture
+  - distractor - adds 1-5 non-task objects as clutter
+  - background - perturbs wall and floor textures
+  - articulation - perturbs fixture state, like drawers/doors/stoves, by sampling their initial joint state
+  - combination - you may compose two or more of the above pertubations
+
+Armed with the ability to write Scenic and a plan of the pertubations that we want, we let `omar` work on this for a few days. Every few hours, we check in to provide testing feedback (we watch simulation videos for `omar`) and occasionally instruct `omar` to perform refactors. `omar` on it's own was able to discover concepts like containment (e.g., if I displace an object that has objects inside it like a ball inside a cabinet, the ball should move with the cabinet so it stays inside) and implement code to support that as well as tests to prevent future regressions.
+
+In total, `omar` produced LIBERO-Infinity in one week. For context, such projects would often academic researchers several weeks if not a full semester. Lastly, while we do not explore it in this blog, we point out that by using Scenic, we've enabled LIBERO to connect with Scenic's companion tool, [VerifAI](https://verifai.readthedocs.io/en/latest/), which would allow for falsification-guided adversarial search over the Scenic distribution, i.e., we can formally identify failure modes of our robot policies. 
+
+### Deep Research - March Madness Style 🏀
+
+American college sports and especially basketball is unparalled in any other country. The talent is the best in the world and fans from all over the world tune in to watch. This year's 68-team playoffs, known as March Madness, has already broken record. Broadcasting rights were sold for over $1 billion. 
+
+As of the start of this year's tournament no one has ever predicted all 63 games correctly (i.e, formed a correct bracket). 
+
+> If every game were a true 50/50 coin flip, the odds of picking a perfect bracket would be 1 in 9.2 quintillion.
+> 
+> In reality, fans use stats, matchups, and basketball knowledge to guide their picks. Even then, the odds are still estimated to be around 1 in 120 billion.
+
+[Fox Sports](https://www.foxsports.com/stories/betting/kalshi-1-billion-dollar-perfect-bracket-challenge-march-madness-2026)
+
+This problem is so hard that even the predicition market, Kalshi, offers anyone a chance to win [$1 billion](https://kalshi.com/billion-dollar-bracket) if they form a perfect bracket. 
+
+#### Omar's Turn
+
+As Fox noted, one can improve their bracket by using basketball knowledge. However, if I wanted to include all sources of information like news and analyst recommendations, I would need days if not weeks to consolidtae the information. Instead, what if I use an army of coordinated agents to do the research I planned to do? Commanders and generals leading teams in different domains, working all in parallel to gather every singal availalbe and culminate it all into one bracket? With `omar` it's now possible do this in a controlled and digestible manner.
+
+We give our EA in `omar` the following prompt:
+> "I want to build an NCAA winning bracket. I need you to select the teams for me to do this. We will need to spawn a massive set of agents. We will need teams to read the news about all teams in the tournament as well as every individual player on each team. We need to consider both news and social media profiles of the players to see if they have been locked in. We should also look for historical information and metrics stuff like based on a teams seasons stats do those stats go on to predict anything about the playoffs? For example, KenPom and rule of 2 are interesting metrics that come to mind. We should also be robust and have agents debate each other. These debate agents can also Critique the brackets of professional analysts who have already published theirs as a way to include additional information in our research process. The net result should be a hierarchy of agents at least three layers deep with a total number of agents in the range of 50 to 100 agents working to create the best possible bracket."
+
+As you can see, the prompt is not exhaustive but it includes things that the average college basketball viewer may not know like the KenPom metric. 
+
+Our EA creates a single agent -- `ncaa-master` -- to sit at the top and manage everything. The `ncaa-master` then goes on to idenitfy 7 domains and creats a manager for each one. 
+- `news-mgr` Breaking news, injuries, coaching changes for all 68 teams
+- `social-mg` Player Twitter/Instagram/TikTok — morale, lock-in, drama
+- `stats-mgr` KenPom, NET, SOS, pace, 3PT risk, FT rate, Rule of 2
+- `matchup-mgr` Region-by-region matchup modeling, style clashes, Sweet 16 paths
+- `debate-mgr` Adversarial FOR/AGAINST debate agents for every contested pick
+- `analyst-mgr` ESPN, CBS, Jay Bilas, Joe Lunardi, The Ringer, Action Network brackets
+
+As we watched these 6 managers spin up, we recalled that we missed a critical infromation source: Vegas. Had we directly used the deep research feature from somewhere like Gemini or leverage the background agents feature in Cladue Code, this would have been the end of our experiemnt as we would have had to stop it and restart with this additional information. These existing products do not provide users a way to directly interact with any subagent. However, `omar` allows this. Thus, we swap over to the `ncaa-master` and give it an additional instruction:
+
+> We forgot to include Vegas itself, so this is futures from gambling market, such as Caesars bets, and DraftKings.
+
+The `ncaa-master` quickly responded by adding a 7<sup>th</sup></sub> manager:
+- `vegas-mgr` DraftKings, Caesars, FanDuel, BetMGM futures, spreads, line movement
+
+At this point, we were happy with our managers and our One Man Army was quickly growing in size. 
+
+![image](https://hackmd.io/_uploads/rk9Xkm99bx.png)
+
+As the experiment progressed, the `ncaa-master` was not pleased with the breadth of information and would further create 12 more managers to cover 12 additional deep research domains: referee tendencies, venue proximity, travel logistics, practice reports, tournament experience, NIL signals, Reddit intel, talent grades, academic eligibility, transfer cohesion, prediction markets, and situational stats. In total hundreds of agents were spawned but we observed a peak of 110 agents running simultaneously.  The entire process took slightly under two hours. 
+
+Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.  
+
+## What's next
+
+We're working on a few exciting :
+
+- Supporting `openrouter` to access free backend models.
+- Supporting multiple executive assistants for ultra large armies.
+- Dockerize `omar` and subagents to improve security.
+- More to come!
 
 Check out the [docs](/docs/) to get started, and join our [Discord](https://discord.gg/X76PSzmfWr) to connect with the community.
+
+Star us on [GitHub](https://github.com/lsk567/omar) if you find `omar` interesting.
+
+`omar` is made with ❤️ at Berkeley, CA.
