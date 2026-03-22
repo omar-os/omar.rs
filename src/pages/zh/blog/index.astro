@@ -14,7 +14,7 @@ const posts = (await getCollection("zh-blog")).sort(
     <div class="posts">
       {
         posts.map((post) => (
-          <a href={`/zh/blog/${post.id}/`} class="post-card">
+          <a href={`${import.meta.env.BASE_URL}zh/blog/${post.id}/`} class="post-card">
             <time>
               {new Date(post.data.date).toLocaleDateString("zh-CN", {
                 year: "numeric",

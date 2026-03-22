@@ -18,7 +18,8 @@ const {
 } = Astro.props;
 const isZh = lang.startsWith("zh");
 const dateLocale = isZh ? "zh-CN" : "en-US";
-const blogHref = isZh ? "/zh/blog/" : "/blog/";
+const base = import.meta.env.BASE_URL;
+const blogHref = isZh ? `${base}zh/blog/` : `${base}blog/`;
 ---
 
 <BaseLayout title={title} description={description} lang={lang}>
