@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npx astro build --base /omarmy-preview --site https://lsk567.github.io
+        run: npx astro build --base /omarmy-preview/ --site https://lsk567.github.io
 
       - name: Deploy to omarmy-preview repo
         env:
