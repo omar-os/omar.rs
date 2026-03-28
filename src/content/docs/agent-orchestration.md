@@ -101,7 +101,7 @@ curl -X DELETE http://localhost:9876/api/projects/<id>
 When spawning agents with a task, OMAR injects the unified `agent.md` prompt. Each agent is autonomous — it decides whether to do the work itself or spawn sub-agents:
 
 ```
-You are an Agent in the OMAR (One-Man Army) system.
+You are an Agent in the OMAR system.
 You receive a task from your parent, assess it, and
 decide the best way to get it done — either by doing
 it yourself or by spawning sub-agents.
