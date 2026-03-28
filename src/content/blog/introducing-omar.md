@@ -5,7 +5,7 @@ date: "2026-03-07"
 author: "OMAR Team"
 ---
 
-We're introducing **OMAR** (one-man army) — a TUI for creating powerful agentic organizations.
+We're introducing **OMAR** — a TUI for creating powerful agentic organizations.
 
 ## Why OMAR?
 
