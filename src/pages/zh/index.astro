@@ -10,26 +10,35 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
-      <div class="hero-text">
-        <h1 class="hero-title">
-          一人成团，<br />在一个终端指挥<br /><span class="hero-accent"
-            >一百个智能体</span
-          >。
-        </h1>
-        <p class="hero-subtitle">
-          <code>omar</code> 是一个用于创建强大智能体组织的 TUI 工具。 深层并行 AI
-          智能体层级，像公司一样管理。
-        </p>
-        <div class="hero-actions">
-          <a href="/zh/docs/" class="btn btn-primary">快速开始</a>
-          <a
-            href="https://github.com/lsk567/omar"
-            class="btn btn-outline"
-            target="_blank"
-            rel="noopener">GitHub</a
-          >
-        </div>
+      <h1 class="hero-title">
+        一人成团，<br />在一个终端指挥 <span class="hero-accent"
+          >一百个智能体</span
+        >。
+      </h1>
+      <p class="hero-subtitle">
+        <code>omar</code> 是一个用于创建强大智能体组织的 TUI 工具。<br />像管理公司一样管理AI智能体。
+      </p>
+      <div class="hero-actions">
+        <a href="/zh/docs/" class="btn btn-primary">快速开始</a>
+        <a
+          href="https://github.com/lsk567/omar"
+          class="btn btn-outline"
+          target="_blank"
+          rel="noopener">GitHub</a
+        >
       </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <div class="container">
+      <iframe
+        src="https://asciinema.org/a/836739/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
+        allowfullscreen
+        loading="lazy"
+        scrolling="no"
+      ></iframe>
     </div>
   </section>
 
@@ -134,51 +143,6 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     </div>
   </section>
 
-  <!-- Agent Backends -->
-  <section class="backends">
-    <div class="container">
-      <h2 class="section-title">支持的智能体后端</h2>
-      <div class="backends-table">
-        <table>
-          <thead>
-            <tr>
-              <th>后端</th>
-              <th>启动方式</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td
-                ><a
-                  href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-                  >Claude Code</a
-                ></td
-              >
-              <td><code>omar</code> 或 <code>omar --agent claude</code></td>
-            </tr>
-            <tr>
-              <td
-                ><a href="https://developers.openai.com/codex/cli">Codex CLI</a
-                ></td
-              >
-              <td><code>omar --agent codex</code></td>
-            </tr>
-            <tr>
-              <td
-                ><a href="https://github.com/anomalyco/opencode">Opencode</a
-                ></td
-              >
-              <td><code>omar --agent opencode</code></td>
-            </tr>
-            <tr>
-              <td><a href="https://cursor.com/cli">Cursor CLI</a></td>
-              <td><code>omar --agent cursor</code></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
 </BaseLayout>
 
 <style>
@@ -188,15 +152,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   }
 
   .hero-inner {
-    max-width: 1100px;
-    display: flex;
-    align-items: center;
-    gap: 3rem;
-  }
-
-  .hero-text {
-    flex: 1;
-    min-width: 0;
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .hero-tag {
@@ -223,6 +181,8 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     font-size: 1.1rem;
     color: var(--text);
     margin-bottom: 2rem;
+    margin-left: auto;
+    margin-right: auto;
     max-width: 560px;
     line-height: 1.7;
   }
@@ -248,18 +208,20 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    justify-content: center;
   }
 
-  .hero-image {
-    flex: 1;
-    min-width: 0;
+  /* Demo */
+  .demo {
+    padding: 0 0 4rem;
   }
 
-  .hero-image img {
-    max-width: 100%;
-    border-radius: var(--radius);
+  .demo iframe {
+    width: 100%;
+    height: 600px;
     border: 1px solid var(--border);
-    opacity: 0.9;
+    border-radius: var(--radius);
+    overflow: hidden;
   }
 
   /* Features */
@@ -311,8 +273,15 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     border-top: 1px solid var(--border);
   }
 
+  .quickstart .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .install-methods {
     max-width: 600px;
+    width: 100%;
     margin-bottom: 3rem;
   }
 
@@ -410,46 +379,14 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     margin-top: 0.5rem;
   }
 
-  /* Backends */
-  .backends {
-    padding: 3rem 0 4rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .backends-table {
-    max-width: 520px;
-  }
-
-  .backends-table table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .backends-table th,
-  .backends-table td {
-    padding: 0.625rem 1rem;
-    border: 1px solid var(--border);
-    text-align: left;
-    font-size: 0.875rem;
-  }
-
-  .backends-table th {
-    background: var(--bg-surface);
-    color: var(--text-bright);
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
   /* Responsive */
   @media (max-width: 768px) {
-    .hero-inner {
-      flex-direction: column;
-    }
-
     .hero-title {
       font-size: 2rem;
+    }
+
+    .demo iframe {
+      height: 350px;
     }
 
     .features-grid {

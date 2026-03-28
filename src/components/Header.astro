@@ -31,8 +31,7 @@ function getLangSwitchUrl() {
 <header class="header">
   <div class="container header-inner">
     <a href={isZh ? "/zh/" : "/"} class="logo">
-      <span class="brand-full">OMAR</span>
-      <span class="brand-short">OMAR</span>
+      OMAR<span class="brand-suffix" id="brand-typewriter"></span>
     </a>
     <nav class="nav">
       {
@@ -156,7 +155,11 @@ function getLangSwitchUrl() {
     border-color: var(--text-dim);
   }
 
-  .brand-short,
+  .brand-suffix {
+    font-weight: 400;
+    color: var(--text-bright, #000);
+  }
+
   .lang-short {
     display: none;
   }
@@ -168,13 +171,51 @@ function getLangSwitchUrl() {
     .nav-link {
       font-size: 0.8rem;
     }
-    .brand-full,
+    .brand-suffix {
+      display: none;
+    }
     .lang-full {
       display: none;
     }
-    .brand-short,
     .lang-short {
       display: inline;
     }
   }
 </style>
+
+<script>
+  (() => {
+    const el = document.getElementById("brand-typewriter");
+    if (!el) return;
+    if (window.matchMedia("(max-width: 640px)").matches) return;
+
+    const text = ": open multi-agent runtime";
+    const typeSpeed = 60;
+    const deleteSpeed = 40;
+    const pauseAfterType = 10000;
+    const pauseAfterDelete = 800;
+    let i = 0;
+
+    function typeForward() {
+      i++;
+      el.textContent = text.slice(0, i);
+      if (i < text.length) {
+        setTimeout(typeForward, typeSpeed);
+      } else {
+        setTimeout(deleteBackward, pauseAfterType);
+      }
+    }
+
+    function deleteBackward() {
+      i--;
+      el.textContent = text.slice(0, i);
+      if (i > 0) {
+        setTimeout(deleteBackward, deleteSpeed);
+      } else {
+        setTimeout(typeForward, pauseAfterDelete);
+      }
+    }
+
+    setTimeout(typeForward, 1000);
+  })();
+</script>
