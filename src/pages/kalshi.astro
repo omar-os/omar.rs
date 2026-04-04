@@ -182,6 +182,13 @@ const DATA_BASE =
       return rows;
     }
 
+    // Ensure timestamp is parsed as UTC even if 'Z' suffix is missing
+    function parseUTC(ts) {
+      ts = ts.trim();
+      if (!/Z|[+-]\d{2}:\d{2}$/.test(ts)) ts += 'Z';
+      return new Date(ts);
+    }
+
     async function fetchCSV(url) {
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`Failed to fetch ${url}: ${resp.status}`);
@@ -307,7 +314,7 @@ const DATA_BASE =
         // Parse and sort
         const baseline = baselineData
           .map((r) => ({
-            ts: new Date(r.timestamp),
+            ts: parseUTC(r.timestamp),
             val: parseFloat(r.total_account_value),
             notes: r.notes || "",
           }))
@@ -316,7 +323,7 @@ const DATA_BASE =
 
         const quant = quantData
           .map((r) => ({
-            ts: new Date(r.timestamp),
+            ts: parseUTC(r.timestamp),
             val: parseFloat(r.total_account_value),
             notes: r.notes || "",
           }))
@@ -614,8 +621,8 @@ const DATA_BASE =
 
       if (buyTrades.length > 0) {
         traces.push({
-          x: buyTrades.map((t) => new Date(t.timestamp)),
-          y: buyTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          x: buyTrades.map((t) => parseUTC(t.timestamp)),
+          y: buyTrades.map((t) => nearestVal(quant, parseUTC(t.timestamp))),
           name: "Quant BUY",
           type: "scatter",
           mode: "markers",
@@ -635,8 +642,8 @@ const DATA_BASE =
 
       if (sellTrades.length > 0) {
         traces.push({
-          x: sellTrades.map((t) => new Date(t.timestamp)),
-          y: sellTrades.map((t) => nearestVal(quant, new Date(t.timestamp))),
+          x: sellTrades.map((t) => parseUTC(t.timestamp)),
+          y: sellTrades.map((t) => nearestVal(quant, parseUTC(t.timestamp))),
           name: "Quant SELL",
           type: "scatter",
           mode: "markers",
@@ -685,8 +692,8 @@ const DATA_BASE =
         }
         for (const [type, events] of Object.entries(byType)) {
           traces.push({
-            x: events.map((e) => new Date(e.timestamp)),
-            y: events.map((e) => nearestVal(dataArr, new Date(e.timestamp))),
+            x: events.map((e) => parseUTC(e.timestamp)),
+            y: events.map((e) => nearestVal(dataArr, parseUTC(e.timestamp))),
             name: `${namePrefix}: ${type}`,
             type: "scatter",
             mode: "markers",
