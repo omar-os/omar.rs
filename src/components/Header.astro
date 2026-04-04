@@ -6,34 +6,32 @@ interface Props {
 const { lang = "en" } = Astro.props;
 const isZh = lang.startsWith("zh");
 const pathname = Astro.url.pathname;
-const base = import.meta.env.BASE_URL;
 
 const navItems = isZh
   ? [
-      { href: `${base}zh/`, label: "首页" },
-      { href: `${base}zh/docs/`, label: "文档" },
-      { href: `${base}zh/blog/`, label: "博客" },
+      { href: "/zh/", label: "首页" },
+      { href: "/zh/docs/", label: "文档" },
+      { href: "/zh/blog/", label: "博客" },
     ]
   : [
-      { href: base, label: "Home" },
-      { href: `${base}docs/`, label: "Docs" },
-      { href: `${base}blog/`, label: "Blog" },
+      { href: "/", label: "Home" },
+      { href: "/docs/", label: "Docs" },
+      { href: "/blog/", label: "Blog" },
     ];
 
 function getLangSwitchUrl() {
   if (isZh) {
-    return pathname.replace(`${base}zh/`, base) || base;
+    return pathname.replace(/^\/zh/, "") || "/";
   } else {
-    return pathname.replace(base, `${base}zh/`);
+    return `/zh${pathname}`;
   }
 }
 ---
 
 <header class="header">
   <div class="container header-inner">
-    <a href={isZh ? `${base}zh/` : base} class="logo">
-      <span class="brand-full">one-man army</span>
-      <span class="brand-short">omar</span>
+    <a href={isZh ? "/zh/" : "/"} class="logo">
+      OMAR<span class="brand-suffix" id="brand-typewriter"></span>
     </a>
     <nav class="nav">
       {
@@ -157,7 +155,11 @@ function getLangSwitchUrl() {
     border-color: var(--text-dim);
   }
 
-  .brand-short,
+  .brand-suffix {
+    font-weight: 400;
+    color: var(--text-bright, #000);
+  }
+
   .lang-short {
     display: none;
   }
@@ -169,13 +171,51 @@ function getLangSwitchUrl() {
     .nav-link {
       font-size: 0.8rem;
     }
-    .brand-full,
+    .brand-suffix {
+      display: none;
+    }
     .lang-full {
       display: none;
     }
-    .brand-short,
     .lang-short {
       display: inline;
     }
   }
 </style>
+
+<script>
+  (() => {
+    const el = document.getElementById("brand-typewriter");
+    if (!el) return;
+    if (window.matchMedia("(max-width: 640px)").matches) return;
+
+    const text = ": open multi-agent runtime";
+    const typeSpeed = 60;
+    const deleteSpeed = 40;
+    const pauseAfterType = 10000;
+    const pauseAfterDelete = 800;
+    let i = 0;
+
+    function typeForward() {
+      i++;
+      el.textContent = text.slice(0, i);
+      if (i < text.length) {
+        setTimeout(typeForward, typeSpeed);
+      } else {
+        setTimeout(deleteBackward, pauseAfterType);
+      }
+    }
+
+    function deleteBackward() {
+      i--;
+      el.textContent = text.slice(0, i);
+      if (i > 0) {
+        setTimeout(deleteBackward, deleteSpeed);
+      } else {
+        setTimeout(typeForward, pauseAfterDelete);
+      }
+    }
+
+    setTimeout(typeForward, 1000);
+  })();
+</script>
