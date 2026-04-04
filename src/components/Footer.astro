@@ -5,7 +5,8 @@ interface Props {
 
 const { lang = "en" } = Astro.props;
 const isZh = lang.startsWith("zh");
-const prefix = isZh ? "/zh" : "";
+const base = import.meta.env.BASE_URL;
+const prefix = isZh ? `${base}zh` : base.slice(0, -1);
 ---
 
 <footer class="footer">
