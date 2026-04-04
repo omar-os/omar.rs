@@ -311,7 +311,7 @@ const DATA_BASE =
         const latest = new Date(Math.max(...allTimestamps));
         const el = document.getElementById("last-updated");
         if (el) {
-          el.textContent = `数据最后更新：${latest.toLocaleString("zh-CN")}`;
+          el.textContent = `数据最后更新：${latest.toLocaleString("zh-CN", { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })}`;
         }
 
         buildPerformanceChart(baseline, quant);
