@@ -154,15 +154,23 @@ const DATA_BASE =
           for (let c = 0; c < numHeaderCols; c++) {
             row[headers[c]] = fields[c];
           }
-        } else if (fields.length === 7 || fields.length === 8) {
-          // New format: timestamp,cash,positions,total,pnl,return_pct,num_positions
-          // Some rows include a label after timestamp, shifting data by 1:
-          //   timestamp,label,cash,positions,total,pnl,return_pct[,num_positions]
-          // Detect by checking if fields[1] is a valid number (cash).
+        } else if (fields.length >= 6) {
+          // Extended format with extra columns. The total account value
+          // is always at index 3 (or 4 if a label follows the timestamp).
+          // Formats seen:
+          //   7-8 cols:  timestamp,cash,positions,total,pnl,return_pct[,num_positions]
+          //   11+ cols:  timestamp,cash,positions_value,total,realized_pnl,
+          //              total_return,fees,unrealized_pnl,num_positions,num_resting,notes
+          // Detect label: if fields[1] is non-numeric, it's a label shifting data by 1.
           const hasLabel = isNaN(parseFloat(fields[1]));
           const offset = hasLabel ? 1 : 0;
           row.timestamp = fields[0];
           row.total_account_value = fields[3 + offset]; // total = cash + positions
+          // Grab notes from last field if available
+          const lastField = fields[fields.length - 1];
+          if (lastField && isNaN(parseFloat(lastField))) {
+            row.notes = lastField;
+          }
         } else {
           continue; // skip malformed lines
         }
