@@ -230,13 +230,28 @@ As the experiment progressed, the `ncaa-master` was not pleased with the breadth
 
 Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.  
 
+## AI Safety
+
+Having the ability to efficiently control tens or even hundreds of agents can be a scary thought. While there is nothing stopping the 10,000x engineer from performing malicious acts with their agents, `omar` does indeed make such attempts more manageable for the average engineer. This is inherent in any multi-agent product, especially ones that support heterogeneous mixtures of agents, and an active area of research we deeply care about.
+
+Another one of our concerns when using teams of agents is traceability and compartmentalization. In organizations of people, we ensure the former by having conversations with managers and stakeholders to receive work and report updates on work that is done. For example, in software companies this information may be communicated as JIRA tickets. The latter is done through access management where employees are given the minimum access to accomplish their daily tasks. In our example, this could be providing employees with source code access to only their teams' code as opposed to all code in the company. As such, we are currently developing safety features in `omar` that implement traceability and compartmentalization.
+
+### OMAR's safety timeline
+
+Here is a recent real-world example of the dangers of unchecked agent access, where [an AI assistant (Claude Code) was given excessive permissions and ended up deleting a developer's entire production environment, including its database and all backups, erasing over two years of records in seconds (Tom's Hardware)](https://www.tomshardware.com/tech-industry/artificial-intelligence/claude-code-deletes-developers-production-setup-including-its-database-and-snapshots-2-5-years-of-records-were-nuked-in-an-instant). 
+
+Such issues are further compounded in multi-agent systems like `omar` not only because there are multiple agents that can do damage, but also because it becomes harder for an individual to track the work and changes created by each agent. In our NCAA bracket example, how does one check the files touched by over 100 agents? The problem quickly becomes intractable. 
+
+In `omar`, we attempt to make this problem more traceable by creating the `trace timeline`. The trace timeline asks each agent to report its plan of action as a concise set of steps that are bubbled up the hierarchy, eventually reaching the executive assistant. As each agent completes work, it checks off tasks completed from the plan and modifies the plan if it deviates from its original goal. While agents can lie and take actions that are not faithful to the plans they report in the trace timeline, we emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. While the trace timeline does not prevent agents from erasing over two years of records, it does provide a concise way for one person to track the actions of teams of agents. 
+
+Lastly, with regards to role access that would limit agents to only have write access to files related to their tasks, this is a feature under active development and will be released soon 🚀 !
+
+
 ## What's next
 
-We're working on a few exciting :
+We're working on a few exciting features:
 
-- Supporting `openrouter` to access free backend models.
-- Supporting multiple executive assistants for ultra large armies.
-- Dockerize `omar` and subagents to improve security.
+- Supporting multiple executive assistants for ultra large teams of agents (think thousands).
 - More to come!
 
 Check out the [docs](/docs/) to get started, and join our [Discord](https://discord.gg/X76PSzmfWr) to connect with the community.
