@@ -94,7 +94,7 @@ Health is determined by pane content change between refresh frames:
 ## Configuration
 
 ```toml
-# ~/.config/omar/config.toml
+# ~/.omar/config.toml
 
 [dashboard]
 refresh_interval = 1
@@ -113,9 +113,42 @@ default_workdir = "."
 enabled = true
 host = "127.0.0.1"
 port = 9876
+
+[fallback]
+command = ""  # empty = disabled; see "Auth Failure Fallback" below
 ```
 
 Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor, or Opencode) and can be overridden with `--agent`.
+
+### Auth Failure Fallback
+
+If a backend's authentication expires (e.g., Claude subscription login), OMAR can auto-detect the outage and spawn mirror agents on a free fallback backend. Original agents stay alive and resume when the backend recovers.
+
+**Prerequisites**: [opencode](https://opencode.ai) installed, [OpenRouter](https://openrouter.ai) account connected via `opencode /connect`.
+
+```toml
+[fallback]
+# Use OpenRouter's free models router through opencode
+command = "opencode --model openrouter/openrouter/free"
+
+# Patterns that trigger fallback (case-insensitive, defaults shown)
+auth_failure_patterns = [
+  "session expired",
+  "authentication failed",
+  "please sign in",
+  "login required",
+  "subscription expired",
+  "log in with",
+]
+```
+
+When triggered, OMAR:
+1. Detects auth failure patterns in agent pane output
+2. Spawns a mirror agent named `<agent>-fallback` with the fallback command
+3. Sends the same task to the mirror
+4. Shows a persistent warning banner in the dashboard
+
+Mirror agents appear in the dashboard alongside originals. Remove them manually once the primary backend recovers.
 
 ## Key Bindings
 

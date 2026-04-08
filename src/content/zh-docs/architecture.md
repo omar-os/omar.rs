@@ -94,7 +94,7 @@ OMAR 是一个 Rust 工作区，包含 3 个 crate：
 ## 配置
 
 ```toml
-# ~/.config/omar/config.toml
+# ~/.omar/config.toml
 
 [dashboard]
 refresh_interval = 1
@@ -113,9 +113,42 @@ default_workdir = "."
 enabled = true
 host = "127.0.0.1"
 port = 9876
+
+[fallback]
+command = ""  # 空 = 禁用；见下方"认证失败回退"
 ```
 
 智能体后端会自动检测已安装的工具（Claude Code、Codex、Cursor 或 Opencode），也可通过 `--agent` 参数手动指定。
+
+### 认证失败回退
+
+当后端认证过期（如 Claude 订阅登录失效），OMAR 可自动检测故障并使用免费回退后端生成镜像智能体。原智能体保持运行，后端恢复后可继续工作。
+
+**前提条件**：已安装 [opencode](https://opencode.ai)，已通过 `opencode /connect` 连接 [OpenRouter](https://openrouter.ai) 账户。
+
+```toml
+[fallback]
+# 通过 opencode 使用 OpenRouter 免费模型路由
+command = "opencode --model openrouter/openrouter/free"
+
+# 触发回退的匹配模式（不区分大小写，以下为默认值）
+auth_failure_patterns = [
+  "session expired",
+  "authentication failed",
+  "please sign in",
+  "login required",
+  "subscription expired",
+  "log in with",
+]
+```
+
+触发时，OMAR 会：
+1. 检测智能体面板输出中的认证失败模式
+2. 生成名为 `<agent>-fallback` 的镜像智能体，使用回退命令
+3. 向镜像发送相同任务
+4. 在仪表盘显示持久警告横幅
+
+镜像智能体与原智能体并排显示在仪表盘中。主后端恢复后可手动删除镜像。
 
 ## 快捷键
 
