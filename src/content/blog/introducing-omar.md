@@ -22,7 +22,7 @@ While the 10,000x engineer is clearly productive beyond our wildest dreams, they
 `omar` is a multi-agent orchestration system managed through an easy to use text user interface (TUI) built on top of `tmux`, the powerful terminal multiplexer tool you probably already know and love. With `omar`, you can tackle massive problems that are easily solved by multi-agent systems without ever having to manually handle orchestration, `Ctrl+Tab` to cycle and context switch through terminals, or directly manage the consoles of tens of Claude Code screens like our 10,000x engineer.
 
 We demonstrate `omar` on several problems and find that `omar` can perform tasks that often are not trivial or even possible for a single agent. With `omar`, you benefit from:
-*(ideally these are each hyperlinks to the sections of the blog down below that definitevely show that omar can do this)*
+*(ideally these are each hyperlinks to the sections of the blog down below that definitively show that omar can do this)*
 - **Deep hierarchies**: Agents managing agents, teams, and organizations just like a company.
 - **Scalability**: create or remove teams of tens or hundreds of agents without the need of direct human interaction
 - **Heterogeneity**: Let different agent backends collaborate as a team.
@@ -44,13 +44,13 @@ Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md an
 
 ## How omar works
 
-At it's core, `omar` is a TUI that begins with one agent the **Executive Assistant** (EA). This agent is the main point of contact for a user interacting with an army of agents, hence One Man Army. While `omar` allows users to manually create their own agents, the real force multiplier kicks in when our EA can spawn several agents which inturn can spawn their own teams of agents quickly leading to hundreds of agents working towards solving the user's goal.
+At its core, `omar` is a TUI that begins with one agent the **Executive Assistant** (EA). This agent is the main point of contact for a user interacting with an army of agents, hence One Man Army. While `omar` allows users to manually create their own agents, the real force multiplier kicks in when our EA can spawn several agents which in turn can spawn their own teams of agents quickly leading to hundreds of agents working towards solving the user's goal.
 
 ### User interface
 
 `omar` has two kinds of entry points: (1) a TUI that serves as the "mission control" (shown in the demo above), (2) messaging apps, e.g. Slack, that relay messages to the Executive Assistant.
 
-The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. We realized that, in a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was built with navigating hierarchy in mind (*not sure about this sentance*).
+The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. We realized that, in a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was built with navigating hierarchy in mind (*not sure about this sentence*).
 
 ### Communication and scheduling
 
@@ -127,13 +127,13 @@ The firm head agent has evolved the organizational structure four times since la
   <figcaption>Figure 3: Quant firm's organizational restructures.</figcaption>
 </figure>
 
-Figure 3 shows the performance curve with an overlay of organizational restructures. After our intervention and the head agent's restructures, the quant firm's performance has stablized. We are curious to see whether the quant firm can eventually outperform the baseline through continuous evolution of the team structure and changes of strategy.
+Figure 3 shows the performance curve with an overlay of organizational restructures. After our intervention and the head agent's restructures, the quant firm's performance has stabilized. We are curious to see whether the quant firm can eventually outperform the baseline through continuous evolution of the team structure and changes of strategy.
 
 #### An ongoing experiment
 
 Back to the first question: Can agents make money on their own? The answer is "yes and no." While the baseline agent was up ~20% after one week, the quant firm agents collectively were down ~40%.
 
-Also, can a team of agents outperform a single agent? Our data so far seem negative, but this is too soon to tell. In the `lesson_learned.md` maintained by the quant firm periodically, a entry entered on March 14 says:
+Also, can a team of agents outperform a single agent? Our data so far seem negative, but this is too soon to tell. In the `lesson_learned.md` maintained by the quant firm periodically, an entry entered on March 14 says:
 
 > **Diverse models for high-stakes decisions.** When conviction is borderline, get a second opinion from a different model (e.g., o3 via opencode). Two independent analyses > one deeper analysis.
 
@@ -149,7 +149,7 @@ In contrast, even the largest robot datasets such as Open X‑Embodiment, and th
 
 To put this into a physical perspective, consider the sun which is about one million times the volume of the Earth. If LLM training text were the Sun, all current real‑robot interaction data for manipulation would easily fit inside a single Earth. 
 
-Even with this massive scale advantage, LLMs are still scaling up further. Consider the latest popular open source models like Minimax, Kimi 2.5, Trinity, Qwen 3 and Nemotron-3 which all credit synthetic data generation as a significant reason for unlocking next-level capabilties. 
+Even with this massive scale advantage, LLMs are still scaling up further. Consider the latest popular open source models like Minimax, Kimi 2.5, Trinity, Qwen 3 and Nemotron-3 which all credit synthetic data generation as a significant reason for unlocking next-level capabilities. 
 
 With `omar`, we can ask, how can we scale up robotics data in a similar manner? 
 
@@ -157,7 +157,7 @@ With `omar`, we can ask, how can we scale up robotics data in a similar manner?
 
 LIBERO is a popular robotics learning benchmark that was initially centered on lifelong, sequential knowledge transfer in manipulation tasks but later became popular for evaluating and eventually training Vision Language Action (VLA) models. Recently models like SmolVLA and 𝜋<sub>0.5</sub> easily score above 90% on LIBERO, so are we ready for VLA-powered robots? Not quite. 
 
-Works such as, [LIBERO-Pro](https://arxiv.org/abs/2510.03827) by Zhou et al., recently found that these VLAs are mearly memorizing the trajectries packaged with the benchmarks. When you perturb (i.e., change) something seemingly pointless like the color of a mug or where the mug is initially placed, these state-of-the-art VLAs often drop to 0% success. Prior work from NVIDIA (COLOSSUEM benchmark 2024) also found that similar collapses of success rates occur in non-VLA robotics models and ultimately, the models that did do well across pertubations also better bridge the sim-to-real gap. Given that, in both cases, these pertubations were hand designed and finite in size, how can we scale to practically infinitly many while doing so with just one engineer and `omar`?
+Works such as, [LIBERO-Pro](https://arxiv.org/abs/2510.03827) by Zhou et al., recently found that these VLAs are merely memorizing the trajectories packaged with the benchmarks. When you perturb (i.e., change) something seemingly pointless like the color of a mug or where the mug is initially placed, these state-of-the-art VLAs often drop to 0% success. Prior work from NVIDIA (COLOSSEUM benchmark 2024) also found that similar collapses of success rates occur in non-VLA robotics models and ultimately, the models that did do well across perturbations also better bridge the sim-to-real gap. Given that, in both cases, these perturbations were hand designed and finite in size, how can we scale to practically infinitely many while doing so with just one engineer and `omar`?
 
 ##### [Scenic](https://scenic-lang.org)
 
@@ -167,9 +167,9 @@ Inspired by ScenicNL, we ask `omar` to similarly create a team of role playing a
 
 ##### Scaling LIBERO up to Infinity
 
-We ask `omar` to explain the 130 base BDDL or tasks of LIBERO, the five environments, and then propose ideas for how we can generalize them. `omar` on it's own proposes a team of 9 agents: 5 for each LIBERO env, and 4 for the LIBERO subtasks.
+We ask `omar` to explain the 130 base BDDL or tasks of LIBERO, the five environments, and then propose ideas for how we can generalize them. `omar` on its own proposes a team of 9 agents: 5 for each LIBERO env, and 4 for the LIBERO subtasks.
 
-With that context and a few rounds of back and forth with my EA, we settled on the following perubations:
+With that context and a few rounds of back and forth with my EA, we settled on the following perturbations:
   - position - randomizes object (x, y) placement over the workspace
   - object - swaps the object’s mesh/texture using the variant pool
   - camera - perturbs the agentview camera pose and tilt
@@ -178,17 +178,17 @@ With that context and a few rounds of back and forth with my EA, we settled on t
   - distractor - adds 1-5 non-task objects as clutter
   - background - perturbs wall and floor textures
   - articulation - perturbs fixture state, like drawers/doors/stoves, by sampling their initial joint state
-  - combination - you may compose two or more of the above pertubations
+  - combination - you may compose two or more of the above perturbations
 
-Armed with the ability to write Scenic and a plan of the pertubations that we want, we let `omar` work on this for a few days. Every few hours, we check in to provide testing feedback (we watch simulation videos for `omar`) and occasionally instruct `omar` to perform refactors. `omar` on it's own was able to discover concepts like containment (e.g., if I displace an object that has objects inside it like a ball inside a cabinet, the ball should move with the cabinet so it stays inside) and implement code to support that as well as tests to prevent future regressions.
+Armed with the ability to write Scenic and a plan of the perturbations that we want, we let `omar` work on this for a few days. Every few hours, we check in to provide testing feedback (we watch simulation videos for `omar`) and occasionally instruct `omar` to perform refactors. `omar` on its own was able to discover concepts like containment (e.g., if I displace an object that has objects inside it like a ball inside a cabinet, the ball should move with the cabinet so it stays inside) and implement code to support that as well as tests to prevent future regressions.
 
-In total, `omar` produced LIBERO-Infinity in one week. For context, such projects would often academic researchers several weeks if not a full semester. Lastly, while we do not explore it in this blog, we point out that by using Scenic, we've enabled LIBERO to connect with Scenic's companion tool, [VerifAI](https://verifai.readthedocs.io/en/latest/), which would allow for falsification-guided adversarial search over the Scenic distribution, i.e., we can formally identify failure modes of our robot policies. 
+In total, `omar` produced LIBERO-Infinity in one week. For context, such projects would often take academic researchers several weeks if not a full semester. Lastly, while we do not explore it in this blog, we point out that by using Scenic, we've enabled LIBERO to connect with Scenic's companion tool, [VerifAI](https://verifai.readthedocs.io/en/latest/), which would allow for falsification-guided adversarial search over the Scenic distribution, i.e., we can formally identify failure modes of our robot policies. 
 
 ### Deep Research - March Madness Style 🏀
 
-American college sports and especially basketball is unparalled in any other country. The talent is the best in the world and fans from all over the world tune in to watch. This year's 68-team playoffs, known as March Madness, has already broken record. Broadcasting rights were sold for over $1 billion. 
+American college sports and especially basketball is unparalleled in any other country. The talent is the best in the world and fans from all over the world tune in to watch. This year's 68-team playoffs, known as March Madness, has already broken records. Broadcasting rights were sold for over $1 billion. 
 
-As of the start of this year's tournament no one has ever predicted all 63 games correctly (i.e, formed a correct bracket). 
+As of the start of this year's tournament no one has ever predicted all 63 games correctly (i.e., formed a correct bracket). 
 
 > If every game were a true 50/50 coin flip, the odds of picking a perfect bracket would be 1 in 9.2 quintillion.
 > 
@@ -196,18 +196,18 @@ As of the start of this year's tournament no one has ever predicted all 63 games
 
 [Fox Sports](https://www.foxsports.com/stories/betting/kalshi-1-billion-dollar-perfect-bracket-challenge-march-madness-2026)
 
-This problem is so hard that even the predicition market, Kalshi, offers anyone a chance to win [$1 billion](https://kalshi.com/billion-dollar-bracket) if they form a perfect bracket. 
+This problem is so hard that even the prediction market, Kalshi, offers anyone a chance to win [$1 billion](https://kalshi.com/billion-dollar-bracket) if they form a perfect bracket. 
 
 #### Omar's Turn
 
-As Fox noted, one can improve their bracket by using basketball knowledge. However, if I wanted to include all sources of information like news and analyst recommendations, I would need days if not weeks to consolidtae the information. Instead, what if I use an army of coordinated agents to do the research I planned to do? Commanders and generals leading teams in different domains, working all in parallel to gather every singal availalbe and culminate it all into one bracket? With `omar` it's now possible do this in a controlled and digestible manner.
+As Fox noted, one can improve their bracket by using basketball knowledge. However, if I wanted to include all sources of information like news and analyst recommendations, I would need days if not weeks to consolidate the information. Instead, what if I use an army of coordinated agents to do the research I planned to do? Commanders and generals leading teams in different domains, working all in parallel to gather every signal available and culminate it all into one bracket? With `omar` it's now possible to do this in a controlled and digestible manner.
 
 We give our EA in `omar` the following prompt:
-> "I want to build an NCAA winning bracket. I need you to select the teams for me to do this. We will need to spawn a massive set of agents. We will need teams to read the news about all teams in the tournament as well as every individual player on each team. We need to consider both news and social media profiles of the players to see if they have been locked in. We should also look for historical information and metrics stuff like based on a teams seasons stats do those stats go on to predict anything about the playoffs? For example, KenPom and rule of 2 are interesting metrics that come to mind. We should also be robust and have agents debate each other. These debate agents can also Critique the brackets of professional analysts who have already published theirs as a way to include additional information in our research process. The net result should be a hierarchy of agents at least three layers deep with a total number of agents in the range of 50 to 100 agents working to create the best possible bracket."
+> "I want to build an NCAA winning bracket. I need you to select the teams for me to do this. We will need to spawn a massive set of agents. We will need teams to read the news about all teams in the tournament as well as every individual player on each team. We need to consider both news and social media profiles of the players to see if they have been locked in. We should also look for historical information and metrics stuff like based on a teams seasons stats do those stats go on to predict anything about the playoffs? For example, KenPom and rule of 2 are interesting metrics that come to mind. We should also be robust and have agents debate each other. These debate agents can also critique the brackets of professional analysts who have already published theirs as a way to include additional information in our research process. The net result should be a hierarchy of agents at least three layers deep with a total number of agents in the range of 50 to 100 agents working to create the best possible bracket."
 
 As you can see, the prompt is not exhaustive but it includes things that the average college basketball viewer may not know like the KenPom metric. 
 
-Our EA creates a single agent -- `ncaa-master` -- to sit at the top and manage everything. The `ncaa-master` then goes on to idenitfy 7 domains and creats a manager for each one. 
+Our EA creates a single agent -- `ncaa-master` -- to sit at the top and manage everything. The `ncaa-master` then goes on to identify 7 domains and creates a manager for each one. 
 - `news-mgr` Breaking news, injuries, coaching changes for all 68 teams
 - `social-mg` Player Twitter/Instagram/TikTok — morale, lock-in, drama
 - `stats-mgr` KenPom, NET, SOS, pace, 3PT risk, FT rate, Rule of 2
@@ -215,11 +215,11 @@ Our EA creates a single agent -- `ncaa-master` -- to sit at the top and manage e
 - `debate-mgr` Adversarial FOR/AGAINST debate agents for every contested pick
 - `analyst-mgr` ESPN, CBS, Jay Bilas, Joe Lunardi, The Ringer, Action Network brackets
 
-As we watched these 6 managers spin up, we recalled that we missed a critical infromation source: Vegas. Had we directly used the deep research feature from somewhere like Gemini or leverage the background agents feature in Cladue Code, this would have been the end of our experiemnt as we would have had to stop it and restart with this additional information. These existing products do not provide users a way to directly interact with any subagent. However, `omar` allows this. Thus, we swap over to the `ncaa-master` and give it an additional instruction:
+As we watched these 6 managers spin up, we recalled that we missed a critical information source: Vegas. Had we directly used the deep research feature from somewhere like Gemini or leverage the background agents feature in Claude Code, this would have been the end of our experiment as we would have had to stop it and restart with this additional information. These existing products do not provide users a way to directly interact with any subagent. However, `omar` allows this. Thus, we swap over to the `ncaa-master` and give it an additional instruction:
 
 > We forgot to include Vegas itself, so this is futures from gambling market, such as Caesars bets, and DraftKings.
 
-The `ncaa-master` quickly responded by adding a 7<sup>th</sup></sub> manager:
+The `ncaa-master` quickly responded by adding a 7<sup>th</sup> manager:
 - `vegas-mgr` DraftKings, Caesars, FanDuel, BetMGM futures, spreads, line movement
 
 At this point, we were happy with our managers and our One Man Army was quickly growing in size. 
@@ -240,9 +240,9 @@ Another one of our concerns when using teams of agents is traceability and compa
 
 Here is a recent real-world example of the dangers of unchecked agent access, where [an AI assistant (Claude Code) was given excessive permissions and ended up deleting a developer's entire production environment, including its database and all backups, erasing over two years of records in seconds (Tom's Hardware)](https://www.tomshardware.com/tech-industry/artificial-intelligence/claude-code-deletes-developers-production-setup-including-its-database-and-snapshots-2-5-years-of-records-were-nuked-in-an-instant). 
 
-Such issues are further compounded in multi-agent systems like `omar` not only because there are multiple agents that can do damage, but also because it becomes harder for an individual to track the work and changes created by each agent. In our NCAA bracket example, how does one check the files touched by over 100 agents? The problem quickly becomes intractable. 
+Such issues are further compounded in multi-agent systems like `omar` not only because there are multiple agents that can do damage, but also because it becomes harder for an individual to track the work and changes created by each agent. In our NCAA bracket example, how does one check the files touched by over 100 agents? What about the work completed? The problem quickly becomes intractable. 
 
-In `omar`, we attempt to make this problem more traceable by creating the `trace timeline`. The trace timeline asks each agent to report its plan of action as a concise set of steps that are bubbled up the hierarchy, eventually reaching the executive assistant. As each agent completes work, it checks off tasks completed from the plan and modifies the plan if it deviates from its original goal. While agents can lie and take actions that are not faithful to the plans they report in the trace timeline, we emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. While the trace timeline does not prevent agents from erasing over two years of records, it does provide a concise way for one person to track the actions of teams of agents. 
+In `omar`, while we haven't yet solved this problem, we have made it traceable through logging. All agents regardless of their backend are directed to provide justification for why they are taking *"any significant action"*. In our experiments, we found that this phrasing led to a moderate amount of logging where agents aren't logging every file they read but they are logging file modifications. Each action logged with a timestamp, the agent's Chain of Command, the reasoning for taking that action, and why the action aligns with the user's goal. We find that this Action Justification & Reasoning Alignment is a good first step towards addressing Multi-Agent Safety. While agents can lie and take actions that are not faithful to their explanations, they report to the `omar` API, we emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. `omar`'s logging API may not prevent agents from erasing over two years of records, but it does provide a way for one person to track the actions of teams of agents. 
 
 Lastly, with regards to role access that would limit agents to only have write access to files related to their tasks, this is a feature under active development and will be released soon 🚀 !
 
@@ -252,6 +252,8 @@ Lastly, with regards to role access that would limit agents to only have write a
 We're working on a few exciting features:
 
 - Supporting multiple executive assistants for ultra large teams of agents (think thousands).
+- better sandboxing through docker containers
+- access role management for agents
 - More to come!
 
 Check out the [docs](/docs/) to get started, and join our [Discord](https://discord.gg/X76PSzmfWr) to connect with the community.
