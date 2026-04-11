@@ -114,41 +114,41 @@ enabled = true
 host = "127.0.0.1"
 port = 9876
 
-[fallback]
-command = ""  # empty = disabled; see "Auth Failure Fallback" below
+[watchdog]
+command = ""  # empty = disabled; see "Watchdog" below
+slack_channel = ""  # Slack channel ID for alerts
 ```
 
 Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor, or Opencode) and can be overridden with `--agent`.
 
-### Auth Failure Fallback
+### Watchdog
 
-If a backend's authentication expires (e.g., Claude subscription login), OMAR can auto-detect the outage and spawn mirror agents on a free fallback backend. Original agents stay alive and resume when the backend recovers.
+If a backend's authentication expires (e.g., Claude subscription login), OMAR can auto-detect the outage and spawn a watchdog agent on a free backend to monitor errors and notify the user via Slack. Original agents stay alive and resume when the backend recovers.
 
 **Prerequisites**: [opencode](https://opencode.ai) installed, [OpenRouter](https://openrouter.ai) account connected via `opencode /connect`.
 
 ```toml
-[fallback]
+[watchdog]
 # Use OpenRouter's free models router through opencode
 command = "opencode --model openrouter/openrouter/free"
 
-# Patterns that trigger fallback (case-insensitive, defaults shown)
+# Slack channel ID to send alerts to (optional)
+slack_channel = "C0123456789"
+
+# Patterns that trigger the watchdog (case-insensitive, defaults shown)
 auth_failure_patterns = [
-  "session expired",
-  "authentication failed",
-  "please sign in",
-  "login required",
-  "subscription expired",
-  "log in with",
+  "please run /login",
+  "401 unauthorized",
 ]
 ```
 
 When triggered, OMAR:
 1. Detects auth failure patterns in agent pane output
-2. Spawns a mirror agent named `<agent>-fallback` with the fallback command
-3. Sends the same task to the mirror
+2. Spawns a single watchdog agent to monitor all sessions
+3. Watchdog sends Slack alerts and periodically checks agent health
 4. Shows a persistent warning banner in the dashboard
 
-Mirror agents appear in the dashboard alongside originals. Remove them manually once the primary backend recovers.
+No API keys or secrets are passed to the watchdog agent.
 
 ## Key Bindings
 
