@@ -1,56 +1,66 @@
 # Preview Deployment System
 
-This repo uses a "train track switcher" to deploy any branch to the preview site.
+This repo can deploy any branch of `omarmy.ai` to a preview site on GitHub Pages.
 
 ## How It Works
 
 ```
-[source branch] --sync--> [preview branch] --deploy--> omarmy-preview (GitHub Pages)
+[source branch] --build & deploy--> omarmy-preview/gh-pages --> GitHub Pages
 ```
 
-1. **Config file** (`.github/preview-config.json`) on `main` specifies which branch is the preview source
-2. **Sync workflow** (`sync-to-preview.yml`) copies the source branch to the `preview` branch
-3. **Deploy workflow** (`deploy-preview.yml` on the `preview` branch) builds and deploys to GitHub Pages
+One workflow (`.github/workflows/deploy-preview.yml`) in `omarmy.ai`:
+
+1. Reads the source branch from `.github/preview-config.json` on `main`
+2. Checks out that branch
+3. Skips if `omarmy-preview/gh-pages` HEAD already references the source SHA
+4. Builds with `astro build --base /omarmy-preview/`
+5. Force-pushes `dist/` to the `gh-pages` branch of `lsk567/omarmy-preview`
+
+GitHub Pages on `omarmy-preview` serves that branch.
 
 ## Switching Which Branch Is Previewed
+
+### Option 1: Persistent — edit the config file
 
 Edit `.github/preview-config.json` on `main`:
 
 ```json
-{
-  "source_branch": "your-branch-name"
-}
+{ "source_branch": "your-branch-name" }
 ```
 
-Commit and push to `main`. The sync workflow will automatically push the new source branch to `preview`, triggering a deploy.
+Commit and push to `main`. The workflow fires on config-file changes and also every 15 minutes.
 
-## How Syncing Works
+### Option 2: Ad-hoc — workflow dispatch
 
-The sync workflow runs in three cases:
+One-off preview of any branch without touching the config:
+
+```bash
+gh workflow run deploy-preview.yml -f branch=feat/my-experiment
+```
+
+Or via the UI: Actions → "Deploy Preview" → Run workflow → enter branch name.
+
+Note: this does not change the configured source branch. The next scheduled run reverts to whatever is in `preview-config.json`.
+
+## Triggers
 
 | Trigger | When |
 |---------|------|
-| **Config change** | You push a change to `.github/preview-config.json` on `main` |
 | **Scheduled** | Every 15 minutes (picks up new commits on the source branch) |
-| **Manual** | Go to Actions → "Sync Source Branch to Preview" → Run workflow |
+| **Config change** | Push to `.github/preview-config.json` or the workflow file on `main` |
+| **Manual** | Actions → "Deploy Preview" → Run workflow (optional branch override) |
 
-The workflow compares the source branch HEAD with the preview branch HEAD. If they differ, it force-pushes the source to preview.
+Each run skips the build+push if `omarmy-preview/gh-pages` already carries the current source SHA, so idle ticks are cheap (one API call).
 
 ## Preview URL
 
-The preview site is deployed to: **https://lsk567.github.io/omarmy-preview/**
+**https://lsk567.github.io/omarmy-preview/**
 
-## Quick Reference
+## Secrets
 
-| Task | How |
-|------|-----|
-| See current preview source | Check `.github/preview-config.json` on `main` |
-| Switch preview to a different branch | Edit the config, push to `main` |
-| Force an immediate sync | Go to Actions → "Sync Source Branch to Preview" → Run workflow |
-| Check deploy status | Go to Actions → "Deploy Preview to GitHub Pages" |
+`PREVIEW_DEPLOY_TOKEN` — a PAT with `contents:write` on `lsk567/omarmy-preview`. Rotate in repo settings when it expires. Symptoms of an expired token: workflow fails with `Invalid username or token. Password authentication is not supported for Git operations.`
 
 ## Notes
 
-- The `preview` branch is managed by the sync workflow — don't push to it directly
-- The source branch must exist on the remote (`origin`) for syncing to work
-- Switching the config triggers an immediate sync; otherwise, new commits on the source branch are picked up within 15 minutes (or trigger a manual sync for instant updates)
+- The source branch must exist on `origin` for checkout to succeed.
+- The old `preview` branch on this repo (from the previous two-workflow setup) is no longer used and can be deleted.
