@@ -101,7 +101,7 @@ curl -X DELETE http://localhost:9876/api/projects/<id>
 创建带任务的智能体时，OMAR 注入统一的 `agent.md` 提示词。每个智能体都是自主的 —— 自行决定是直接工作还是创建子智能体：
 
 ```
-You are an Agent in the OMAR (One-Man Army) system.
+You are an Agent in the OMAR system.
 You receive a task from your parent, assess it, and
 decide the best way to get it done — either by doing
 it yourself or by spawning sub-agents.

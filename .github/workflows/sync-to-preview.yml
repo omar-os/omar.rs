@@ -1,0 +1,74 @@
+name: Sync Source Branch to Preview
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/preview-config.json'
+  workflow_dispatch:
+  schedule:
+    # Check every 15 minutes if source branch has new commits to sync
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Read preview config
+        id: config
+        run: |
+          SOURCE_BRANCH=$(jq -r '.source_branch' .github/preview-config.json)
+          echo "source_branch=$SOURCE_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Source branch configured: $SOURCE_BRANCH"
+
+      - name: Check if sync is needed
+        id: check
+        run: |
+          git fetch origin ${{ steps.config.outputs.source_branch }} || { echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; }
+          SOURCE_SHA=$(git rev-parse origin/${{ steps.config.outputs.source_branch }})
+          echo "source_sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+
+          # Check if preview branch exists and if it already has this source SHA
+          if git fetch origin preview 2>/dev/null; then
+            PREVIEW_MSG=$(git log -1 --format=%s origin/preview)
+            if echo "$PREVIEW_MSG" | grep -q "$SOURCE_SHA"; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              echo "Preview is already up to date (source SHA: $SOURCE_SHA)"
+              exit 0
+            fi
+          fi
+
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "Sync needed. Source SHA: $SOURCE_SHA"
+
+      - name: Sync source branch to preview
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          SOURCE_BRANCH="${{ steps.config.outputs.source_branch }}"
+          SOURCE_SHA="${{ steps.check.outputs.source_sha }}"
+
+          # Start from the source branch content
+          git checkout "origin/$SOURCE_BRANCH" --detach
+
+          # Copy deploy-preview.yml from main so the preview branch can self-deploy
+          mkdir -p .github/workflows
+          git show origin/main:.github/workflows/deploy-preview.yml > .github/workflows/deploy-preview.yml
+
+          # Stage everything and create a sync commit with source SHA marker
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/deploy-preview.yml
+          git commit -m "Sync from $SOURCE_BRANCH ($SOURCE_SHA)" || true
+
+          # Force push to preview
+          git push origin HEAD:refs/heads/preview --force
+          echo "✅ Synced $SOURCE_BRANCH ($SOURCE_SHA) -> preview"
