@@ -94,7 +94,7 @@ Health is determined by pane content change between refresh frames:
 ## Configuration
 
 ```toml
-# ~/.config/omar/config.toml
+# ~/.omar/config.toml
 
 [dashboard]
 refresh_interval = 1
@@ -113,9 +113,42 @@ default_workdir = "."
 enabled = true
 host = "127.0.0.1"
 port = 9876
+
+[watchdog]
+command = ""  # empty = disabled; see "Watchdog" below
+slack_channel = ""  # Slack channel ID for alerts
 ```
 
 Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor, or Opencode) and can be overridden with `--agent`.
+
+### Watchdog
+
+If a backend's authentication expires (e.g., Claude subscription login), OMAR can auto-detect the outage and spawn a watchdog agent on a free backend to monitor errors and notify the user via Slack. Original agents stay alive and resume when the backend recovers.
+
+**Prerequisites**: [opencode](https://opencode.ai) installed, [OpenRouter](https://openrouter.ai) account connected via `opencode /connect`.
+
+```toml
+[watchdog]
+# Use OpenRouter's free models router through opencode
+command = "opencode --model openrouter/openrouter/free"
+
+# Slack channel ID to send alerts to (optional)
+slack_channel = "C0123456789"
+
+# Patterns that trigger the watchdog (case-insensitive, defaults shown)
+auth_failure_patterns = [
+  "please run /login",
+  "401 unauthorized",
+]
+```
+
+When triggered, OMAR:
+1. Detects auth failure patterns in agent pane output
+2. Spawns a single watchdog agent to monitor all sessions
+3. Watchdog sends Slack alerts and periodically checks agent health
+4. Shows a persistent warning banner in the dashboard
+
+No API keys or secrets are passed to the watchdog agent.
 
 ## Key Bindings
 
