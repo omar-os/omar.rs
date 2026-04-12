@@ -1,6 +1,6 @@
 # Preview Deployment System
 
-This repo can deploy any branch of `omarmy.ai` to a preview site on GitHub Pages.
+This repo can deploy any branch of `omar.tech` to a preview site on GitHub Pages.
 
 ## How It Works
 
@@ -8,7 +8,7 @@ This repo can deploy any branch of `omarmy.ai` to a preview site on GitHub Pages
 [source branch] --build & deploy--> omarmy-preview/gh-pages --> GitHub Pages
 ```
 
-One workflow (`.github/workflows/deploy-preview.yml`) in `omarmy.ai`:
+One workflow (`.github/workflows/deploy-preview.yml`) in `omar.tech`:
 
 1. Reads the source branch from `.github/preview-config.json` on `main`
 2. Checks out that branch

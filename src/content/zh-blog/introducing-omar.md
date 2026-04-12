@@ -266,6 +266,37 @@ Scenic 是一种"用于对信息物理系统环境进行建模的领域特定概
 最后，关于限制智能体只能对与其任务相关的文件拥有写入权限的角色访问功能，这是一个正在积极开发中的功能，即将发布 🚀 ！
 
 
+## 相关工作
+
+多智能体编排工具的生态在 2025 到 2026 年间快速增长。我们将相关项目分为四类，并说明 `omar` 在其中所处的位置。
+
+### 并行编程智能体的终端与桌面运行器
+
+近期有不少工具专注于并行运行多个编程智能体，通常采用"一个智能体一个 git worktree"的模式。Imbue 的 [Sculptor](https://github.com/imbue-ai/sculptor) 和 [mngr](https://github.com/imbue-ai/mngr)、Stravu 的 [Crystal/Nimbalyst](https://github.com/stravu/crystal)、Melty 团队的 [Conductor](https://conductor.build)、[uzi](https://github.com/devflowinc/uzi)、[Pane](https://www.runpane.com/)、[cmux](https://github.com/manaflow-ai/cmux)、[agtx](https://github.com/fynnfluegge/agtx)，以及 [Claude Code Agent Farm](https://github.com/Dicklesworthstone/claude_code_agent_farm) 都属于这一类。BloopAI 的 [Vibe Kanban](https://github.com/BloopAI/vibe-kanban) 走了略有不同的路线：它不是终端 UI，而是一个在本地运行的 Web 应用，用看板界面承载同样的"一个智能体一个 worktree"模型，并支持包括 Claude Code、Codex、Cursor、Gemini CLI、Amp、OpenCode、Qwen Code 等 10 多个后端。这一类工具中的 `uzi`、`agtx`、`Conductor`、`Pane` 和 `Vibe Kanban` 都支持异构后端并行运行。但它们普遍不支持*递归的子智能体生成*：智能体由用户扁平地启动或拖到看板上，没有"智能体自己创建团队"的一等概念。`omar` 与其中几款工具共享 tmux 底层，但它是围绕层级结构构建的：`omar` 中的每个智能体都可以调用用户使用的同一套 API，在自己下面再创建智能体，而 TUI 本身就是为在这棵树中导航而设计的。
+
+### 多智能体编排框架
+
+第二类工具把智能体协调做成框架或服务，而不是 UI。Steve Yegge 的 [Gas Town](https://github.com/gastownhall/gastown)（Sourcegraph 一直将其称为"编程智能体的 Kubernetes"）在 Mayor、Polecats、Refinery 等角色下协调 20 到 30 个 Claude Code 实例，工作单元以 git 支持的"Beads"形式存储。[Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) 提供了一个 serverless 运行时，支持 supervisor 与 collaborator 角色以及 A2A 协议。AWS Labs 的 [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) 和 Composio 的 [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) 则走了更偏 CLI 的路线。相比之下，`omar` 在用户体验上更加 opinionated：层级结构不是一个纯内部抽象，而是 TUI 的导航模型，用户可以随时深入任意层级的任意智能体。
+
+### IDE 集成的多智能体产品
+
+主流 IDE 厂商也在朝这个方向发展。[JetBrains Air](https://air.dev/) 于 2026 年 3 月发布公开预览版，是一款基于前 Fleet 代码库构建的智能体 IDE，可以把 Codex、Claude Agent、Gemini CLI 和 JetBrains 自家的 [Junie](https://github.com/JetBrains/junie) 作为并发的独立任务循环运行。GitHub 的 Copilot CLI 新增了 [`/fleet`](https://github.blog/ai-and-ml/github-copilot/run-multiple-agents-at-once-with-fleet-in-copilot-cli/) 命令，用于并行运行多个 Copilot 智能体。这些产品打磨精良，与各自的 IDE 深度集成，但它们也都是闭源的，而且围绕各自厂商的工作流来设计。`omar` 是开源的、终端原生的——我们相信当目标是让一个工程师在不等待 IDE 更新的情况下把任意后端拼接起来时，这一点很重要。
+
+### 沙箱与运行时层
+
+还有一类相邻但独立的工作专注于为每个智能体提供一个安全的运行环境。Dagger 的 [container-use](https://github.com/dagger/container-use) 是最清晰的例子：一个 MCP 服务器，为每个智能体提供独立的 Dagger 容器和 worktree，可被任何兼容 MCP 的客户端使用。这与 `omar` 的功能是互补的，而不是竞争关系。我们正在为 `omar` 的智能体构建更好的沙箱机制（通过 Docker 容器），预期它的形态会更接近 `container-use` 而非自造方案。
+
+### `omar` 的不同之处
+
+把这些汇总起来，我们认为 `omar` 有三点与上述项目不同：
+
+1. **把递归层级作为一等概念**，而不是扁平的 fan-out。`omar` 中的智能体可以使用与用户相同的 API 生成自己的团队，这正是让 NCAA 实验中的 100 多个智能体能从单条提示中展开的原因。
+2. **在同一会话中使用异构后端**，对 Claude Code、Codex、Cursor、Opencode 等统一应用相同的编排原语。
+3. **为导航大型智能体组织而设计的终端原生 TUI**，包括在任意深度附加到任意智能体并直接观察或操控它的能力。
+
+如果我们遗漏了你的项目或哪里写错了，请告诉我们，我们会更新这一节。
+
+
 ## 下一步计划
 
 我们正在开发几个令人期待的功能：
