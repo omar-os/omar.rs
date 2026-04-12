@@ -266,6 +266,37 @@ In `omar`, while we haven't yet solved this problem, we have made it traceable t
 Lastly, with regards to role access that would limit agents to only have write access to files related to their tasks, this is a feature under active development and will be released soon 🚀 !
 
 
+## Related work
+
+The space of multi-agent orchestration tools has been growing rapidly in 2025 and 2026. We group related projects into four buckets and highlight where `omar` sits.
+
+### Terminal and desktop runners for parallel coding agents
+
+A number of recent tools focus on running several coding agents in parallel, typically one per git worktree. [Sculptor](https://github.com/imbue-ai/sculptor) and [mngr](https://github.com/imbue-ai/mngr) from Imbue, [Crystal/Nimbalyst](https://github.com/stravu/crystal) from Stravu, [Conductor](https://conductor.build) from the Melty team, [uzi](https://github.com/devflowinc/uzi), [Pane](https://www.runpane.com/), [cmux](https://github.com/manaflow-ai/cmux), [agtx](https://github.com/fynnfluegge/agtx), and [Claude Code Agent Farm](https://github.com/Dicklesworthstone/claude_code_agent_farm) all fall in this category. [Vibe Kanban](https://github.com/BloopAI/vibe-kanban) by BloopAI takes a slightly different angle: instead of a terminal UI, it is a local web app that puts a Kanban board in front of the same "one worktree per agent" model, and it supports an impressive roster of 10+ backends including Claude Code, Codex, Cursor, Gemini CLI, Amp, OpenCode, and Qwen Code. Several of the tools in this group, like `uzi`, `agtx`, `Conductor`, `Pane`, and `Vibe Kanban`, support running heterogeneous backends side by side. What they generally do not support is *recursive subagent spawning*: agents are launched flat by the user or dragged onto a board, and there is no first-class notion of an agent creating its own team. `omar` shares the tmux substrate with several of these tools but is built around hierarchy: every agent in `omar` can call the same APIs the user calls to create more agents below it, and the TUI is designed for navigating that tree.
+
+### Multi-agent orchestration frameworks
+
+A second cluster targets agent coordination as a framework or service rather than a UI. Steve Yegge's [Gas Town](https://github.com/gastownhall/gastown) (which Sourcegraph has been promoting as "Kubernetes for coding agents") coordinates 20 to 30 Claude Code instances under named roles like Mayor, Polecats, and Refinery, with work units stored as git-backed "Beads." [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) offers a serverless runtime with supervisor and collaborator agents and an A2A protocol. AWS Labs' [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) and Composio's [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) take a more CLI-centric approach. Compared to these, `omar` is opinionated about the user experience: hierarchy is not just an internal abstraction, it is the navigation model in the TUI, and the user can drop into any agent at any depth at any time.
+
+### IDE-integrated multi-agent products
+
+The major IDE vendors are also moving in this direction. [JetBrains Air](https://air.dev/) launched in public preview in March 2026 as an agentic IDE built on the former Fleet codebase, and runs Codex, Claude Agent, Gemini CLI, and JetBrains' own [Junie](https://github.com/JetBrains/junie) as concurrent independent task loops. GitHub's Copilot CLI added a [`/fleet`](https://github.blog/ai-and-ml/github-copilot/run-multiple-agents-at-once-with-fleet-in-copilot-cli/) command for running multiple Copilot agents at once. These products are polished and tightly integrated with their host IDEs, but they are also closed and shaped around a specific vendor's workflow. `omar` is open and terminal-native, which we think matters when the goal is letting one engineer wire together arbitrary backends without waiting for an IDE update.
+
+### Sandboxing and runtime layers
+
+A separate but adjacent line of work focuses on giving each agent a safe place to run. Dagger's [container-use](https://github.com/dagger/container-use) is the clearest example: an MCP server that gives each agent its own Dagger container and worktree, usable from any MCP-compatible client. This is complementary to what `omar` does rather than competing with it. Better sandboxing for `omar` agents (via Docker containers) is something we are actively building, and we expect it to look a lot more like `container-use` than like a custom solution.
+
+### What's different about `omar`
+
+Putting it all together, we see three things that distinguish `omar` from the projects above:
+
+1. **Recursive hierarchies as a first-class concept**, not a flat fan-out. Agents in `omar` can spawn their own teams using the same APIs the user uses, which is what makes the NCAA experiment with 100+ agents tractable from a single prompt.
+2. **Heterogeneous backends in one session**, with the same orchestration primitives applied uniformly to Claude Code, Codex, Cursor, Opencode, and others.
+3. **A terminal-native TUI built specifically for navigating large agent organizations**, including the ability to attach to any agent at any depth and watch or steer it directly.
+
+If we missed your project or got something wrong, please let us know and we will update this section.
+
+
 ## What's next
 
 We're working on a few exciting features:
