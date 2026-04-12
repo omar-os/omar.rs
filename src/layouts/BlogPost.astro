@@ -1,11 +1,16 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 
+interface Author {
+  name: string;
+  url?: string;
+}
+
 interface Props {
   title: string;
   date: string;
   description?: string;
-  author?: string;
+  author?: string | Author[];
   lang?: string;
 }
 
@@ -16,6 +21,10 @@ const {
   author = "OMAR Team",
   lang = "en",
 } = Astro.props;
+
+const authors: Author[] = Array.isArray(author)
+  ? author
+  : [{ name: author }];
 const isZh = lang.startsWith("zh");
 const dateLocale = isZh ? "zh-CN" : "en-US";
 const base = import.meta.env.BASE_URL;
@@ -39,9 +48,15 @@ const blogHref = isZh ? `${base}zh/blog/` : `${base}blog/`;
       >
       <h1 class="post-title">{title}</h1>
       {description && <p class="post-desc">{description}</p>}
-      <span class="post-author"
-        >{isZh ? `作者：${author}` : `by ${author}`}</span
-      >
+      <span class="post-author">
+        {isZh ? "作者：" : "by "}
+        {authors.map((a, i) => (
+          <>
+            {i > 0 && ", "}
+            {a.url ? <a href={a.url} class="author-link" target="_blank" rel="noopener">{a.name}</a> : a.name}
+          </>
+        ))}
+      </span>
     </header>
     <div class="post-body prose">
       <slot />
@@ -51,7 +66,7 @@ const blogHref = isZh ? `${base}zh/blog/` : `${base}blog/`;
 
 <style>
   .blog-post {
-    max-width: 42rem;
+    max-width: 56rem;
     padding-top: 2.5rem;
     padding-bottom: 4rem;
   }
@@ -97,5 +112,15 @@ const blogHref = isZh ? `${base}zh/blog/` : `${base}blog/`;
   .post-author {
     font-size: 0.825rem;
     color: var(--text-dim);
+  }
+
+  .post-author :global(.author-link) {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .post-author :global(.author-link:hover) {
+    color: var(--text-bright);
   }
 </style>

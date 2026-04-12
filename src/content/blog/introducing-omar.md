@@ -1,8 +1,15 @@
 ---
 title: "Introducing OMAR"
-description: ""
 date: "2026-04-12"
-author: "Shaokai Lin, Karim Elmaaroufi, Matei Zaharia, Sanjit Seshia"
+author:
+  - name: "Shaokai Lin"
+    url: "https://www.shaok.ai"
+  - name: "Karim Elmaaroufi"
+    url: "https://kael.tech.blog"
+  - name: "Matei Zaharia"
+    url: "https://people.eecs.berkeley.edu/~matei/"
+  - name: "Sanjit Seshia"
+    url: "https://people.eecs.berkeley.edu/~sseshia/"
 ---
 
 ## Can one person run a unicorn company in the future?

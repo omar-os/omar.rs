@@ -10,13 +10,18 @@ const docs = defineCollection({
   }),
 });
 
+const authorSchema = z.union([
+  z.string(),
+  z.array(z.object({ name: z.string(), url: z.string().optional() })),
+]);
+
 const blog = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/blog" }),
   schema: z.object({
     title: z.string(),
     description: z.string().optional(),
     date: z.string(),
-    author: z.string().optional(),
+    author: authorSchema.optional(),
   }),
 });
 
@@ -35,7 +40,7 @@ const zhBlog = defineCollection({
     title: z.string(),
     description: z.string().optional(),
     date: z.string(),
-    author: z.string().optional(),
+    author: authorSchema.optional(),
   }),
 });
 
