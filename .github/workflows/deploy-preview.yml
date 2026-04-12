@@ -97,7 +97,9 @@ jobs:
 
       - name: Build
         if: steps.check.outputs.skip != 'true'
-        run: npx astro build --base /omarmy-preview/ --site https://lsk567.github.io
+        env:
+          ASTRO_BASE: /omarmy-preview/
+        run: npx astro build --site https://lsk567.github.io
 
       - name: Deploy to omarmy-preview/gh-pages
         if: steps.check.outputs.skip != 'true'
