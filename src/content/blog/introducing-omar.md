@@ -168,7 +168,7 @@ Needless to say, we have entered our bracket into Kalshi with Arizona as the pro
 
 ### How well can agents trade on prediction markets? 📈
 
-Project site: [https://omarmy.ai/kalshi](https://omarmy.ai/kalshi)
+Project site: [https://omar.tech/kalshi](https://omar.tech/kalshi)
 
 One of the most exciting (and somewhat scary) questions is whether agents can make money on their own. The prerequisite of becoming an agentic unicorn is the ability to bring in some positive cashflow. In addition, can a team of agents outperform a single agent? 
 
@@ -247,7 +247,7 @@ We still believe that multi-agent interactions could unlock potential not access
 
 We also stumbled upon another insight. When a prompt is complex and an agent has been fed the same prompt multiple times in a single session, the agent starts to cut corners and skip critical steps in the instructions. This is a known phenomenon called "context rot," and we observed it when feeding a big skill file on how to run a trading cycle to the quant firm agent. With `omar`, we fixed this issue by letting a persistent parent spawn ephemeral subagents for every step in the instructions using the `omar` APIs. When a subagent starts with a fresh context, it follows the instructions much more faithfully.
 
-Because of `omar`, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. At the time this blog is written, the Kalshi experiment is still running live. Check out agents' live trading data at [omarmy.ai/kalshi](https://omarmy.ai/kalshi).
+Because of `omar`, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. At the time this blog is written, the Kalshi experiment is still running live. Check out agents' live trading data at [omar.tech/kalshi](https://omar.tech/kalshi).
 
 ## AI Safety
 
