@@ -94,7 +94,7 @@ The baseline trader was launched on March 7, 2026. Without explicit prompting, t
 We have been running the experiment for a month and observed some surprising results. Overall, the solo trader has been outperforming the quant firm significantly. The figure below shows the total account value of both teams with key events annotated.
 
 <figure style="text-align: center;">
-  <img src="/blog/introducing-omar/performance.png" alt="Performance comparison as of April 11, 2026."> 
+  <img src="/blog/introducing-omar/performance.png" alt="Performance comparison as of April 11, 2026.">
   <figcaption>Figure 2: Performance comparison as of April 11, 2026.</figcaption>
 </figure>
 
@@ -133,7 +133,7 @@ The firm head agent has evolved the organizational structure four times since la
 > • **v10: Coordinator Model** (Apr 8) — The pipeline was good on paper, but in one cycle the firm head got busy and skipped the risk check, missing a catastrophic drawdown. Fix: the firm head no longer does anything — it only dispatches. Every step of every cycle is handled by a dedicated subagent, and the risk check is now its own agent that physically cannot be skipped. The pipeline has since produced six new strategy candidates that cleared a seven-test gauntlet, all queued for a final audit before any real money touches them.
 
 <figure style="text-align: center;">
-  <img src="/blog/introducing-omar/org-changes.png" alt="Quant firm's organizational restructures."> 
+  <img src="/blog/introducing-omar/org-changes.png" alt="Quant firm's organizational restructures.">
   <figcaption>Figure 3: Quant firm's organizational restructures.</figcaption>
 </figure>
 
