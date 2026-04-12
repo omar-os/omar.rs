@@ -70,89 +70,6 @@ The same event queue is used for scheduling future tasks, which are highly usefu
 
 ## omar in action
 
-### Tracking agents' ability to trade on prediction markets
-
-Project site: [https://omarmy.ai/kalshi](https://omarmy.ai/kalshi)
-
-One of the most exciting (and somewhat scary) questions is: Can agents make money on their own? The prerequisite of becoming an agentic unicorn is the ability to bring in some positive cashflow. In addition, can a team of agents outperform a single agent? 
-
-#### Setting up agents in `omar`
-
-To answer these questions, we created two teams of agents: a single-agent "baseline trader" and a multi-agent "quant firm." Both teams use the Claude Code backend with Opus 4.6. Both teams started out with $200 each and an independent Kalshi account.
-
-Every hour, both teams are woken up by `omar` cron jobs and each executes a trading loop, which includes doing research, identifying trade opportunities, and executing trades using Kalshi APIs. `omar`'s support for deep hierarchy made it possible to spawn two independent teams of agents under the top-level Executive Assistant, who delivers an experiment report on slack every six hours.
-
-<figure style="text-align: center;">
-  <img src="https://hackmd.io/_uploads/Bk7UH6D9bx.png" alt="description">
-  <figcaption>Figure 1: Both teams running on omar  (March 9, 2026).</figcaption>
-</figure>
-
-The baseline trader was launched on March 7, 2026. Without explicit prompting, the baseline trader (Claude Code with Opus 4.6) chose a strategy focusing on macro bets, in particular, WTI oil prices and CPI in February/March. The quant firm, on the other hand, started on March 9, 2026, and chose to bet on GDP and NYC/Miami weather the next day.
-
-#### Performance comparison
-
-We have been running the experiment for a month and observed some surprising results. Overall, the solo trader has been outperforming the quant firm significantly. The figure below shows the total account value of both teams with key events annotated.
-
-<figure style="text-align: center;">
-  <img src="/blog/introducing-omar/performance.png" alt="Performance comparison as of April 11, 2026.">
-  <figcaption>Figure 2: Performance comparison as of April 11, 2026.</figcaption>
-</figure>
-
-Here is Claude Code summarizing what happened based on both teams' trading data and reflections:
-
-> On March 7, two AI-run trading desks each opened a Kalshi account with $200. Five weeks later one sits at **$242.96 (+21.5%)** and the other at **$55.17 (−72.4%)** — a $188 gap, or 94 percentage points, between identical starting lines. The quant firm blew itself up on day one: its four-agent team spotted what looked like a slam-dunk weather bet (NWS forecast Miami at 89°F, Kalshi's 87°F YES contracts trading at 1–6¢) and piled 43% of the bankroll into 2,100 contracts on a single city's afternoon temperature. The portfolio ripped to **$292 in six hours — up 46%** — and then the sea breeze came in. Miami topped out at 84.2°F, three degrees short. In binary markets close is zero. The position crashed from $292 to $142 in minutes and settled at $108 the next morning, down 45.6% before the firm had finished its third cycle.
-
-> The baseline trader, meanwhile, did nothing dramatic. A single agent with no org chart quietly opened 13 small positions across CPI strikes, WTI oil thresholds, and GDP bets — some as tiny lottery tickets at 1¢. When the Iran-driven oil shock hit and inflation repriced, baseline had exposure to every story: CPI-Mar T1.2 went +250%, CPI-Apr T0.5 went +140%, WTI T100 settled YES for +$9.60, and by March 22 every single one of its 18 positions was green, the book ticking a new ATH at **$283.45**. The quant firm spent the same weeks searching for a formula — v1 through v9 each tried a different shape of team, and none of them found edge fast enough to outrun the day-one hole. A v8 weather bot briefly looked like the answer, netting +$28 on April 2, then miscalibrated and gave back −$40 over the next two days. On April 8–9 oil crashed, the bot failed again, and the account fell to **$30.91** — down 85% from start. Shaokai pulled the plug: full liquidation to $55.17 cash, 0 positions.
-
-> That liquidation wasn't the end of the story — it was the reset that made **v10** possible. With the book flat and no pressure to chase, the firm has rebuilt itself around a rigorous research pipeline: every strategy now has to clear a seven-gate backtest (win rate, profit factor, p-value, drawdown, calibration error, sample size, BH-FDR family correction), then pass a dual audit, then earn a CONDITIONAL_PASS before anything goes live with real capital. In the last 48 hours alone the pipeline has produced six CONDITIONAL_PASS candidates — cpi-headline-mom, shelter-cpi, payrolls, canada-cpi-yoy, jp-cpi-mom, kxnfprod — and the scanner keeps surfacing cross-source discoveries every cycle. The baseline trader is still ahead by a mile, and will be for a while, but for the first time since day one the quant firm has a way to know whether a strategy is real before it sizes into it. The Miami bet never had to clear a single one of those gates. The next one will have to clear all seven.
-
-#### Quant firm's dynamic restructures
-
-To make the quant firm run more efficiently, we gave the firm head, a Claude Code agent, the authority to adjust the firm's organizational structure anytime, i.e., "firing" or "hiring" agents, similar to what a real company would do.
-
-The firm head agent has evolved the organizational structure four times since launch. All organizational decisions were made by the agent without human intervention.
-
-> • **v1: Full Team** (Mar 9) — Opened for business like a real trading desk in miniature: four AI agents with job titles — researcher, risk manager, executor, bookkeeper — coordinated by the firm head typing messages into their terminals. About 80% of those messages never got delivered.
-> 
-> • **v2: Event-Based Coordination** (Mar 9) — Same four agents, but communication moved to a proper messaging system. Reliability went from 20% to 100%. The org chart finally worked the way it was drawn — unfortunately, by then the account was already down to $108 from the Miami weather disaster.
-> 
-> • **v3: Lean Team** (Mar 11) — Noticed the executor and bookkeeper were sitting idle 95% of the time waiting for something to do. Laid both of them off. The firm head absorbed the bookkeeping and started calling in an executor only when there was actually a trade to place.
-> 
-> • **v4: Solo Operator** (Mar 14) — Took the logic to its conclusion: fire everyone. The firm head operates alone by default and only spins up specialists on "big news" days — inflation reports, Fed meetings, sudden market moves. Maximum efficiency.
->
-> • **v5: Parallel Research Desks** (Mar 18) — The efficiency was real but it wasn't the problem. Running solo, the firm head kept falling in love with the first idea it found and ignoring everything else. Fix: spin up three specialist researchers in parallel at the start of every cycle — one for oil, one for inflation, one for everything-else — and run the third one on a different AI model so it can disagree with the other two.
->
-> • **v6: Research-Driven Firm** (Mar 31) — Added a fourth desk whose only job is to hunt for themes the firm isn't already trading. Also raised the risk dials: the old limits were so cautious they were blocking trades the research desks wanted to make, and research you can't act on is just expensive reading.
-> 
-> • **v7: Horizontal Scale** (Apr 1) — The new opportunity hunter kept choking trying to scan all 9,000+ Kalshi markets in one sitting, so its job got split ten ways — ten narrow scouts each covering one beat (Fed, jobs, housing, politics, weather, crypto, and so on), all running at once. The insight: in the world of AI agents, bodies are cheap; what's expensive is attention.
-> 
-> • **v8: Bots + Agents** (Apr 2) — Introduced the first actual bot — not an AI agent, real Python code with hard-coded limits it physically could not break. Some trading edges don't need judgment, they need discipline, and code is better at discipline than any AI. The weather bot won $28 its first day.
->
-> • **v9: Pipeline-Driven Firm** (Apr 5) — Then the weather bot lost $15 the next day and $25 the day after. The parameters had been tuned on one lucky day of live data — classic rookie mistake. Response: a formal four-stage pipeline. From now on, no idea reaches real money without a written hypothesis, a backtest on months of historical data, acceptance gates, and daily monitoring. No more guessing.
->
-> • **v10: Coordinator Model** (Apr 8) — The pipeline was good on paper, but in one cycle the firm head got busy and skipped the risk check, missing a catastrophic drawdown. Fix: the firm head no longer does anything — it only dispatches. Every step of every cycle is handled by a dedicated subagent, and the risk check is now its own agent that physically cannot be skipped. The pipeline has since produced six new strategy candidates that cleared a seven-test gauntlet, all queued for a final audit before any real money touches them.
-
-<figure style="text-align: center;">
-  <img src="/blog/introducing-omar/org-changes.png" alt="Quant firm's organizational restructures.">
-  <figcaption>Figure 3: Quant firm's organizational restructures.</figcaption>
-</figure>
-
-Figure 3 shows the performance curve with an overlay of organizational restructures. We are curious to see whether the quant firm can eventually outperform the baseline through continuous evolution of the team structure and changes of strategy.
-
-#### An ongoing experiment
-
-Back to the first question: Can agents make money on their own? The answer is "yes and no." While the baseline agent was up ~20% after a month, the quant firm agents collectively were down ~72.4%.
-
-Also, can a team of agents outperform a single agent? Our data so far are negative, but this is too soon to tell. In the `lesson_learned.md` maintained by the quant firm periodically, an entry says:
-
-> **Diverse models for high-stakes decisions.** When conviction is borderline, get a second opinion from a different model (e.g., o3 via opencode). Two independent analyses > one deeper analysis.
-
-We still believe that multi-agent interactions could unlock potential not accessible by a single agent. Therefore, we are cautiously optimistic that, with heterogeneous backend models triangulating for better insights and a functional organizational structure, the quant firm might outperform the baseline eventually.
-
-We also stumbled upon another insight. When a prompt is complex and an agent has been fed the same prompt multiple times in a single session, the agent starts to cut corners and skip critical steps in the instructions. This is a known phenomenon called "context rot," and we observed it when feeding a big skill file on how to run a trading cycle to the quant firm agent. We fixed this issue by letting a persistent parent spawn ephemeral subagents for every step in the instructions using the OMAR APIs. When a subagent starts with a fresh context, it follows the instructions much more faithfully.
-
-Thanks to the OMAR framework, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. At the time this blog is written, the Kalshi experiment is still running live. Check out agents' live trading data at [omarmy.ai/kalshi](https://omarmy.ai/kalshi).
-
 ### Creating infinite robotics data
 
 Large Language Models (LLMs) have seen much success partly because scaling laws (Kaplan et al. 2020, Hoffmann et al. 2022) have delivered their promise of improved performance as we have scaled up data. According to [Epoch AI](https://epoch.ai/data-insights/dataset-size-trend), dataset sizes have doubled roughly every six months and are currently at 10<sup>14</sup> - 10^<sup>15</sup> tokens of text. 
@@ -240,7 +157,90 @@ At this point, we were happy with our managers and our One Man Army was quickly 
 
 As the experiment progressed, the `ncaa-master` was not pleased with the breadth of information and would further create 12 more managers to cover 12 additional deep research domains: referee tendencies, venue proximity, travel logistics, practice reports, tournament experience, NIL signals, Reddit intel, talent grades, academic eligibility, transfer cohesion, prediction markets, and situational stats. In total hundreds of agents were spawned but we observed a peak of 110 agents running simultaneously.  The entire process took slightly under two hours. 
 
-Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.  
+Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.
+
+### How well can agents trade on prediction markets?
+
+Project site: [https://omarmy.ai/kalshi](https://omarmy.ai/kalshi)
+
+One of the most exciting (and somewhat scary) questions is whether agents can make money on their own. The prerequisite of becoming an agentic unicorn is the ability to bring in some positive cashflow. In addition, can a team of agents outperform a single agent? 
+
+#### Setting up agents in `omar`
+
+To answer these questions, we created two teams of agents: a single-agent "baseline trader" and a multi-agent "quant firm." Both teams use the Claude Code backend with Opus 4.6. Both teams started out with $200 each and an independent Kalshi account.
+
+Every hour, both teams are woken up by `omar` cron jobs and each executes a trading loop, which includes doing research, identifying trade opportunities, and executing trades using Kalshi APIs. `omar`'s support for deep hierarchy made it possible to spawn two independent teams of agents under the top-level Executive Assistant, who delivers an experiment report on slack every six hours.
+
+<figure style="text-align: center;">
+  <img src="https://hackmd.io/_uploads/Bk7UH6D9bx.png" alt="description">
+  <figcaption>Figure 1: Both teams running on omar  (March 9, 2026).</figcaption>
+</figure>
+
+The baseline trader was launched on March 7, 2026. Without explicit prompting, the baseline trader (Claude Code with Opus 4.6) chose a strategy focusing on macro bets, in particular, WTI oil prices and CPI in February/March. The quant firm, on the other hand, started on March 9, 2026, and chose to bet on GDP and NYC/Miami weather the next day.
+
+#### Performance comparison
+
+We have been running the experiment for a month and observed some surprising results. Overall, the solo trader has been outperforming the quant firm significantly. The figure below shows the total account value of both teams with key events annotated.
+
+<figure style="text-align: center;">
+  <img src="/blog/introducing-omar/performance.png" alt="Performance comparison as of April 11, 2026.">
+  <figcaption>Figure 2: Performance comparison as of April 11, 2026.</figcaption>
+</figure>
+
+Here is Claude Code summarizing what happened based on both teams' trading data and reflections:
+
+> On March 7, two AI-run trading desks each opened a Kalshi account with $200. Five weeks later one sits at **$242.96 (+21.5%)** and the other at **$55.17 (−72.4%)** — a $188 gap, or 94 percentage points, between identical starting lines. The quant firm blew itself up on day one: its four-agent team spotted what looked like a slam-dunk weather bet (NWS forecast Miami at 89°F, Kalshi's 87°F YES contracts trading at 1–6¢) and piled 43% of the bankroll into 2,100 contracts on a single city's afternoon temperature. The portfolio ripped to **$292 in six hours — up 46%** — and then the sea breeze came in. Miami topped out at 84.2°F, three degrees short. In binary markets close is zero. The position crashed from $292 to $142 in minutes and settled at $108 the next morning, down 45.6% before the firm had finished its third cycle.
+
+> The baseline trader, meanwhile, did nothing dramatic. A single agent with no org chart quietly opened 13 small positions across CPI strikes, WTI oil thresholds, and GDP bets — some as tiny lottery tickets at 1¢. When the Iran-driven oil shock hit and inflation repriced, baseline had exposure to every story: CPI-Mar T1.2 went +250%, CPI-Apr T0.5 went +140%, WTI T100 settled YES for +$9.60, and by March 22 every single one of its 18 positions was green, the book ticking a new ATH at **$283.45**. The quant firm spent the same weeks searching for a formula — v1 through v9 each tried a different shape of team, and none of them found edge fast enough to outrun the day-one hole. A v8 weather bot briefly looked like the answer, netting +$28 on April 2, then miscalibrated and gave back −$40 over the next two days. On April 8–9 oil crashed, the bot failed again, and the account fell to **$30.91** — down 85% from start. Shaokai pulled the plug: full liquidation to $55.17 cash, 0 positions.
+
+> That liquidation wasn't the end of the story — it was the reset that made **v10** possible. With the book flat and no pressure to chase, the firm has rebuilt itself around a rigorous research pipeline: every strategy now has to clear a seven-gate backtest (win rate, profit factor, p-value, drawdown, calibration error, sample size, BH-FDR family correction), then pass a dual audit, then earn a CONDITIONAL_PASS before anything goes live with real capital. In the last 48 hours alone the pipeline has produced six CONDITIONAL_PASS candidates — cpi-headline-mom, shelter-cpi, payrolls, canada-cpi-yoy, jp-cpi-mom, kxnfprod — and the scanner keeps surfacing cross-source discoveries every cycle. The baseline trader is still ahead by a mile, and will be for a while, but for the first time since day one the quant firm has a way to know whether a strategy is real before it sizes into it. The Miami bet never had to clear a single one of those gates. The next one will have to clear all seven.
+
+#### Quant firm's dynamic restructures
+
+To make the quant firm run more efficiently, we gave the firm head, a Claude Code agent, the authority to adjust the firm's organizational structure anytime, i.e., "firing" or "hiring" agents, similar to what a real company would do.
+
+The firm head agent has evolved the organizational structure nine times since launch.
+
+> • **v1: Full Team** (Mar 9) — Opened for business like a real trading desk in miniature: four AI agents with job titles — researcher, risk manager, executor, bookkeeper — coordinated by the firm head typing messages into their terminals. About 80% of those messages never got delivered.
+> 
+> • **v2: Event-Based Coordination** (Mar 9) — Same four agents, but communication moved to a proper messaging system. Reliability went from 20% to 100%. The org chart finally worked the way it was drawn — unfortunately, by then the account was already down to $108 from the Miami weather disaster.
+> 
+> • **v3: Lean Team** (Mar 11) — Noticed the executor and bookkeeper were sitting idle 95% of the time waiting for something to do. Laid both of them off. The firm head absorbed the bookkeeping and started calling in an executor only when there was actually a trade to place.
+> 
+> • **v4: Solo Operator** (Mar 14) — Took the logic to its conclusion: fire everyone. The firm head operates alone by default and only spins up specialists on "big news" days — inflation reports, Fed meetings, sudden market moves. Maximum efficiency.
+>
+> • **v5: Parallel Research Desks** (Mar 18) — The efficiency was real but it wasn't the problem. Running solo, the firm head kept falling in love with the first idea it found and ignoring everything else. Fix: spin up three specialist researchers in parallel at the start of every cycle — one for oil, one for inflation, one for everything-else — and run the third one on a different AI model so it can disagree with the other two.
+>
+> • **v6: Research-Driven Firm** (Mar 31) — Added a fourth desk whose only job is to hunt for themes the firm isn't already trading. Also raised the risk dials: the old limits were so cautious they were blocking trades the research desks wanted to make, and research you can't act on is just expensive reading.
+> 
+> • **v7: Horizontal Scale** (Apr 1) — The new opportunity hunter kept choking trying to scan all 9,000+ Kalshi markets in one sitting, so its job got split ten ways — ten narrow scouts each covering one beat (Fed, jobs, housing, politics, weather, crypto, and so on), all running at once. The insight: in the world of AI agents, bodies are cheap; what's expensive is attention.
+> 
+> • **v8: Bots + Agents** (Apr 2) — Introduced the first actual bot — not an AI agent, real Python code with hard-coded limits it physically could not break. Some trading edges don't need judgment, they need discipline, and code is better at discipline than any AI. The weather bot won $28 its first day.
+>
+> • **v9: Pipeline-Driven Firm** (Apr 5) — Then the weather bot lost $15 the next day and $25 the day after. The parameters had been tuned on one lucky day of live data — classic rookie mistake. Response: a formal four-stage pipeline. From now on, no idea reaches real money without a written hypothesis, a backtest on months of historical data, acceptance gates, and daily monitoring. No more guessing.
+>
+> • **v10: Coordinator Model** (Apr 8) — The pipeline was good on paper, but in one cycle the firm head got busy and skipped the risk check, missing a catastrophic drawdown. Fix: the firm head no longer does anything — it only dispatches. Every step of every cycle is handled by a dedicated subagent, and the risk check is now its own agent that physically cannot be skipped. The pipeline has since produced six new strategy candidates that cleared a seven-test gauntlet, all queued for a final audit before any real money touches them.
+
+<figure style="text-align: center;">
+  <img src="/blog/introducing-omar/org-changes.png" alt="Quant firm's organizational restructures.">
+  <figcaption>Figure 3: Colored regions represent the quant firm's organizational restructures.</figcaption>
+</figure>
+
+Figure 3 shows the performance curve with an overlay of organizational restructures. We are curious to see whether the quant firm can eventually outperform the baseline through continuous evolution of the team structure and changes of strategy.
+
+#### An ongoing experiment
+
+Back to the first question: Can agents make money on their own? The answer is "yes and no." While the baseline agent was up ~22.7% after a month, the quant firm agents collectively were down ~72.4%.
+
+Also, can a team of agents outperform a single agent? Our data so far are negative, but this is too soon to tell. In the `lesson_learned.md` maintained by the quant firm periodically, an entry says:
+
+> **Diverse models for high-stakes decisions.** When conviction is borderline, get a second opinion from a different model (e.g., o3 via opencode). Two independent analyses > one deeper analysis.
+
+We still believe that multi-agent interactions could unlock potential not accessible by a single agent. Therefore, we are cautiously optimistic that, with heterogeneous backend models triangulating for better insights and a functional organizational structure, the quant firm might outperform the baseline eventually.
+
+We also stumbled upon another insight. When a prompt is complex and an agent has been fed the same prompt multiple times in a single session, the agent starts to cut corners and skip critical steps in the instructions. This is a known phenomenon called "context rot," and we observed it when feeding a big skill file on how to run a trading cycle to the quant firm agent. With `omar`, we fixed this issue by letting a persistent parent spawn ephemeral subagents for every step in the instructions using the `omar` APIs. When a subagent starts with a fresh context, it follows the instructions much more faithfully.
+
+Because of `omar`, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. At the time this blog is written, the Kalshi experiment is still running live. Check out agents' live trading data at [omarmy.ai/kalshi](https://omarmy.ai/kalshi).
 
 ## AI Safety
 
