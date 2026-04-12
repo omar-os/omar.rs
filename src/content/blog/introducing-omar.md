@@ -70,7 +70,7 @@ The same event queue is used for scheduling future tasks, which are highly usefu
 
 ## omar in action
 
-### Creating infinite robotics data
+### Creating infinite robotics data 🦾
 
 Large Language Models (LLMs) have seen much success partly because scaling laws (Kaplan et al. 2020, Hoffmann et al. 2022) have delivered their promise of improved performance as we have scaled up data. According to [Epoch AI](https://epoch.ai/data-insights/dataset-size-trend), dataset sizes have doubled roughly every six months and are currently at 10<sup>14</sup> - 10^<sup>15</sup> tokens of text. 
 
@@ -159,7 +159,7 @@ As the experiment progressed, the `ncaa-master` was not pleased with the breadth
 
 Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.
 
-### How well can agents trade on prediction markets?
+### How well can agents trade on prediction markets? 📈
 
 Project site: [https://omarmy.ai/kalshi](https://omarmy.ai/kalshi)
 
