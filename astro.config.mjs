@@ -37,7 +37,7 @@ function remarkBaseUrl() {
 export default defineConfig({
   base,
   output: "static",
-  site: "https://omarmy.ai",
+  site: "https://omar.tech",
   build: {
     assets: "assets",
   },
