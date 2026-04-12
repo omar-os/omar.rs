@@ -1,0 +1,124 @@
+name: Deploy Preview
+
+# Collapsed preview pipeline: builds the configured source branch and pushes
+# the built dist/ directly to omarmy-preview/gh-pages in a single job.
+#
+# Replaces the previous two-workflow setup (sync-to-preview.yml +
+# old deploy-preview.yml) which force-pushed the source to an intermediate
+# `preview` branch and relied on a second workflow to deploy. That chain
+# broke because pushes via GITHUB_TOKEN do not trigger downstream workflows.
+#
+# Requires repo secret PREVIEW_DEPLOY_TOKEN: a PAT with contents:write on
+# lsk567/omarmy-preview. Rotate via repo settings when it expires.
+
+on:
+  schedule:
+    # Every 15 minutes. Skip is cheap (one API call) if nothing new to deploy.
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to preview (blank = use .github/preview-config.json)"
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/preview-config.json'
+      - '.github/workflows/deploy-preview.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-preview
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main for config
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Resolve source branch
+        id: resolve
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
+        run: |
+          if [ -n "$INPUT_BRANCH" ]; then
+            BRANCH="$INPUT_BRANCH"
+            echo "Using workflow_dispatch override: $BRANCH"
+          else
+            BRANCH=$(jq -r '.source_branch' .github/preview-config.json)
+            echo "Using preview-config.json: $BRANCH"
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.resolve.outputs.branch }}
+          fetch-depth: 1
+
+      - name: Get source SHA
+        id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Check if already deployed
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.PREVIEW_DEPLOY_TOKEN }}
+          SOURCE_SHA: ${{ steps.sha.outputs.sha }}
+        run: |
+          # Skip if omarmy-preview/gh-pages HEAD already references this SHA.
+          # On any API error, fail open (proceed with deploy) so a bad skip
+          # check never silently stalls the preview.
+          LATEST_MSG=$(gh api repos/lsk567/omarmy-preview/commits/gh-pages --jq .commit.message 2>/dev/null || echo "")
+          if [ -n "$LATEST_MSG" ] && echo "$LATEST_MSG" | grep -q "$SOURCE_SHA"; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Preview is up to date (source SHA $SOURCE_SHA already deployed)"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Deploy needed for source SHA $SOURCE_SHA"
+          fi
+
+      - name: Setup Node
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        if: steps.check.outputs.skip != 'true'
+        run: npm ci
+
+      - name: Build
+        if: steps.check.outputs.skip != 'true'
+        env:
+          ASTRO_BASE: /omarmy-preview/
+        run: npx astro build --site https://lsk567.github.io
+
+      - name: Deploy to omarmy-preview/gh-pages
+        if: steps.check.outputs.skip != 'true'
+        env:
+          DEPLOY_TOKEN: ${{ secrets.PREVIEW_DEPLOY_TOKEN }}
+          SOURCE_SHA: ${{ steps.sha.outputs.sha }}
+          SOURCE_BRANCH: ${{ steps.resolve.outputs.branch }}
+        run: |
+          # Trim any whitespace/newlines from the token (defensive; see
+          # past incident where trailing \n broke the push).
+          CLEAN_TOKEN=$(echo -n "$DEPLOY_TOKEN" | tr -d '[:space:]')
+          cd dist
+          touch .nojekyll
+          git init -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy preview from $SOURCE_BRANCH ($SOURCE_SHA)"
+          git push --force \
+            "https://x-access-token:${CLEAN_TOKEN}@github.com/lsk567/omarmy-preview.git" \
+            HEAD:gh-pages
+          echo "Deployed $SOURCE_BRANCH @ $SOURCE_SHA to omarmy-preview/gh-pages"
