@@ -112,6 +112,7 @@ jobs:
           # past incident where trailing \n broke the push).
           CLEAN_TOKEN=$(echo -n "$DEPLOY_TOKEN" | tr -d '[:space:]')
           cd dist
+          rm -f CNAME
           touch .nojekyll
           git init -b gh-pages
           git config user.name "github-actions[bot]"
