@@ -166,6 +166,45 @@ As the experiment progressed, the `ncaa-master` was not pleased with the breadth
 
 Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.
 
+### Evolving Genetic Evolutionary Coding Algorithms
+
+Evolutionary search has recently seen a strong resurgence thanks to AI coding agents. For example, Deepmind's AlphaEvolve set new matrix multiplication records and helped Google save some compute on a global scale by optimizing scheduling algorithms. GEPA demonstrated that evolutionary algorithms can also be used to outperform RL while being more sample efficient. In their first paper, across four benchmarks, GEPA’s reflective prompt evolution outperforms GRPO by up to 19% with up to 35× fewer rollouts. The success of such algorithms has led to several derivative works such as OpenEvolve, KISS Sorcar, and more.
+
+All of this success has come from modifying single text artifacts like code blocks (OpenEvolve), prompts (the original GEPA), and even single text files (GEPA Optimize Anything, KISS). Unfortunately, **real software doesn't live in a single file**. Real production software lives in a repo with configs, tests, build systems, and cross-file dependencies that have to move together. OpenEvolve requires you to wrap the evolvable region in special EVOLVE-BLOCK markers while most other tools ask you to point at one function, one prompt, or one general text artifact. If you need to make changes to multiple files like auth.py:42 and routes.py:17 in the same step, you're out of luck.
+
+Another limitation is that most of these genetic algorithms rely on interacting with a coding agent through an API in a single interaction step. However, today's widely used coding tools like Claude Code and OpenCode turn these AI models into full fledged coding agents that can interact with a codebase. Rather than propose a solution in a single step, these coding agents can clarify confusion by searching the codebase or even the web, they can make surgical edits rather than propose new candidates in a single shot, they can create subagents to help delegate work while they focus on solving the big picture, and they can even test their changes by running the code or tests mid-flight before returning.
+
+So we asked `omar` to close these gaps.
+
+#### Introducing HELIX 🧬
+
+HELIX — *Hierarchical Evolution via LLM-Informed eXploration* — extends GEPA's reflective Pareto loop so that **the unit of evolution is the entire git repository**. Each candidate is a full worktree. Each mutation is an agentic coding session (Claude Code, Codex, or any CLI backend) running inside that worktree with real tool access: read across the codebase, edit multiple files coherently, run the test suite mid-mutation, hit the web for documentation, self-correct, and *then* get scored. It preserves GEPA's instance-level Pareto frontier, its minibatch gating, and its caching — but swaps the single-artifact candidate for a whole repository, and swaps blind text rewrites for multi-turn agentic edits.
+
+The entire project was built by one of our authors and `omar` in about four days. 
+
+To accomplish this task, we prompted `omar` to:
+- isolate the core GEPA Optimize Anything algorithm independent of dependencies such as DSPy
+- integrate a coding agent (Claude Code was the MVP) rather than litellm as the evolutionary unit executing the work
+- use git worktrees as an efficient way to manage multiple inflight versions of the same repository
+
+As expected, `omar`'s EA spawned a team with a small number of PM-level agents, each owning a vertical of the system: one for the evolution loop, one for the worktree and executor substrate, one for the Claude Code mutator, one for benchmarks, and one (later) for the differential-testing harness. Each PM in turn spawned its own worker agents. At its peak, we observed more than ten agents running simultaneously across the omar TUI, each in its own tmux pane, each inside its own git worktree — HELIX's architecture and omar's architecture turned out to rhyme almost exactly.
+
+This hierarchy of having teams matters for a reason that becomes obvious once you try it: as the workers made progress, they discovered problems their parent PMs hadn't anticipated. A test suite started failing in a way that implicated the cache layer owned by a *different* PM. With traditional background agents from a single coding tool, that cross-team fix would have forced us to stop everything and re-plan. In `omar`, the concern is bubbled up to the EA who lets us know and we can directly drop into the affected agent, explain the cross-cutting concern, and let it coordinate with the other team on its own (through the `omar` event bus). Several GEPA-parity bugs we found during development (naturally these LLMs hallucinate on almost everything) — a parent-train-eval cache consumer that had gone missing, a `HELIX_SPLIT` environment-variable name that had drifted between the spawner and the subprocess, an RNG being shared where GEPA kept it local — were all fixed this way, live, without unwinding the rest of the run.
+
+#### The differential-testing harness (and the bug it caught on its first run)
+
+Two days in, we hit the problem every framework fork hits eventually: how do you prove, automatically, that your derivative is still semantically equivalent to the reference you forked from, across an emergent loop that runs for hundreds of iterations? Unit tests don't catch drift. Type checks don't catch drift. Real benchmarks catch it eventually, but only after you've burned a weekend staring at logs.
+
+We asked `omar` to spin up a dedicated team to solve it. Their output was a differential-testing harness that treats the GEPA reference implementation as an *executable oracle*: both GEPA and HELIX are driven in parallel by the same deterministic fixture with mocked evaluators, and three semantic invariants (control-flow equality on accept/reject decisions, cache soundness as an *inequality* rather than an equality, and within-fork self-consistency on cache keys) are asserted across the resulting traces. The harness runs in under a second and it ships in HELIX's CI. For example, on its first run, the harness flagged an InvariantViolation [A: control-flow] caused by HELIX sharing an RNG between the Pareto frontier and the epoch-shuffled batch sampler, where GEPA kept them independent. This is the kind of nasty bug we (a human) could have spent days chasing before finding a solution.
+
+#### Results
+
+On the circle packing benchmark from GEPA's own blog — pack 26 non-overlapping circles in the unit square, maximize sum of radii — HELIX evolved a naive concentric-grid seed at score 0.9798 to **2.6360 in 14 generations**, edging past GEPA's published 2.635. Moreover, it did this using the cheapest Claude configuration we could find: haiku, with low reasoning effort, and we even enforced a maximum of 20 turns for the agent per mutation. This is in comparison to GEPA using a frontier model, GPT-5.
+
+We also introduce a toy example, **web researcher**: an evaluator that scores an agent's ability to answer simple questions that require web access (e.g., *"What is the latest version of numpy on PyPI?"*). Whether we run RL or text optimization an offline LLM will not solve this problem. However, with HELIX this can be solved in a single generation as our coding agents have full tool access including web access. 
+
+We look forward to releasing more examples as our budget permits 🥲
+
 ### How well can agents trade on prediction markets? 📈
 
 Project site: [https://omar.tech/kalshi](https://omar.tech/kalshi)
