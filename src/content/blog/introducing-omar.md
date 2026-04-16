@@ -340,12 +340,11 @@ If we missed your project or got something wrong, please let us know and we will
 
 ## What's next
 
-We're working on a few exciting features:
+At the time of writing, we're actively working on a few exciting features:
 
-- Supporting multiple executive assistants for ultra large teams of agents (think thousands).
-- better sandboxing through docker containers
-- access role management for agents
-- More to come!
+- Better sandboxing through docker containers
+- Access role management for agents
+- And more to come!
 
 Check out the [docs](/docs/) to get started, and join our [Discord](https://discord.gg/X76PSzmfWr) to connect with the community.
 
