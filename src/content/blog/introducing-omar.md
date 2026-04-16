@@ -49,19 +49,15 @@ Try out this demo by sending the following prompt to the Executive Assistant (re
 Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
 ```
 
-## How omar works
+## OMAR in a nutshell
 
-At its core, `omar` is a TUI that begins with one agent the **Executive Assistant** (EA). This agent is the main point of contact for a user interacting with an army of agents, hence One Man Army. While `omar` allows users to manually create their own agents, the real force multiplier kicks in when our EA can spawn several agents which in turn can spawn their own teams of agents quickly leading to hundreds of agents working towards solving the user's goal.
+At its core, `omar` is a TUI that begins with one agent the **Executive Assistant** (EA). This agent is the main point of contact for a user interacting with a swarm of agents. While `omar` allows users to manually create their own agents, the real force multiplier kicks in when our EA can spawn several agents which in turn can spawn their own teams of agents quickly leading to hundreds of agents working towards solving the user's goal.
 
-### User interface
+### Event scheduling
 
-`omar` has two kinds of entry points: (1) a TUI that serves as the "mission control" (shown in the demo above), (2) messaging apps, e.g. Slack, that relay messages to the Executive Assistant.
+`omar` implements a discrete-event system based on the concept of *logical time*, which treats timing as a first-class specification rather than an uncontrolled side effect. Communications between coding agents are modeled as timestamped *events*. An event with a logical timestamp with `t` is physically processed at physical time `T >= t`. The `omar` server has an internal event queue, which orders all events by their logical timestamps. This design is directly inspired by the [reactor model](https://reactor-model.org) and is chosen to implement *deterministic* and *reproducible* real-time coordination.
 
-The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. We realized that, in a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was built with navigating hierarchy in mind (*not sure about this sentence*).
-
-### Communication and scheduling
-
-Communication between agents is orchestrated by the `omar` server, which has an internal event queue. When agent `A` sends a message to agent `B`, agent `A` sends an HTTP POST request to the `omar` server with the following format:
+For example, when agent `A` sends a message to agent `B`, agent `A` sends an HTTP POST request to the `omar` server with the following format:
 ```json 
 {
     "sender": "A",
@@ -75,7 +71,13 @@ Upon receiving the message, the server inserts a new event into its event queue,
 
 The same event queue is used for scheduling future tasks, which are highly useful for implementing *cron jobs* in `omar`. Cron jobs are essentially a special type of event that carries a predefined period. When a cron job fires, the `omar` server automatically reschedules it based on its period.
 
-## omar in action
+### User interface
+
+`omar` has two kinds of entry points: (1) a TUI that serves as the "mission control" (shown in the demo above), (2) messaging apps, e.g. Slack, that relay messages to the Executive Assistant.
+
+The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. We realized that, in a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was designed to additionally aid better navigation of agent hierarchies.
+
+## OMAR in action
 
 ### Creating infinite robotics data 🦾
 
@@ -134,9 +136,9 @@ As of the start of this year's tournament no one has ever predicted all 63 games
 
 This problem is so hard that even the prediction market, Kalshi, offers anyone a chance to win [$1 billion](https://kalshi.com/billion-dollar-bracket) if they form a perfect bracket. 
 
-#### Omar's Turn
+#### OMAR's turn
 
-As Fox noted, one can improve their bracket by using basketball knowledge. However, if I wanted to include all sources of information like news and analyst recommendations, I would need days if not weeks to consolidate the information. Instead, what if I use an army of coordinated agents to do the research I planned to do? Commanders and generals leading teams in different domains, working all in parallel to gather every signal available and culminate it all into one bracket? With `omar` it's now possible to do this in a controlled and digestible manner.
+As Fox noted, one can improve their bracket by using basketball knowledge. However, if I wanted to include all sources of information like news and analyst recommendations, I would need days if not weeks to consolidate the information. Instead, what if I use a swarm of coordinated agents to do the research I planned to do? Commanders and generals leading teams in different domains, working all in parallel to gather every signal available and culminate it all into one bracket? With `omar` it's now possible to do this in a controlled and digestible manner.
 
 We give our EA in `omar` the following prompt:
 > "I want to build an NCAA winning bracket. I need you to select the teams for me to do this. We will need to spawn a massive set of agents. We will need teams to read the news about all teams in the tournament as well as every individual player on each team. We need to consider both news and social media profiles of the players to see if they have been locked in. We should also look for historical information and metrics stuff like based on a teams seasons stats do those stats go on to predict anything about the playoffs? For example, KenPom and rule of 2 are interesting metrics that come to mind. We should also be robust and have agents debate each other. These debate agents can also critique the brackets of professional analysts who have already published theirs as a way to include additional information in our research process. The net result should be a hierarchy of agents at least three layers deep with a total number of agents in the range of 50 to 100 agents working to create the best possible bracket."
@@ -158,7 +160,7 @@ As we watched these 6 managers spin up, we recalled that we missed a critical in
 The `ncaa-master` quickly responded by adding a 7<sup>th</sup> manager:
 - `vegas-mgr` DraftKings, Caesars, FanDuel, BetMGM futures, spreads, line movement
 
-At this point, we were happy with our managers and our One Man Army was quickly growing in size. 
+At this point, we were happy with our managers and our agent swarm was quickly growing in size. 
 
 ![image](https://hackmd.io/_uploads/rk9Xkm99bx.png)
 
