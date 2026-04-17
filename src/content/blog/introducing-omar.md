@@ -16,27 +16,22 @@ author:
 
 Imagine you are the CEO, leading hundreds of non-stop AI agents to solve humanity's biggest problems.
 
-That is the vision we have for **Open Multi-Agent Runtime** (`omar`), a TUI for creating powerful agentic organizations.
-
-## The 10,000x engineer
-
 <blockquote class="twitter-tweet" data-media-max-width="560"><p lang="et" dir="ltr">10000x Engineer <a href="https://t.co/zLwGV3q7a9">pic.twitter.com/zLwGV3q7a9</a></p>&mdash; shafu (@shafu0x) <a href="https://twitter.com/shafu0x/status/2019854429848236051?ref_src=twsrc%5Etfw">February 6, 2026</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 ## Open Multi-Agent Runtime
 
-While the 10,000x engineer is clearly productive beyond our wildest dreams, they remain elusive and difficult for the average engineer to ever match in skills. Today, we significantly close the gap between the average engineer and the 10,000x engineer by introducing **Open Multi-Agent Runtime** (`omar`).
+While the 10,000x engineer is clearly productive beyond our wildest dreams, they remain elusive for us to hire and difficult for the average engineer to be trained to match their skills. Today, we significantly close the gap between the average engineer and the 10,000x engineer by introducing **Open Multi-Agent Runtime** (`omar`), a TUI for creating powerful agentic organizations.
 
 `omar` is a multi-agent orchestration system managed through an easy-to-use terminal user interface (TUI) built on top of `tmux`, the powerful terminal multiplexer tool you probably already know and love. With `omar`, you can tackle massive problems that are easily solved by multi-agent systems without ever having to manually handle orchestration, `Ctrl+Tab` to cycle and context switch through terminal windows, or directly manage the consoles of tens of Claude Code screens like our 10,000x engineer.
 
 We demonstrate `omar` on several problems and find that `omar` can perform tasks that often are not trivial or even possible for a single agent. With `omar`, you benefit from:
-<!-- *(ideally these are each hyperlinks to the sections of the blog down below that definitively show that omar can do this)* -->
-- **Deep hierarchies**: Agents managing agents, teams, and organizations just like a company.
-- **Scalability**: create or remove tens or hundreds of agents without the need for direct human interaction
-- **Heterogeneity**: Let different agent backends (e.g., Claude and Codex) collaborate as a team.
-- **Full control**: Talk to, monitor, and control any agent in any level of the hierarchy you want.
-- **Life span**: Long-running or ephemeral agents, your choice.
+- [**Deep hierarchies**](#evolving-genetic-evolutionary-coding-algorithms): Agents managing agents, teams, and organizations just like a company.
+- [**Scalability**](#deep-research---march-madness-style-): create or remove tens or hundreds of agents without the need for direct human interaction
+- [**Heterogeneity**](#demo): Let different agent backends (e.g., Claude and Codex) collaborate as a team so that you can leverage the best of each coding agent.
+- [**Full control**](#deep-research---march-madness-style-): Talk to, monitor, and control any agent in any level of the hierarchy you want.
+- [**Life span**](#are-coding-agents-good-traders-on-prediction-markets-): Long-running or ephemeral agents, your choice.
 
-Other features include messaging system integrations (e.g., Slack), computer use, support for classic `tmux` commands, and multi-workspace support. 
+Other features include messaging system integrations (e.g., Slack), computer use, support for classic `tmux` commands, and multi-workspace support — all built on an architecture rooted in academic research on real-time systems.
 
 ## Demo
 
@@ -75,7 +70,7 @@ The same event queue is used for scheduling future tasks, which are useful for i
 
 `omar` has two kinds of entry points: (1) a TUI that serves as the "mission control" (shown in the demo above), (2) messaging apps, e.g. Slack, that relay messages to the Executive Assistant.
 
-The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. In a large agentic organization, the user might be working with hundreds of agents simultaneously, thus the TUI was designed to additionally aid better navigation of agent hierarchies.
+The `omar` TUI is built on top of Ratatui, a Rust-based TUI framework. Rather than a flat list of terminal windows, the interface mirrors the structure of a real organization: you navigate your chain of command the way you would walk an org chart — stepping into a team to see its members, then backing out to the division above. At any point you can pull up your list of active projects, inspect the event queue to see what messages are in flight between agents, or drop directly into any agent at any depth to read its output or give it a new instruction.
 
 ## OMAR in action
 
@@ -95,7 +90,7 @@ With `omar`, we can ask, how can we scale up robotics data in a similar manner?
 
 LIBERO is a popular robotics learning benchmark that was initially centered on lifelong, sequential knowledge transfer in manipulation tasks but later became popular for evaluating and eventually training Vision Language Action (VLA) models. Recently models like SmolVLA and 𝜋<sub>0.5</sub> easily score above 90% on LIBERO, so are we ready for VLA-powered robots? Not quite. 
 
-Works such as [LIBERO-Pro](https://arxiv.org/abs/2510.03827) by Zhou et al., recently found that these VLAs are merely memorizing the trajectories packaged with the benchmarks. When you perturb (i.e., change) something seemingly pointless like the color of a mug or where the mug is initially placed, these state-of-the-art VLAs often drop to 0% success. Prior work from NVIDIA (COLOSSEUM benchmark 2024) also found that similar collapses of success rates occur in non-VLA robotics models and ultimately, the models that did do well across perturbations also better bridge the sim-to-real gap. Given that, in both cases, these perturbations were hand-designed and finite in size, how can we scale to practically infinitely many while doing so with just one engineer and `omar`?
+Works such as [LIBERO-Pro](https://arxiv.org/abs/2510.03827) by Zhou et al., recently found that these VLAs are merely memorizing the trajectories packaged with the benchmarks. When you perturb (i.e., change) something seemingly pointless like the color of a mug or where the mug is initially placed, these state-of-the-art VLAs often drop to 0% success. Prior work from NVIDIA (COLOSSEUM benchmark 2024) also found that similar collapses of success rates occur in non-VLA robotics models and ultimately, the models that did do well across perturbations also better bridge the sim-to-real gap. Given that, in both cases, these perturbations were hand-designed and finite in size, how can we scale to practically infinitely many while doing so with just one PhD student and `omar`?
 
 ##### [Scenic](https://scenic-lang.org)
 
@@ -124,7 +119,7 @@ In total, `omar` produced LIBERO-Infinity in one week. For context, such project
 
 ### Evolving Genetic Evolutionary Coding Algorithms
 
-Evolutionary search has recently seen a strong resurgence thanks to AI coding agents. For example, DeepMind's AlphaEvolve set new matrix multiplication records and helped Google save some compute on a global scale by optimizing scheduling algorithms. GEPA demonstrated that evolutionary algorithms can also be used to outperform RL while being more sample efficient. In their first paper, across four benchmarks, GEPA’s reflective prompt evolution outperforms GRPO by up to 19% with up to 35× fewer rollouts. The success of such algorithms has led to several derivative works such as OpenEvolve, KISS Sorcar, and more.
+Evolutionary search has recently seen a strong resurgence thanks to AI coding agents. For example, DeepMind's [AlphaEvolve](https://arxiv.org/abs/2506.13131) (Novikov et al., 2025) set new matrix multiplication records and helped Google save some compute on a global scale by optimizing scheduling algorithms. [GEPA](https://arxiv.org/abs/2507.19457) (Agrawal et al., 2025) demonstrated that evolutionary algorithms can also be used to outperform RL while being more sample efficient. In their first paper, across four benchmarks, GEPA’s reflective prompt evolution outperforms GRPO by up to 19% with up to 35× fewer rollouts. The success of such algorithms has led to several derivative works such as [OpenEvolve](https://github.com/algorithmicsuperintelligence/openevolve), [KISS Sorcar](https://github.com/ksenxx/kiss_ai), and more.
 
 All of this success has come from modifying single text artifacts like code blocks (OpenEvolve), prompts (the original GEPA), and even single text files (GEPA Optimize Anything, KISS). Unfortunately, **real software doesn't live in a single file**. Real production software lives in a repo with configs, tests, build systems, and cross-file dependencies that have to move together. OpenEvolve requires you to wrap the evolvable region in special EVOLVE-BLOCK markers while most other tools ask you to point at one function, one prompt, or one general text artifact. If you need to make changes to multiple files like auth.py:42 and routes.py:17 in the same step, you're out of luck.
 
@@ -302,7 +297,7 @@ Here is a recent real-world example of the dangers of unchecked agent access, wh
 
 Such issues are further compounded in multi-agent systems like `omar` not only because there are multiple agents that can do damage, but also because it becomes harder for an individual to track the work and changes created by each agent. In our NCAA bracket example, how does one check the files touched by over 100 agents? What about the work completed? The problem quickly becomes intractable. 
 
-In `omar`, while we haven't yet solved this problem, we have made it traceable through logging. All agents regardless of their backend are directed to provide justification for why they are taking *"any significant action"*. In our experiments, we found that this phrasing led to a moderate amount of logging where agents aren't logging every file they read but they are logging file modifications. Each action is logged with a timestamp, the agent's Chain of Command, the reasoning for taking that action, and why the action aligns with the user's goal. We find that this Action Justification & Reasoning Alignment is a good first step towards addressing Multi-Agent Safety. While agents can lie and take actions that are not faithful to their explanations, they report to the `omar` API. We emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. `omar`'s logging API may not prevent agents from erasing over two years of records, but it does provide a way for one person to track the actions of teams of agents and attribute accountability to specific agent backends. 
+In `omar`, while we haven't yet solved this problem, we have made it traceable through logging. All agents regardless of their backend are directed to provide justification for why they are taking *"any significant action"*. In our experiments, we found that this phrasing led to a moderate amount of logging where agents aren't logging every file they read but they are logging file modifications. Each action is logged with a timestamp, the agent's Chain of Command, the reasoning for taking that action, and why the action aligns with the user's goal. We find that this **Action Justification & Reasoning Alignment** is a good first step towards addressing Multi-Agent Safety. While agents can lie and take actions that are not faithful to their explanations, they report to the `omar` API. We emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. `omar`'s logging API may not prevent agents from erasing over two years of records, but it does provide a way for one person to track the actions of teams of agents and attribute accountability to specific agent backends. 
 
 Lastly, with regard to role access that would limit agents to only have write access to files related to their tasks, this is a feature under active development and will be released soon 🚀 !
 
@@ -332,7 +327,7 @@ A separate but adjacent line of work focuses on giving each agent a safe place t
 Putting it all together, we see three things that distinguish `omar` from the projects above:
 
 1. **Recursive hierarchies as a first-class concept**, not a flat fan-out. Agents in `omar` can spawn their own teams using the same APIs the user uses, which is what makes the NCAA experiment with 100+ agents tractable from a single prompt.
-2. **Heterogeneous backends in one session**, with the same orchestration primitives applied uniformly to Claude Code, Codex, Cursor, Opencode, and others.
+2. **Heterogeneous backends in one session**, with the same orchestration primitives applied uniformly to Claude Code, Codex, Cursor, Opencode, and others. This allows users and agents to manage budgets and abilties. 
 3. **A terminal-native TUI built specifically for navigating large agent organizations**, including the ability to attach to any agent at any depth and watch or steer it directly.
 
 If we missed your project or got something wrong, please let us know and we will update this section.
