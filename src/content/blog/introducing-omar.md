@@ -200,7 +200,7 @@ At this point, we were happy with our managers and our agent swarm was quickly g
 
 As the experiment progressed, the `ncaa-master` was not pleased with the breadth of information and would further create 12 more managers to cover 12 additional deep research domains: referee tendencies, venue proximity, travel logistics, practice reports, tournament experience, NIL signals, Reddit intel, talent grades, academic eligibility, transfer cohesion, prediction markets, and situational stats. In total hundreds of agents were spawned but we observed a peak of 110 agents running simultaneously.  The entire process took slightly under two hours. 
 
-Needless to say, we have entered our bracket into Kalshi with Arizona as the projected winner.
+We entered our bracket into Kalshi with Arizona as the projected winner. The tournament has since concluded. Michigan defeated UConn 69 to 63 in the championship, so we did not take home the $1B prize. That said, `omar`'s pick wasn't bad. Arizona made it all the way to the Final Four (one of only four teams out of the original 68), where they lost to the eventual champion Michigan 73 to 91. Picking the right Final Four team in a field that astronomical is, by itself, a non-trivial signal that an agent swarm of this kind can do real research.
 
 ### Are coding agents good traders on prediction markets? 📈
 
@@ -291,7 +291,7 @@ Having the ability to efficiently control tens or even hundreds of agents can be
 
 Another one of our concerns when using teams of agents is traceability and compartmentalization. In organizations of people, we ensure the former by having conversations with managers and stakeholders to receive work and report updates on work that is done. For example, in software companies this information may be communicated as JIRA tickets. The latter is done through access management where employees are given the minimum access to accomplish their daily tasks. In our example, this could be providing employees with source code access to only their teams' code as opposed to all code in the company. As such, we are currently developing safety features in `omar` that implement traceability and compartmentalization.
 
-**Before we release these features, we strongly recommend installing OMAR in a sandboxed / non-critical environment to remain safe.**
+**Before we release these features, we strongly recommend installing `omar` in a sandboxed / non-critical environment (e.g., a Docker container) to remain safe.**
 
 Here is a recent real-world example of the dangers of unchecked agent access, where [an AI assistant (Claude Code) was given excessive permissions and ended up deleting a developer's entire production environment, including its database and all backups, erasing over two years of records in seconds (Tom's Hardware)](https://www.tomshardware.com/tech-industry/artificial-intelligence/claude-code-deletes-developers-production-setup-including-its-database-and-snapshots-2-5-years-of-records-were-nuked-in-an-instant). 
 
@@ -300,6 +300,8 @@ Such issues are further compounded in multi-agent systems like `omar` not only b
 In `omar`, while we haven't yet solved this problem, we have made it traceable through logging. All agents regardless of their backend are directed to provide justification for why they are taking *"any significant action"*. In our experiments, we found that this phrasing led to a moderate amount of logging where agents aren't logging every file they read but they are logging file modifications. Each action is logged with a timestamp, the agent's Chain of Command, the reasoning for taking that action, and why the action aligns with the user's goal. We find that this **Action Justification & Reasoning Alignment** is a good first step towards addressing Multi-Agent Safety. While agents can lie and take actions that are not faithful to their explanations, they report to the `omar` API. We emphasize that this is no different from an agent that would lie to a user and take malicious actions. You probably wouldn't have run such agents on your system anyway. `omar`'s logging API may not prevent agents from erasing over two years of records, but it does provide a way for one person to track the actions of teams of agents and attribute accountability to specific agent backends. 
 
 Lastly, with regard to role access that would limit agents to only have write access to files related to their tasks, this is a feature under active development and will be released soon 🚀 !
+
+Proposals for AI safety that guide our ongoing and future work on improving the safety and trustworthiness of `omar` include [*Toward Verified Artificial Intelligence*](https://cacm.acm.org/research/toward-verified-artificial-intelligence/) (Seshia et al., 2022) and [*Towards Guaranteed Safe AI*](https://arxiv.org/abs/2405.06624) (Dalrymple et al., 2024).
 
 
 ## Related work
