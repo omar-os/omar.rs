@@ -26,10 +26,10 @@ While the 10,000x engineer is clearly productive beyond our wildest dreams, they
 
 We demonstrate `omar` on several problems and find that `omar` can perform tasks that often are not trivial or even possible for a single agent. With `omar`, you benefit from:
 - [**Deep hierarchies**](#evolving-genetic-evolutionary-coding-algorithms): Agents managing agents, teams, and organizations just like a company.
-- [**Scalability**](#deep-research---march-madness-style-): create or remove tens or hundreds of agents without the need for direct human interaction
+- [**Scalability**](#deep-research---march-madness-style): create or remove tens or hundreds of agents without the need for direct human interaction
 - [**Heterogeneity**](#demo): Let different agent backends (e.g., Claude and Codex) collaborate as a team so that you can leverage the best of each coding agent.
-- [**Full control**](#deep-research---march-madness-style-): Talk to, monitor, and control any agent in any level of the hierarchy you want.
-- [**Life span**](#are-coding-agents-good-traders-on-prediction-markets-): Long-running or ephemeral agents, your choice.
+- [**Full control**](#deep-research---march-madness-style): Talk to, monitor, and control any agent in any level of the hierarchy you want.
+- [**Life span**](#are-coding-agents-good-traders-on-prediction-markets): Long-running or ephemeral agents, your choice.
 
 Other features include messaging system integrations (e.g., Slack), computer use, support for classic `tmux` commands, and multi-workspace support — all built on an architecture rooted in academic research on real-time systems.
 
