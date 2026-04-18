@@ -347,4 +347,4 @@ Check out the [docs](/docs/) to get started, and join our [Discord](https://disc
 
 Star us on [GitHub](https://github.com/lsk567/omar) if you find `omar` interesting.
 
-`omar` is made with ❤️ at Berkeley, CA.
+`omar` is made with ❤️ in Berkeley, CA.
