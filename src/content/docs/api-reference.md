@@ -30,6 +30,7 @@ List installed agent backends and their availability.
       "available": true
     },
     { "name": "cursor", "command": "cursor agent --yolo", "available": false },
+    { "name": "gemini", "command": "gemini --yolo", "available": false },
     { "name": "opencode", "command": "opencode", "available": false }
   ]
 }
@@ -203,7 +204,7 @@ Get current cursor position.
 Health check.
 
 ```json
-{ "status": "ok", "version": "0.1.0" }
+{ "status": "ok", "version": "0.2.2" }
 ```
 
 ## Configuration

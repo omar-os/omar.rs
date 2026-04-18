@@ -109,8 +109,9 @@ omar setup-tmux
 1. 检查 PATH 中是否有 `claude` → `claude --dangerously-skip-permissions`
 2. 回退到 `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
 3. 回退到 `cursor` → `cursor agent --yolo`
-4. 回退到 `opencode`
-5. 可通过 `--agent <name>` 手动覆盖（支持：claude、codex、cursor、opencode）
+4. 回退到 `gemini` → `gemini --yolo`
+5. 回退到 `opencode`
+6. 可通过 `--agent <name>` 手动覆盖（支持：claude、codex、cursor、gemini、opencode）
 
 ## 桥接
 

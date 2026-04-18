@@ -109,8 +109,9 @@ On startup, OMAR auto-detects available agent backends:
 1. Checks for `claude` in PATH → `claude --dangerously-skip-permissions`
 2. Falls back to `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
 3. Falls back to `cursor` → `cursor agent --yolo`
-4. Falls back to `opencode`
-5. Override with `--agent <name>` (supports: claude, codex, cursor, opencode)
+4. Falls back to `gemini` → `gemini --yolo`
+5. Falls back to `opencode`
+6. Override with `--agent <name>` (supports: claude, codex, cursor, gemini, opencode)
 
 ## Bridges
 

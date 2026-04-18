@@ -30,6 +30,7 @@ CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
       "available": true
     },
     { "name": "cursor", "command": "cursor agent --yolo", "available": false },
+    { "name": "gemini", "command": "gemini --yolo", "available": false },
     { "name": "opencode", "command": "opencode", "available": false }
   ]
 }
@@ -203,7 +204,7 @@ CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
 健康检查。
 
 ```json
-{ "status": "ok", "version": "0.1.0" }
+{ "status": "ok", "version": "0.2.2" }
 ```
 
 ## 配置
