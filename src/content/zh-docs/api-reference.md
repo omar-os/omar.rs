@@ -204,7 +204,7 @@ CORS 已全面启用（`Access-Control-Allow-Origin: *`）。
 健康检查。
 
 ```json
-{ "status": "ok", "version": "0.2.2" }
+{ "status": "ok", "version": "0.2.3" }
 ```
 
 ## 配置

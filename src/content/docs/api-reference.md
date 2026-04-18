@@ -204,7 +204,7 @@ Get current cursor position.
 Health check.
 
 ```json
-{ "status": "ok", "version": "0.2.2" }
+{ "status": "ok", "version": "0.2.3" }
 ```
 
 ## Configuration

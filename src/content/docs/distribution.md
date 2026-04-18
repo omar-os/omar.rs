@@ -28,7 +28,7 @@ Options:
 
 ```bash
 # Pin a specific version
-OMAR_VERSION=0.2.2 curl -fsSL https://omar.tech/install.sh | sh
+OMAR_VERSION=0.2.3 curl -fsSL https://omar.tech/install.sh | sh
 
 # Custom install directory
 OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.tech/install.sh | sh

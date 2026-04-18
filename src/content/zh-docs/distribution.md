@@ -28,7 +28,7 @@ curl -fsSL https://omar.tech/install.sh | sh
 
 ```bash
 # 指定版本
-OMAR_VERSION=0.2.2 curl -fsSL https://omar.tech/install.sh | sh
+OMAR_VERSION=0.2.3 curl -fsSL https://omar.tech/install.sh | sh
 
 # 自定义安装目录
 OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.tech/install.sh | sh
