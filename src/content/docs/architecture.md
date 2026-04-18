@@ -11,32 +11,20 @@ OMAR is a TUI dashboard for orchestrating AI coding agents via tmux. It provides
 ## Architecture
 
 ```
-┌─ tmux server ───────────────────────────────────────────────┐
-│                                                             │
-│  ┌─ omar-dashboard (session) ────────────────────────────┐  │
-│  │                                                       │  │
-│  │  ┌─ TUI Dashboard ─────────────────────────────────┐  │  │
-│  │  │ Agents: 3 running / 2 idle                      │  │  │
-│  │  │ ┌─────────┐ ┌─────────┐ ┌─────────┐            │  │  │
-│  │  │ │ agent-1 │ │ agent-2 │ │ agent-3 │            │  │  │
-│  │  │ │ ● run   │ │ ○ idle  │ │ ● run   │            │  │  │
-│  │  │ └─────────┘ └─────────┘ └─────────┘            │  │  │
-│  │  └─────────────────────────────────────────────────┘  │  │
-│  │                                                       │  │
-│  │     ┌─ tmux popup ──────────────────────┐            │  │
-│  │     │ $ claude                          │            │  │
-│  │     │ > Analyzing src/auth.py...        │            │  │
-│  │     └───────────────────────────────────┘            │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-│  ┌─ omar-agent-ea ─────┐  ┌─ omar-agent-worker1 ────┐      │
-│  │ Executive Assistant │  │ claude working...       │      │
-│  └─────────────────────┘  └─────────────────────────┘      │
-│                                                             │
-│  ┌─ HTTP API (:9876) ─────────────────────────────────────┐ │
-│  │ REST endpoints for agent spawning, messaging, events   │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+tmux server
+├── omar-dashboard (session)
+│   ├── TUI Dashboard
+│   │   ├── agent-1 (● running)
+│   │   ├── agent-2 (○ idle)
+│   │   └── agent-3 (● running)
+│   └── tmux popup (attach to any agent)
+│
+├── omar-agent-ea (Executive Assistant)
+├── omar-agent-worker1 (claude)
+├── omar-agent-worker2 (codex)
+│
+└── HTTP API (:9876)
+    └── REST endpoints: agent spawning, messaging, events
 ```
 
 ## Core Components
@@ -119,18 +107,24 @@ Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor,
 
 ## Key Bindings
 
-| Key            | Action                           |
-| -------------- | -------------------------------- |
-| `↑/↓` or `j/k` | Navigate agents                  |
-| `→` or `Tab`   | Drill into child agents          |
-| `←`            | Back to parent                   |
-| `Enter`        | Attach to agent (tmux popup)     |
-| `n`            | Spawn new agent                  |
-| `d`            | Delete agent (with confirmation) |
-| `p`            | Add project                      |
-| `e`            | Show events                      |
-| `r`            | Refresh                          |
-| `z`            | Detach from tmux                 |
-| `D`            | Debug console                    |
-| `?`            | Help                             |
-| `Q`            | Quit (with confirmation)         |
+| Key                  | Action                              |
+| -------------------- | ----------------------------------- |
+| `←/→` or `h/l`      | Switch panel (sidebar / main)       |
+| `↑/↓` or `j/k`      | Move selection up/down              |
+| `Tab`                | Drill into selected agent           |
+| `Shift+Tab` or `Esc` | Back (drill up)                    |
+| `Enter`              | Attach to selected agent            |
+| `n`                  | Spawn new agent                     |
+| `d`                  | Kill selected agent                 |
+| `N`                  | Spawn new EA (prompts for name)     |
+| `D`                  | Delete current EA                   |
+| `[`                  | Previous EA                         |
+| `]`                  | Next EA                             |
+| `p`                  | Add a project                       |
+| `e`                  | Show scheduled events               |
+| `S`                  | Settings                            |
+| `G`                  | Debug console                       |
+| `r`                  | Refresh agent list                  |
+| `z`                  | Detach (dashboard keeps running)    |
+| `?`                  | Toggle help                         |
+| `Q`                  | Quit                                |
