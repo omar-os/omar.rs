@@ -43,7 +43,7 @@ EA aggregates results
 Agents track their parent via `~/.omar/agent_parents.json`. This enables:
 
 - Tree visualization in the TUI (command tree with box-drawing)
-- Navigation: `↑↓←→` cycles at current level, `Tab` drills into children, `Shift+Tab` returns to parent
+- Navigation: `↑/↓` moves selection, `←/→` switches panels, `Tab` drills into children, `Shift+Tab` returns to parent
 - Hierarchical status monitoring
 
 Any agent can spawn children, creating arbitrary depth.

@@ -77,9 +77,9 @@ $ cd omar && make install</code></pre>
       <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
-      观察智能体自动创建。用 <strong>&uarr;&darr;&larr;&rarr;</strong> 切换智能体，<strong
+      观察智能体自动创建。用 <strong>&uarr;&darr;</strong> 导航，<strong
         >Tab</strong
-      > 深入下层，<strong>Shift+Tab</strong> 返回上层
+      > 深入智能体，<strong>Shift+Tab</strong> 返回上层
     </li>
     <li>
       关闭时：
@@ -93,26 +93,25 @@ $ cd omar && make install</code></pre>
       <tr><th>按键</th><th>操作</th></tr>
     </thead>
     <tbody>
-      <tr
-        ><td><code>&uarr;&darr;&larr;&rarr;</code> 或 <code>j/k</code></td><td
-          >在当前层级切换智能体</td
-        ></tr
-      >
-      <tr
-        ><td><code>Tab</code></td><td>深入子智能体</td
-        ></tr
-      >
-      <tr><td><code>Shift+Tab</code></td><td>返回上层</td></tr>
-      <tr><td><code>Enter</code></td><td>附加到智能体（弹窗）</td></tr>
+      <tr><td><code>&larr;/&rarr;</code> 或 <code>h/l</code></td><td>切换面板（侧栏 / 主区域）</td></tr>
+      <tr><td><code>&uarr;/&darr;</code> 或 <code>j/k</code></td><td>上下移动选择</td></tr>
+      <tr><td><code>Tab</code></td><td>深入选中的智能体</td></tr>
+      <tr><td><code>Shift+Tab</code> 或 <code>Esc</code></td><td>返回上层</td></tr>
+      <tr><td><code>Enter</code></td><td>附加到选中的智能体</td></tr>
       <tr><td><code>n</code></td><td>创建新智能体</td></tr>
-      <tr><td><code>d</code></td><td>删除智能体（需确认）</td></tr>
+      <tr><td><code>d</code></td><td>终止选中的智能体</td></tr>
+      <tr><td><code>N</code></td><td>创建新 EA（输入名称）</td></tr>
+      <tr><td><code>D</code></td><td>删除当前 EA</td></tr>
+      <tr><td><code>[</code></td><td>上一个 EA</td></tr>
+      <tr><td><code>]</code></td><td>下一个 EA</td></tr>
       <tr><td><code>p</code></td><td>添加项目</td></tr>
-      <tr><td><code>e</code></td><td>显示事件</td></tr>
-      <tr><td><code>r</code></td><td>刷新状态</td></tr>
-      <tr><td><code>z</code></td><td>脱离 tmux</td></tr>
-      <tr><td><code>D</code></td><td>调试控制台</td></tr>
+      <tr><td><code>e</code></td><td>显示定时事件</td></tr>
+      <tr><td><code>S</code></td><td>设置</td></tr>
+      <tr><td><code>G</code></td><td>调试控制台</td></tr>
+      <tr><td><code>r</code></td><td>刷新智能体列表</td></tr>
+      <tr><td><code>z</code></td><td>脱离（仪表盘继续运行）</td></tr>
       <tr><td><code>?</code></td><td>帮助</td></tr>
-      <tr><td><code>Q</code></td><td>退出（需确认）</td></tr>
+      <tr><td><code>Q</code></td><td>退出</td></tr>
     </tbody>
   </table>
 

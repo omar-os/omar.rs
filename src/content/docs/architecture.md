@@ -119,18 +119,24 @@ Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor,
 
 ## Key Bindings
 
-| Key            | Action                           |
-| -------------- | -------------------------------- |
-| `↑↓←→` or `j/k` | Cycle through agents at current level |
-| `Tab`           | Drill into child agents          |
-| `Shift+Tab`     | Back to parent                   |
-| `Enter`        | Attach to agent (tmux popup)     |
-| `n`            | Spawn new agent                  |
-| `d`            | Delete agent (with confirmation) |
-| `p`            | Add project                      |
-| `e`            | Show events                      |
-| `r`            | Refresh                          |
-| `z`            | Detach from tmux                 |
-| `D`            | Debug console                    |
-| `?`            | Help                             |
-| `Q`            | Quit (with confirmation)         |
+| Key                  | Action                              |
+| -------------------- | ----------------------------------- |
+| `←/→` or `h/l`      | Switch panel (sidebar / main)       |
+| `↑/↓` or `j/k`      | Move selection up/down              |
+| `Tab`                | Drill into selected agent           |
+| `Shift+Tab` or `Esc` | Back (drill up)                    |
+| `Enter`              | Attach to selected agent            |
+| `n`                  | Spawn new agent                     |
+| `d`                  | Kill selected agent                 |
+| `N`                  | Spawn new EA (prompts for name)     |
+| `D`                  | Delete current EA                   |
+| `[`                  | Previous EA                         |
+| `]`                  | Next EA                             |
+| `p`                  | Add a project                       |
+| `e`                  | Show scheduled events               |
+| `S`                  | Settings                            |
+| `G`                  | Debug console                       |
+| `r`                  | Refresh agent list                  |
+| `z`                  | Detach (dashboard keeps running)    |
+| `?`                  | Toggle help                         |
+| `Q`                  | Quit                                |
