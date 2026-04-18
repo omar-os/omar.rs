@@ -11,32 +11,20 @@ OMAR is a TUI dashboard for orchestrating AI coding agents via tmux. It provides
 ## Architecture
 
 ```
-┌─ tmux server ───────────────────────────────────────────────┐
-│                                                             │
-│  ┌─ omar-dashboard (session) ────────────────────────────┐  │
-│  │                                                       │  │
-│  │  ┌─ TUI Dashboard ─────────────────────────────────┐  │  │
-│  │  │ Agents: 3 running / 2 idle                      │  │  │
-│  │  │ ┌─────────┐ ┌─────────┐ ┌─────────┐            │  │  │
-│  │  │ │ agent-1 │ │ agent-2 │ │ agent-3 │            │  │  │
-│  │  │ │ ● run   │ │ ○ idle  │ │ ● run   │            │  │  │
-│  │  │ └─────────┘ └─────────┘ └─────────┘            │  │  │
-│  │  └─────────────────────────────────────────────────┘  │  │
-│  │                                                       │  │
-│  │     ┌─ tmux popup ──────────────────────┐            │  │
-│  │     │ $ claude                          │            │  │
-│  │     │ > Analyzing src/auth.py...        │            │  │
-│  │     └───────────────────────────────────┘            │  │
-│  └───────────────────────────────────────────────────────┘  │
-│                                                             │
-│  ┌─ omar-agent-ea ─────┐  ┌─ omar-agent-worker1 ────┐      │
-│  │ Executive Assistant │  │ claude working...       │      │
-│  └─────────────────────┘  └─────────────────────────┘      │
-│                                                             │
-│  ┌─ HTTP API (:9876) ─────────────────────────────────────┐ │
-│  │ REST endpoints for agent spawning, messaging, events   │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+tmux server
+├── omar-dashboard (session)
+│   ├── TUI Dashboard
+│   │   ├── agent-1 (● running)
+│   │   ├── agent-2 (○ idle)
+│   │   └── agent-3 (● running)
+│   └── tmux popup (attach to any agent)
+│
+├── omar-agent-ea (Executive Assistant)
+├── omar-agent-worker1 (claude)
+├── omar-agent-worker2 (codex)
+│
+└── HTTP API (:9876)
+    └── REST endpoints: agent spawning, messaging, events
 ```
 
 ## Core Components
