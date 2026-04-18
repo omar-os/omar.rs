@@ -1,6 +1,6 @@
 ---
 title: "Introducing OMAR"
-date: "2026-04-12"
+date: "2026-04-18"
 author:
   - name: "Shaokai Lin"
     url: "https://www.shaok.ai"
@@ -35,13 +35,13 @@ Other features include messaging system integrations (e.g., Slack), computer use
 
 ## Demo
 
-Enjoy a demo of `claude`, `opencode`, `codex`, and `cursor` agents working together as a team. 
+Enjoy a demo of `claude`, `codex`, `opencode`, `cursor`, and `gemini` agents working together as a team. 
 
-[![asciicast](https://asciinema.org/a/836739.svg)](https://asciinema.org/a/836739)
+<a href="https://asciinema.org/a/946195" target="_blank"><img src="https://asciinema.org/a/946195.svg" alt="asciicast" /></a>
 
 Try out this demo by sending the following prompt to the Executive Assistant (requires more than one agent backend installed):
 ```
-Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
+Spawn a binary tree of heterogeneous agents up to 3 levels deep. Postfix each agent's name with its backend's name.
 ```
 
 ## OMAR in a nutshell
