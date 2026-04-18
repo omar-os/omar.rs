@@ -121,9 +121,9 @@ Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor,
 
 | Key            | Action                           |
 | -------------- | -------------------------------- |
-| `↑/↓` or `j/k` | Navigate agents                  |
-| `→` or `Tab`   | Drill into child agents          |
-| `←`            | Back to parent                   |
+| `↑↓←→` or `j/k` | Cycle through agents at current level |
+| `Tab`           | Drill into child agents          |
+| `Shift+Tab`     | Back to parent                   |
 | `Enter`        | Attach to agent (tmux popup)     |
 | `n`            | Spawn new agent                  |
 | `d`            | Delete agent (with confirmation) |
