@@ -17,25 +17,22 @@ EA（`executive-assistant.md`）比较特殊：它纯粹作为调度器 —— �
 ## 智能体生命周期
 
 ```
-用户向 EA 下达任务
+User gives EA a task
         │
         ▼
-EA 提出计划（JSON）
+EA proposes plan (JSON)
         │
         ▼
-OMAR 解析计划，通过 API 创建智能体
+OMAR parses plan, creates agents via API
         │
         ▼
-  ┌─────────┐  ┌─────────┐  ┌─────────┐
-  │ 智能体1 │  │ 智能体2 │  │ 智能体3 │
-  │ 工作中  │  │ 工作中  │  │ 等待中  │
-  └─────────┘  └─────────┘  └─────────┘
+  agent-1 (working)   agent-2 (working)   agent-3 (idle)
         │
         ▼
-智能体通过 [TASK COMPLETE] 报告完成
+Agents report [TASK COMPLETE]
         │
         ▼
-EA 汇总结果
+EA aggregates results
 ```
 
 ## 父子层级
