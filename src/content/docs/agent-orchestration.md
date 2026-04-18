@@ -26,10 +26,7 @@ EA proposes a plan (JSON)
 OMAR parses plan, spawns agents via API
         │
         ▼
-  ┌─────────┐  ┌─────────┐  ┌─────────┐
-  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │
-  │ Working │  │ Working │  │ Waiting │
-  └─────────┘  └─────────┘  └─────────┘
+  agent-1 (working)   agent-2 (working)   agent-3 (idle)
         │
         ▼
 Agents report completion via [TASK COMPLETE]
@@ -43,7 +40,7 @@ EA aggregates results
 Agents track their parent via `~/.omar/agent_parents.json`. This enables:
 
 - Tree visualization in the TUI (command tree with box-drawing)
-- Navigation: `→/Tab` drills into children, `←` returns to parent
+- Navigation: `↑/↓` moves selection, `←/→` switches panels, `Tab` drills into children, `Shift+Tab` returns to parent
 - Hierarchical status monitoring
 
 Any agent can spawn children, creating arbitrary depth.

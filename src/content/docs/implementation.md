@@ -85,32 +85,7 @@ omar --agent opencode
 
 # Custom config
 omar --config ~/.config/omar/config.toml
-
-# Spawn a new agent
-omar spawn --name my-agent --command "claude"
-
-# List agents (non-TUI)
-omar list
-
-# Kill an agent
-omar kill agent-1
-
-# Start executive assistant
-omar manager start
-
-# Setup tmux configuration
-omar setup-tmux
 ```
-
-## Auto-Detection
-
-On startup, OMAR auto-detects available agent backends:
-
-1. Checks for `claude` in PATH → `claude --dangerously-skip-permissions`
-2. Falls back to `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
-3. Falls back to `cursor` → `cursor agent --yolo`
-4. Falls back to `opencode`
-5. Override with `--agent <name>` (supports: claude, codex, cursor, opencode)
 
 ## Bridges
 

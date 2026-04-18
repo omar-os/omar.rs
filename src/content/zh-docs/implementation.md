@@ -85,32 +85,7 @@ omar --agent opencode
 
 # 自定义配置
 omar --config ~/.config/omar/config.toml
-
-# 创建新智能体
-omar spawn --name my-agent --command "claude"
-
-# 列出智能体（非 TUI 模式）
-omar list
-
-# 终止智能体
-omar kill agent-1
-
-# 启动执行助理
-omar manager start
-
-# 配置 tmux
-omar setup-tmux
 ```
-
-## 自动检测
-
-启动时，OMAR 会自动检测可用的智能体后端：
-
-1. 检查 PATH 中是否有 `claude` → `claude --dangerously-skip-permissions`
-2. 回退到 `codex` → `codex --no-alt-screen --dangerously-bypass-approvals-and-sandbox`
-3. 回退到 `cursor` → `cursor agent --yolo`
-4. 回退到 `opencode`
-5. 可通过 `--agent <name>` 手动覆盖（支持：claude、codex、cursor、opencode）
 
 ## 桥接
 

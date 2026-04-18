@@ -26,8 +26,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
         >Claude Code</a
       >,
       <a href="https://developers.openai.com/codex/cli">Codex CLI</a>,
-      <a href="https://github.com/anomalyco/opencode">Opencode</a>, or
-      <a href="https://cursor.com/cli">Cursor CLI</a>
+      <a href="https://github.com/anomalyco/opencode">Opencode</a>,
+      <a href="https://cursor.com/cli">Cursor CLI</a>, or
+      <a href="https://ai.google.dev/gemini-api/docs/gemini-cli">Gemini CLI</a>
     </li>
   </ul>
 
@@ -68,6 +69,7 @@ $ cd omar && make install</code></pre>
       <tr><td>Codex CLI</td><td><code>omar --agent codex</code></td></tr>
       <tr><td>Opencode</td><td><code>omar --agent opencode</code></td></tr>
       <tr><td>Cursor CLI</td><td><code>omar --agent cursor</code></td></tr>
+      <tr><td>Gemini CLI</td><td><code>omar --agent gemini</code></td></tr>
     </tbody>
   </table>
 
@@ -82,9 +84,9 @@ $ cd omar && make install</code></pre>
       <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
-      Watch agents spawn. Use <strong>&uarr;&darr;</strong> to cycle agents, <strong
-        >&rarr;</strong
-      > to drill deeper, <strong>&larr;</strong> to go back
+      Watch agents spawn. Use <strong>&uarr;&darr;</strong> to navigate, <strong
+        >Tab</strong
+      > to drill into an agent, <strong>Shift+Tab</strong> to back out
     </li>
     <li>
       To shut down:
@@ -98,27 +100,25 @@ $ cd omar && make install</code></pre>
       <tr><th>Key</th><th>Action</th></tr>
     </thead>
     <tbody>
-      <tr
-        ><td><code>&uarr;/&darr;</code> or <code>j/k</code></td><td
-          >Navigate agents</td
-        ></tr
-      >
-      <tr
-        ><td><code>&rarr;</code> or <code>Tab</code></td><td
-          >Drill into child agents</td
-        ></tr
-      >
-      <tr><td><code>&larr;</code></td><td>Back to parent level</td></tr>
-      <tr><td><code>Enter</code></td><td>Attach to agent (tmux popup)</td></tr>
+      <tr><td><code>&larr;/&rarr;</code> or <code>h/l</code></td><td>Switch panel (sidebar / main)</td></tr>
+      <tr><td><code>&uarr;/&darr;</code> or <code>j/k</code></td><td>Move selection up/down</td></tr>
+      <tr><td><code>Tab</code></td><td>Drill into selected agent</td></tr>
+      <tr><td><code>Shift+Tab</code> or <code>Esc</code></td><td>Back (drill up)</td></tr>
+      <tr><td><code>Enter</code></td><td>Attach to selected agent</td></tr>
       <tr><td><code>n</code></td><td>Spawn new agent</td></tr>
-      <tr><td><code>d</code></td><td>Delete agent (with confirmation)</td></tr>
-      <tr><td><code>p</code></td><td>Add project</td></tr>
-      <tr><td><code>e</code></td><td>Show events</td></tr>
-      <tr><td><code>r</code></td><td>Refresh status</td></tr>
-      <tr><td><code>z</code></td><td>Detach from tmux</td></tr>
-      <tr><td><code>D</code></td><td>Debug console</td></tr>
-      <tr><td><code>?</code></td><td>Help</td></tr>
-      <tr><td><code>Q</code></td><td>Quit (with confirmation)</td></tr>
+      <tr><td><code>d</code></td><td>Kill selected agent</td></tr>
+      <tr><td><code>N</code></td><td>Spawn new EA (prompts for name)</td></tr>
+      <tr><td><code>D</code></td><td>Delete current EA</td></tr>
+      <tr><td><code>[</code></td><td>Previous EA</td></tr>
+      <tr><td><code>]</code></td><td>Next EA</td></tr>
+      <tr><td><code>p</code></td><td>Add a project</td></tr>
+      <tr><td><code>e</code></td><td>Show scheduled events</td></tr>
+      <tr><td><code>S</code></td><td>Settings</td></tr>
+      <tr><td><code>G</code></td><td>Debug console</td></tr>
+      <tr><td><code>r</code></td><td>Refresh agent list</td></tr>
+      <tr><td><code>z</code></td><td>Detach (dashboard keeps running)</td></tr>
+      <tr><td><code>?</code></td><td>Toggle help</td></tr>
+      <tr><td><code>Q</code></td><td>Quit</td></tr>
     </tbody>
   </table>
 

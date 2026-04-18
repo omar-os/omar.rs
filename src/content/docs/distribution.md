@@ -28,7 +28,7 @@ Options:
 
 ```bash
 # Pin a specific version
-OMAR_VERSION=0.1.0 curl -fsSL https://omar.tech/install.sh | sh
+OMAR_VERSION=0.2.3 curl -fsSL https://omar.tech/install.sh | sh
 
 # Custom install directory
 OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.tech/install.sh | sh
@@ -62,12 +62,3 @@ Pre-built binaries for all major platforms are provided via [GitHub Releases](ht
 - `omar-darwin-arm64.tar.gz`
 
 Each release includes `checksums.txt` (SHA256) for verification.
-
-### Creating a Release
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
-The CI workflow builds binaries for all targets, creates a GitHub Release, and auto-updates the Homebrew formula.
