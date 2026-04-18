@@ -62,12 +62,3 @@ Pre-built binaries for all major platforms are provided via [GitHub Releases](ht
 - `omar-darwin-arm64.tar.gz`
 
 Each release includes `checksums.txt` (SHA256) for verification.
-
-### Creating a Release
-
-```bash
-git tag v0.2.2
-git push origin v0.2.2
-```
-
-The CI workflow builds binaries for all targets, creates a GitHub Release, and auto-updates the Homebrew formula.

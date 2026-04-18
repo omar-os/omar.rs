@@ -26,10 +26,7 @@ EA proposes a plan (JSON)
 OMAR parses plan, spawns agents via API
         │
         ▼
-  ┌─────────┐  ┌─────────┐  ┌─────────┐
-  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │
-  │ Working │  │ Working │  │ Waiting │
-  └─────────┘  └─────────┘  └─────────┘
+  agent-1 (working)   agent-2 (working)   agent-3 (idle)
         │
         ▼
 Agents report completion via [TASK COMPLETE]

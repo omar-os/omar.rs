@@ -62,12 +62,3 @@ make install
 - `omar-darwin-arm64.tar.gz`
 
 每个版本包含 `checksums.txt`（SHA256）用于校验。
-
-### 创建发布
-
-```bash
-git tag v0.2.2
-git push origin v0.2.2
-```
-
-CI 工作流会自动为所有目标构建二进制、创建 GitHub Release，并自动更新 Homebrew formula。
