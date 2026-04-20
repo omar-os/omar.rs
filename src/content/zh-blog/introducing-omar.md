@@ -1,6 +1,6 @@
 ---
 title: "OMAR 介绍"
-date: "2026-04-20"
+date: "2026-04-12"
 author:
   - name: "林少凯"
     url: "https://www.shaok.ai"
@@ -35,13 +35,13 @@ author:
 
 ## 演示
 
-欣赏一段 `claude`、`codex`、`opencode`、`cursor` 和 `gemini` 智能体作为团队协同工作的演示。
+欣赏一段 `claude`、`opencode`、`codex` 和 `cursor` 智能体作为团队协同工作的演示。
 
-<a href="https://asciinema.org/a/946195" target="_blank"><img src="https://asciinema.org/a/946195.svg" alt="asciicast" /></a>
+[![asciicast](https://asciinema.org/a/836739.svg)](https://asciinema.org/a/836739)
 
 你可以通过向执行助理发送以下提示来尝试此演示（需要安装一种以上的智能体后端）：
 ```
-Spawn a binary tree of heterogeneous agents up to 3 levels deep. Postfix each agent's name with its backend's name.
+Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
 ```
 
 ## OMAR 概览
@@ -52,29 +52,19 @@ Spawn a binary tree of heterogeneous agents up to 3 levels deep. Postfix each ag
 
 `omar` 实现了一个基于*逻辑时间*概念的离散事件系统，将时序作为一等的规约（specification），而不是不受控制的副作用。编程智能体之间的通信被建模为带时间戳的*事件*。一个逻辑时间戳为 `t` 的事件由运行时在物理时间 `T >= t` 时处理。`omar` 服务器维护一个内部事件队列，按事件的逻辑时间戳对所有事件排序。这一设计直接受 [reactor model](https://reactor-model.org) 启发，该模型支持*确定性*且*可复现*的实时协调（详见[这篇论文](https://dl.acm.org/doi/abs/10.1145/3448128)）。
 
-例如，当智能体 `A` 向智能体 `B` 发送消息时，智能体 `A` 会调用 `schedule_event` MCP 工具：
+例如，当智能体 `A` 向智能体 `B` 发送消息时，智能体 `A` 会向 `omar` 服务器发送一个 HTTP POST 请求，格式如下：
 ```json 
 {
     "sender": "A",
     "receiver": "B",
-    "timestamp_ns": 1773768458704306000,
+    "timestamp": 1773768458704306000,
     "payload": "Execute the following task: ..."
 }
 ```
 
-收到该事件后，`omar` 服务器会按时间戳顺序将其插入事件队列。当事件到达投递时刻，运行时会从队列中弹出该事件并执行 `tmux send-keys`，将消息输入到目标智能体的会话中。
+服务器收到来自智能体 `A` 的消息后，会按时间戳顺序将一个新事件插入事件队列。当消息需要投递时，服务器从队列中弹出该事件并执行 `tmux send-keys`，将消息输入到目标智能体的会话中。
 
 同一个事件队列也用于调度未来的任务，这对于在 `omar` 中实现 *cron 任务* 非常有用。Cron 任务本质上是一种携带预定义周期的特殊事件。当 cron 任务触发时，`omar` 服务器会根据其周期自动将其重新调度到未来。
-
-### 为什么选择 MCP：一个不会被遗忘的接口
-
-早期的 `omar` 使用本地 REST 服务器。像 [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) 这样的工具也采用类似方式，让智能体通过 HTTP 调用 `POST /invocations` 来驱动编排。这种服务器是能正常工作的，但其失败模式更为微妙。
-
-要让智能体使用 REST API，它必须*知道*这个 API：精确的端点路径、字段名和 schema。这些知识存放在模型上下文的某处，通常是系统提示或早期对话历史中。随着对话不断进行，上下文窗口会被填满。在长时间运行的会话中，聊天和编程智能体会对早期对话进行摘要以回收空间。任何最近没有使用过的内容都可能被丢弃：一个智能体上百轮没碰过的端点会被压缩成"有一些 API 端点"，甚至完全消失。然后智能体就会产生略微错误的 URL、遗漏必需字段，或者因为"忘记"调度器存在而悄悄停止调度事件。在 Kalshi 实验中，我们就观察到了 `omar` 自身基于 REST 的 EA 在运行中以这种方式漂移：并不是模型坏了，而是 API 文档被挤出了上下文。
-
-MCP 在协议层解决了这个问题。**MCP 工具是作为函数定义出现在 LLM API 调用的专门部分中的，位于消息历史和上下文窗口之外。** 无论对话多长、触发了多少次摘要，每次推理调用都会收到完整、新鲜的工具列表及其完整 schema。即使一个智能体已经进行到第 500 轮，正处在摘要过程中，它仍然能看到 `omar` 暴露的每一个工具：`create_task`、`check_task`、`complete_task`、`replace_stuck_task_agent`、`schedule_event`、`notify_parent` 等等。智能体不可能"忘记" `replace_stuck_task_agent` 的存在，因为它从来就不是上下文的一部分。
-
-值得一提的是，Amazon 还构建了另一个产品 [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator)，它在底层有一个 REST 层，但同样基于上述原因将其智能体接口包装为 MCP 工具。整个行业正在缓慢地汇聚到同一个结论。
 
 ### 用户界面
 
@@ -324,7 +314,7 @@ HELIX，全称 *Hierarchical Evolution via LLM-Informed eXploration*，扩展了
 
 ### 多智能体编排框架
 
-第二类工具把智能体协调做成框架或服务，而不是 UI。Steve Yegge 的 [Gas Town](https://github.com/gastownhall/gastown)（Sourcegraph 一直将其称为"编程智能体的 Kubernetes"）在 Mayor、Polecats、Refinery 等角色下协调 20 到 30 个 Claude Code 实例，工作单元（"Beads"）存储在 [Dolt](https://github.com/dolthub/dolt) SQL 数据库中。Gas Town 对我们上面描述的上下文窗口问题给出了一个有意思的替代方案：它不使用 MCP，而是通过一个可重复运行的 `gt prime` 命令在需要时从 Dolt 数据库重新注入完整上下文，再配合一套钩子系统把工作分配持久化到文件系统中，这样智能体就可以在不依赖记忆的情况下重新发现自己的任务。[Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) 提供了一个基于 REST 的 serverless 运行时，支持 supervisor 与 collaborator 角色以及 A2A 协议。AWS Labs 的 [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) 和 Composio 的 [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) 则走了更偏 CLI 的路线。相比之下，`omar` 在用户体验上更加 opinionated：层级结构不是一个纯内部抽象，而是 TUI 的导航模型，用户可以随时深入任意层级的任意智能体。
+第二类工具把智能体协调做成框架或服务，而不是 UI。Steve Yegge 的 [Gas Town](https://github.com/gastownhall/gastown)（Sourcegraph 一直将其称为"编程智能体的 Kubernetes"）在 Mayor、Polecats、Refinery 等角色下协调 20 到 30 个 Claude Code 实例，工作单元以 git 支持的"Beads"形式存储。[Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) 提供了一个 serverless 运行时，支持 supervisor 与 collaborator 角色以及 A2A 协议。AWS Labs 的 [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) 和 Composio 的 [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) 则走了更偏 CLI 的路线。相比之下，`omar` 在用户体验上更加 opinionated：层级结构不是一个纯内部抽象，而是 TUI 的导航模型，用户可以随时深入任意层级的任意智能体。
 
 ### IDE 集成的多智能体产品
 
@@ -336,12 +326,11 @@ HELIX，全称 *Hierarchical Evolution via LLM-Informed eXploration*，扩展了
 
 ### `omar` 的不同之处
 
-把这些汇总起来，我们认为 `omar` 有四点与上述项目不同：
+把这些汇总起来，我们认为 `omar` 有三点与上述项目不同：
 
-1. **把递归层级作为一等概念**，而不是扁平的 fan-out。`omar` 中的智能体可以使用与用户相同的 MCP 工具生成自己的团队，这正是让 NCAA 实验中的 100 多个智能体能从单条提示中展开的原因。
+1. **把递归层级作为一等概念**，而不是扁平的 fan-out。`omar` 中的智能体可以使用与用户相同的 API 生成自己的团队，这正是让 NCAA 实验中的 100 多个智能体能从单条提示中展开的原因。
 2. **在同一会话中使用异构后端**，对 Claude Code、Codex、Cursor、Opencode 等统一应用相同的编排原语。这让用户和智能体可以管理预算与能力。
-3. **以 MCP 为原生编排接口**，意味着无论上下文长度或摘要触发了多少次，智能体始终能访问完整的工具目录——这是任何基于 REST 的编排器都无法提供的结构性保证。
-4. **为导航大型智能体组织而设计的终端原生 TUI**，包括在任意深度附加到任意智能体并直接观察或操控它的能力。
+3. **为导航大型智能体组织而设计的终端原生 TUI**，包括在任意深度附加到任意智能体并直接观察或操控它的能力。
 
 如果我们遗漏了你的项目或哪里写错了，请告诉我们，我们会更新这一节。
 

@@ -6,7 +6,7 @@ order: 2
 
 ## Overview
 
-OMAR is a TUI dashboard for orchestrating AI coding agents via tmux. It provides a real-time terminal interface, an MCP stdio server for agent orchestration, and integration bridges for Slack and computer use.
+OMAR is a TUI dashboard for orchestrating AI coding agents via tmux. It provides a real-time terminal interface, an HTTP API, and integration bridges for Slack and computer use.
 
 ## Architecture
 
@@ -20,11 +20,11 @@ tmux server
 │   └── tmux popup (attach to any agent)
 │
 ├── omar-agent-ea (Executive Assistant)
-│   └── MCP stdio server (per-agent, auto-wired into coding tool)
-├── omar-agent-worker1 (claude / cursor / codex / ...)
-│   └── MCP stdio server
-└── omar-agent-worker2 (codex)
-    └── MCP stdio server
+├── omar-agent-worker1 (claude)
+├── omar-agent-worker2 (codex)
+│
+└── HTTP API (:9876)
+    └── REST endpoints: agent spawning, messaging, events
 ```
 
 ## Core Components
@@ -33,17 +33,15 @@ tmux server
 
 OMAR is a Rust workspace with 3 crates:
 
-- **`omar`** - Main binary: TUI dashboard, MCP server, event scheduler
+- **`omar`** - Main binary: TUI dashboard, HTTP API, event scheduler
 - **`omar-slack-bridge`** - Slack Socket Mode integration
 - **`omar-computer-bridge`** - X11 computer use (mouse, keyboard, screenshots)
 
 ### Session Types
 
 - **Dashboard**: `omar-dashboard` - the TUI session (auto-created on launch)
-- **Executive Assistant**: `omar-agent-ea-<id>` - one per EA (EA 0 is the default)
-- **Work Agents**: `omar-agent-<ea_id>-<name>` - spawned by EA via MCP tools
-
-Multiple EAs are supported. Switch between them with `[`/`]`; create with `N`, delete with `D`.
+- **Executive Assistant**: `omar-agent-ea` - auto-started manager agent
+- **Work Agents**: `omar-agent-<name>` - spawned by EA or API
 
 ### Unified Agent Model
 
@@ -73,15 +71,11 @@ Health is determined by pane content change between refresh frames:
 
 ```
 ~/.omar/
-├── eas.json                   # EA registry
-├── active_ea                  # Currently active EA ID
-├── manager_notes_ea<N>.md     # Persistent notes for EA N
-├── ea/<id>/
-│   ├── memory.md              # Snapshot of active state (prepended to EA prompt)
-│   ├── task_registry.json     # Authoritative task lifecycle state
-│   ├── worker_tasks.json      # Session → task description cache
-│   ├── agent_parents.json     # Parent-child relationships
-│   └── status/<session>.md    # Agent self-reported status
+├── memory.md                  # Snapshot of active state
+├── tasks.md                   # Project list
+├── worker_tasks.json          # Agent task assignments
+├── agent_parents.json         # Parent-child relationships
+├── status/<session>.md        # Agent self-reported status
 └── prompts/                   # Synced prompt templates
 ```
 
@@ -103,8 +97,10 @@ error_patterns = ["error", "failed", "rate limit", "exception"]
 default_command = "claude --dangerously-skip-permissions"
 default_workdir = "."
 
-[mcp]
+[api]
 enabled = true
+host = "127.0.0.1"
+port = 9876
 ```
 
 Agent backend is auto-detected from installed tools (Claude Code, Codex, Cursor, or Opencode) and can be overridden with `--agent`.

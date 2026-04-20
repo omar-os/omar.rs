@@ -20,19 +20,19 @@ The EA (`executive-assistant.md`) is special: it acts purely as a dispatcher —
 User gives task to EA
         │
         ▼
-EA proposes a plan
+EA proposes a plan (JSON)
         │
         ▼
-EA calls create_task MCP tool to spawn agents
+OMAR parses plan, spawns agents via API
         │
         ▼
   agent-1 (working)   agent-2 (working)   agent-3 (idle)
         │
         ▼
-Agents output [TASK COMPLETE] + call notify_parent
+Agents report completion via [TASK COMPLETE]
         │
         ▼
-EA aggregates results, calls complete_task
+EA aggregates results
 ```
 
 ## Parent-Child Hierarchy
@@ -47,55 +47,50 @@ Any agent can spawn children, creating arbitrary depth.
 
 ## EA Protocol
 
-The EA communicates with OMAR exclusively via MCP tools. It never does work directly — it only spawns agents, monitors them, and manages projects.
+The EA communicates with OMAR exclusively via the HTTP API. It never does work directly — it only spawns agents, monitors their output, and manages projects.
 
 ### Spawning agents
 
-```json
-// create_task
-{
-  "name": "api",
-  "task": "Create Express server with /users and /posts endpoints",
-  "parent": "ea"
-}
+```bash
+curl -X POST http://localhost:9876/api/agents \
+  -H "Content-Type: application/json" \
+  -d '{"name": "api", "task": "Create Express server with /users and /posts endpoints"}'
 ```
 
 ### Monitoring agents
 
-```json
-// check_task — accepts task UUID or agent short name
-{ "task_id": "api" }
+```bash
+# Check a specific agent's output
+curl http://localhost:9876/api/agents/api
 
-// get_ea_summary — overview of all active agents
-{}
+# List all agents with health status
+curl http://localhost:9876/api/agents
 ```
 
 ### Sending input to agents
 
-```json
-// send_input
-{
-  "name": "api",
-  "text": "Also add /comments endpoint",
-  "enter": true
-}
+```bash
+curl -X POST http://localhost:9876/api/agents/api/send \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Also add /comments endpoint", "enter": true}'
 ```
 
-### Completing tasks
+### Killing agents on completion
 
-```json
-// complete_task — handles cleanup atomically
-{ "task_id": "api" }
+```bash
+curl -X DELETE http://localhost:9876/api/agents/api
 ```
 
-### Replacing stuck agents
+### Managing projects
 
-```json
-// replace_stuck_task_agent
-{
-  "task_id": "api",
-  "additional_context": "Focus on the /users endpoint first"
-}
+```bash
+# Add a project
+curl -X POST http://localhost:9876/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Build REST API"}'
+
+# Complete a project
+curl -X DELETE http://localhost:9876/api/projects/<id>
 ```
 
 ## Agent Context
@@ -113,7 +108,7 @@ YOUR PARENT: ea
 YOUR TASK: Create Express server with /users and /posts endpoints
 ```
 
-Agents signal completion by outputting `[TASK COMPLETE]` followed by a summary, then immediately calling `notify_parent` with their name and the summary text. This wakes the parent without polling.
+Agents signal completion by outputting `[TASK COMPLETE]` followed by a summary.
 
 ## Event-Driven Coordination
 
@@ -125,34 +120,35 @@ The scheduler enables timed coordination between agents:
 
 Events are delivered by injecting text into the target agent's tmux session.
 
-```json
-// schedule_event — one-shot wake-up
-{
-  "sender": "ea",
-  "receiver": "api",
-  "payload": "Check progress on API implementation",
-  "delay_seconds": 300
-}
+```bash
+# Schedule a one-shot wake-up event
+curl -X POST http://localhost:9876/api/events \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sender": "ea",
+    "receiver": "api",
+    "payload": "Check progress on API implementation",
+    "timestamp": 1772904000000000000
+  }'
 
-// schedule_event — recurring cron (every 5 minutes)
-{
-  "sender": "ea",
-  "receiver": "api",
-  "payload": "Progress check",
-  "recurring_seconds": 300
-}
+# Schedule a recurring cron job (every 5 minutes)
+curl -X POST http://localhost:9876/api/events \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sender": "ea",
+    "receiver": "api",
+    "payload": "Progress check",
+    "recurring_ns": 300000000000
+  }'
 ```
 
 ## Memory Persistence
 
-OMAR maintains state across sessions (all paths are EA-scoped under `~/.omar/ea/<id>/`):
+OMAR maintains state across sessions:
 
-- **`memory.md`** - Snapshot of active projects, agents, and tasks; prepended to EA prompt on restart
-- **`task_registry.json`** - Authoritative task lifecycle state for `create_task` / `check_task` / `complete_task`
-- **`worker_tasks.json`** - Session name → task description cache (augmented from task registry)
-- **`agent_parents.json`** - Parent-child relationships
-- **`status/<session>.md`** - Agent self-reported status
+- **`~/.omar/memory.md`** - Snapshot of active projects, agents, and tasks
+- **`~/.omar/worker_tasks.json`** - Map of session name to task description
+- **`~/.omar/agent_parents.json`** - Parent-child relationships
+- **`~/.omar/status/<session>.md`** - Agent self-reported status
 
-Top-level `~/.omar/`:
-- **`eas.json`** - Registry of all EAs
-- **`manager_notes_ea<N>.md`** - Persistent manager notes for EA N
+On restart, the EA prompt includes the last memory snapshot for continuity.
