@@ -1,243 +1,238 @@
 ---
-title: "HTTP API Reference"
-description: "OMAR's REST API for agent orchestration, events, and computer use"
+title: "MCP Tool Reference"
+description: "OMAR's MCP tools for agent orchestration, task lifecycle, events, and more"
 order: 4
 ---
 
 ## Overview
 
-OMAR runs an HTTP API on port 9876 (configurable) for programmatic agent control. Any tool that can make HTTP calls can orchestrate agents - Claude, opencode, Python scripts, curl, etc.
+OMAR exposes its orchestration interface as an [MCP](https://modelcontextprotocol.io) stdio server. Every spawned agent gets its own MCP server instance automatically wired into its coding tool (e.g., Cursor). Agents call tools natively through function calling — no HTTP, no curl, no memorized endpoint paths.
 
-CORS is fully enabled (`Access-Control-Allow-Origin: *`).
+Because MCP tools arrive as function definitions in a dedicated part of the LLM API call (outside the message history), agents always see the full tool catalog regardless of context length or how many summarizations have occurred. This is the key reliability advantage over REST.
 
-## Backend Endpoints
+## Agent Tools
 
-### `GET /api/backends`
+### `spawn_agent_session`
 
-List installed agent backends and their availability.
+Spawn an agent or demo session. Use `create_task` instead for work that needs full project lifecycle tracking.
 
-```json
-{
-  "backends": [
-    {
-      "name": "claude",
-      "command": "claude --dangerously-skip-permissions",
-      "available": true
-    },
-    {
-      "name": "codex",
-      "command": "codex --no-alt-screen ...",
-      "available": true
-    },
-    { "name": "cursor", "command": "cursor agent --yolo", "available": false },
-    { "name": "gemini", "command": "gemini --yolo", "available": false },
-    { "name": "opencode", "command": "opencode", "available": false }
-  ]
-}
-```
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | ✓ | Agent name |
+| `task` | string | ✓ | Work description shown in the dashboard. Clean description only — no `[TASK COMPLETE]` instructions. |
+| `workdir` | string | | Working directory |
+| `command` | string | | Raw command override |
+| `backend` | string | | Backend shorthand: `claude`, `codex`, `cursor`, `opencode` |
+| `model` | string | | Model override |
+| `parent` | string | | Parent agent name for hierarchy tracking |
 
-## Agent Endpoints
-
-### `POST /api/agents`
-
-Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its system prompt with the task injected.
-
-```json
-// Request
-{
-  "name": "worker-1",
-  "task": "Implement feature X",
-  "workdir": "/path/to/project",
-  "backend": "codex",
-  "model": "o3",
-  "parent": "ea"
-}
-
-// Response
-{
-  "id": "worker-1",
-  "status": "running",
-  "session": "omar-agent-worker-1",
-  "created_at": "2025-01-26T12:00:00Z"
-}
-```
-
-Fields:
-
-- `name` — Agent name (auto-generated if omitted)
-- `task` — Task description; triggers `agent.md` prompt injection
-- `workdir` — Working directory
-- `backend` — Backend shorthand: `"claude"`, `"codex"`, `"cursor"`, `"opencode"`. Cannot be used with `command`.
-- `model` — Model override, appended as `--model <value>` to the base command
-- `command` — Explicit command to run. Cannot be used with `backend`.
-- `parent` — Parent agent name for hierarchy tracking
-
-### `GET /api/agents`
-
-List all agents with health and status.
-
-```json
-{
-  "agents": [
-    {
-      "id": "worker-1",
-      "status": "running",
-      "health": "working",
-      "idle_seconds": 5,
-      "last_output": "Writing tests..."
-    }
-  ],
-  "manager": {
-    "id": "omar-agent-ea",
-    "status": "running",
-    "health": "working"
-  }
-}
-```
-
-### `GET /api/agents/:id`
-
-Get agent details including recent output tail.
-
-### `GET /api/agents/:id/summary`
-
-Lightweight card view: health, task, status, children.
-
-### `PUT /api/agents/:id/status`
-
-Update an agent's self-reported status (stored in `~/.omar/status/<session>.md`).
-
-```json
-{ "status": "Implementing auth module - 60% done" }
-```
-
-### `POST /api/agents/:id/send`
-
-Send text input to an agent's tmux session.
-
-```json
-{ "text": "Yes, proceed", "enter": true }
-```
-
-### `DELETE /api/agents/:id`
+### `kill_agent`
 
 Kill an agent session.
 
-**Note:** Session names accept both short form (`worker-1`) and full form (`omar-agent-worker-1`).
+| Param | Type | Required |
+|---|---|---|
+| `name` | string | ✓ |
 
-## Event Endpoints
+### `send_input`
 
-### `POST /api/events`
+Send text input to an agent's tmux session.
 
-Schedule an event for delivery to an agent.
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `name` | string | ✓ | Agent name |
+| `text` | string | ✓ | Text to send |
+| `enter` | boolean | | Whether to press Enter after sending |
+
+### `get_agent_summary`
+
+Get a lightweight summary of a specific agent: health, task, status, children.
+
+| Param | Type | Required |
+|---|---|---|
+| `name` | string | ✓ |
 
 ```json
+// Response
 {
-  "sender": "ea",
-  "receiver": "worker-1",
-  "payload": "Status check: how is the implementation going?",
-  "timestamp": 1772904000000000000,
-  "recurring_ns": 300000000000
+  "id": "auth",
+  "health": "working",
+  "task": "Implement JWT authentication module",
+  "status": "Writing token validation logic",
+  "children": ["auth-tests", "auth-docs"]
 }
 ```
 
-### `GET /api/events`
+### `list_agents`
 
-List scheduled events. Supports `?receiver=<name>` query filter.
+List all running agents with health and status.
 
-### `DELETE /api/events/:id`
+### `update_agent_status`
 
-Cancel a scheduled event.
+Update an agent's self-reported one-line status (shown in the dashboard).
 
-## Project Endpoints
+| Param | Type | Required |
+|---|---|---|
+| `name` | string | ✓ |
+| `status` | string | ✓ |
 
-### `GET /api/projects`
+### `list_backends`
 
-List projects from `~/.omar/tasks.md`.
+List installed agent backends and their availability. Call before picking a `backend` override when availability is unclear.
 
-### `POST /api/projects`
+## Task Lifecycle
 
-Add a new project.
+The recommended workflow for all tracked work. Handles project creation, agent spawning, and lifecycle state atomically.
 
-### `DELETE /api/projects/:id`
+### `create_task`
 
-Complete/remove a project.
+Create a tracked task: add project, spawn worker, persist lifecycle state.
 
-## Computer Use Endpoints
-
-### `GET /api/computer/status`
-
-Check if computer use is available and who holds the lock.
-
-### `POST /api/computer/lock`
-
-Acquire exclusive computer access (one agent at a time).
-
-### `DELETE /api/computer/lock`
-
-Release computer lock.
-
-### `POST /api/computer/screenshot`
-
-Take a screenshot (must hold lock). Returns base64-encoded image.
-
-### `POST /api/computer/mouse`
-
-Mouse control: move, click, drag, scroll.
-
-### `POST /api/computer/keyboard`
-
-Keyboard input: type text or press key combinations.
-
-### `GET /api/computer/screen-size`
-
-Get display dimensions.
-
-### `GET /api/computer/mouse-position`
-
-Get current cursor position.
-
-## System Endpoints
-
-### `GET /api/health`
-
-Health check.
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `task` | string | ✓ | Clean work description. No `[TASK COMPLETE]` or `notify_parent` instructions — those are in every agent's system prompt. |
+| `name` | string | ✓ | Worker name |
+| `project_name` | string | | Short project label (auto-derived from task if omitted) |
+| `parent` | string | | Parent agent name. Omit for EA-owned tasks. |
+| `backend` | string | | Backend override |
+| `model` | string | | Model override |
+| `workdir` | string | | Working directory |
 
 ```json
-{ "status": "ok", "version": "0.2.3" }
+// Response
+{
+  "task_id": "a3f2c1d4-...",
+  "agent": "auth",
+  "session": "omar-ea-0-auth",
+  "project": "JWT Auth"
+}
 ```
+
+### `check_task`
+
+Inspect tracked task state. Accepts either a task UUID or the agent's short name.
+
+| Param | Type | Required |
+|---|---|---|
+| `task_id` | string | ✓ |
+
+```json
+// Response
+{
+  "task_id": "a3f2c1d4-...",
+  "agent": "auth",
+  "status": "running",
+  "health": "working",
+  "last_status": "Writing token validation logic",
+  "last_output": "...",
+  "ready_to_complete": false
+}
+```
+
+### `complete_task`
+
+Complete a tracked task atomically. This is the only correct cleanup path — handles agent teardown, project removal, and task state update.
+
+| Param | Type | Required |
+|---|---|---|
+| `task_id` | string | ✓ |
+
+### `replace_stuck_task_agent`
+
+Kill a stuck worker and spawn a fresh one for the same task, optionally with additional context. Use when `check_task` shows the agent is idle/stuck.
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `task_id` | string | ✓ | Task to reassign |
+| `additional_context` | string | | Extra instructions appended to the original task |
+
+## Event Scheduling
+
+### `schedule_event`
+
+Schedule a wake-up or message for an agent. Supports one-shot and recurring events.
+
+| Param | Type | Required | Description |
+|---|---|---|---|
+| `receiver` | string | ✓ | Target agent name |
+| `payload` | string | ✓ | Message to deliver |
+| `sender` | string | | Sender name for logging |
+| `delay_seconds` | integer | | Deliver N seconds from now |
+| `timestamp_ns` | integer | | Absolute logical timestamp (nanoseconds) |
+| `recurring_seconds` | integer | | Auto-reschedule every N seconds (cron) |
+
+```json
+// Check in on a worker in 5 minutes
+{
+  "receiver": "auth",
+  "payload": "Status check: how is the auth module going?",
+  "delay_seconds": 300
+}
+
+// Recurring hourly cron
+{
+  "receiver": "ea",
+  "payload": "Run trading cycle",
+  "recurring_seconds": 3600
+}
+```
+
+### `list_events`
+
+List all scheduled events for the current EA.
+
+### `cancel_event`
+
+Cancel a scheduled event by ID.
+
+| Param | Type | Required |
+|---|---|---|
+| `event_id` | string | ✓ |
+
+## Coordination
+
+### `notify_parent`
+
+Notify your parent agent that you have completed your task. Call this immediately after printing `[TASK COMPLETE]`. Delivery is handled reliably regardless of payload size.
+
+| Param | Type | Required |
+|---|---|---|
+| `name` | string | ✓ | Your own agent name |
+| `summary` | string | ✓ | Completion summary (same text as your `[TASK COMPLETE]` output) |
+
+### `log_action`
+
+Log a significant action with its reasoning. Used for traceability — all agents are expected to log before state-changing operations.
+
+### `append_manager_note`
+
+Persist a note to the EA's manager log. Use to record active task-to-agent mappings, completed work summaries, user preferences, or recovery context.
+
+## Projects
+
+### `list_projects`
+
+List active projects for the current EA.
+
+## Computer Use
+
+### `computer_status`
+
+Check whether computer use is available and who holds the lock.
+
+### `computer_lock_acquire`
+
+Acquire exclusive computer access. Only one agent may hold the lock at a time.
 
 ## Configuration
 
+MCP server settings live in the main config file:
+
 ```toml
 # ~/.config/omar/config.toml
-[api]
+
+[mcp]
 enabled = true
-port = 9876
-host = "127.0.0.1"
 ```
 
-## Usage Examples
-
-```bash
-# Spawn a worker
-curl -X POST http://localhost:9876/api/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name": "auth", "task": "Implement JWT auth", "parent": "ea"}'
-
-# Check status
-curl http://localhost:9876/api/agents/auth
-
-# Send input
-curl -X POST http://localhost:9876/api/agents/auth/send \
-  -H "Content-Type: application/json" \
-  -d '{"text": "y", "enter": true}'
-
-# Schedule recurring status check
-curl -X POST http://localhost:9876/api/events \
-  -H "Content-Type: application/json" \
-  -d '{"sender": "ea", "receiver": "auth", "payload": "Status?", "recurring_ns": 300000000000}'
-
-# Kill agent
-curl -X DELETE http://localhost:9876/api/agents/auth
-```
+The MCP server binary path and per-agent context file are managed automatically by `omar` — no manual wiring needed.

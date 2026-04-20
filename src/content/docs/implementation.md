@@ -11,7 +11,7 @@ order: 3
 | Language  | Rust                     | Memory safety, concurrency, single binary |
 | TUI       | ratatui 0.29 + crossterm | Active community, performant              |
 | Async     | tokio (full)             | Industry standard                         |
-| HTTP      | axum 0.7                 | Ergonomic, tower-based                    |
+| MCP       | rmcp                     | Native MCP stdio server for agent tools   |
 | CLI       | clap 4 (derive)          | Excellent UX                              |
 | Config    | toml + serde             | Native Rust support                       |
 | Errors    | anyhow + thiserror       | Ergonomic handling                        |
@@ -27,12 +27,10 @@ omar/
 │   ├── config.rs           # Configuration loading + auto-detection
 │   ├── event.rs            # Input/tick event handling
 │   ├── memory.rs           # Persistent state management
+│   ├── mcp.rs              # MCP stdio server: all agent-facing tools
+│   ├── tasks.rs            # Task registry (task_registry.json)
 │   ├── computer.rs         # X11 computer use integration
 │   ├── projects.rs         # Project CRUD
-│   ├── api/
-│   │   ├── mod.rs          # Router setup
-│   │   ├── handlers.rs     # HTTP API endpoints (axum)
-│   │   └── models.rs       # Request/response types
 │   ├── tmux/
 │   │   ├── mod.rs          # Module root
 │   │   ├── client.rs       # tmux command wrapper
@@ -62,9 +60,9 @@ Entry point with CLI parsing (clap). Auto-relaunches inside tmux if not already 
 
 Core application state machine. Manages agent list, selection, focus, projects, and UI state. Handles refresh cycles that poll tmux for session updates. Builds the hierarchical command tree for agent visualization.
 
-### api/handlers.rs (~1,039 lines)
+### mcp.rs
 
-Full REST API on axum with CORS. Endpoints for agent CRUD (with `backend` and `model` fields for heterogeneous spawning), event scheduling, computer use, and project management. Supports session name normalization (short names like "auth" resolve to "omar-agent-auth").
+MCP stdio server implementing all agent-facing tools: `create_task`, `check_task`, `complete_task`, `replace_stuck_task_agent`, `spawn_agent_session`, `kill_agent`, `send_input`, `notify_parent`, `schedule_event`, `log_action`, `append_manager_note`, `get_agent_summary`, `list_backends`, and more. Each spawned agent gets its own server instance with a context file scoped to its EA. Tools are function-call definitions outside the LLM context window — agents always see the full catalog regardless of conversation length.
 
 ### scheduler/mod.rs
 
@@ -77,21 +75,36 @@ Persistent state snapshots. Writes active state (projects, agents, tasks) to `~/
 ## CLI Interface
 
 ```bash
-# Start dashboard (default - auto-detects backend)
+# Start dashboard (default)
 omar
-
-# Use specific agent backend
-omar --agent opencode
-
-# Custom config
+omar --agent opencode          # override default backend
+omar --ea 1                    # target EA by ID or name
 omar --config ~/.config/omar/config.toml
+
+# Agent management
+omar spawn <name>              # spawn a named agent
+omar list                      # list agents for active EA
+omar list --all-eas            # list agents across all EAs
+omar kill <name>               # kill an agent
+
+# Event scheduling
+omar event schedule --receiver <name> --payload "..." --delay-seconds 60
+omar event list
+omar event cancel <id>
+
+# Setup
+omar setup-tmux                # configure tmux for OMAR
+
+# Internal (used by the runtime, not by users directly)
+omar mcp-server --context-file <path>   # start MCP stdio server for an agent
+omar manager start                       # start EA manager session
 ```
 
 ## Bridges
 
 Both bridges are optional and auto-spawned when their environment is available:
 
-- **Slack Bridge**: Spawns if `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN` are set. Routes Slack messages to OMAR agents via the API.
+- **Slack Bridge**: Spawns if `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN` are set. Routes Slack messages to OMAR agents via MCP tools.
 - **Computer Bridge**: Spawns if `DISPLAY` is set. Provides X11 mouse/keyboard/screenshot control with exclusive locking per agent.
 
 ## Embedded Prompts
