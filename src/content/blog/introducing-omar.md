@@ -1,6 +1,6 @@
 ---
 title: "Introducing OMAR"
-date: "2026-04-18"
+date: "2026-04-20"
 author:
   - name: "Shaokai Lin"
     url: "https://www.shaok.ai"
@@ -52,19 +52,29 @@ At its core, `omar` is a TUI that begins with one agent, the **Executive Assista
 
 `omar` implements a discrete-event system based on the concept of *logical time*, which treats timing as a first-class specification rather than an uncontrolled side effect. Communications between coding agents are modeled as timestamped *events*. An event with a logical timestamp `t` is processed by the runtime at physical time `T >= t`. The `omar` server has an internal event queue, which orders all events by their logical timestamps. This design is directly inspired by the [reactor model](https://reactor-model.org), which supports *deterministic* and *reproducible* real-time coordination (see [this paper](https://dl.acm.org/doi/abs/10.1145/3448128) for more details).
 
-For example, when agent `A` sends a message to agent `B`, agent `A` sends an HTTP POST request to the `omar` server with the following format:
+For example, when agent `A` sends a message to agent `B`, agent `A` calls the `schedule_event` MCP tool:
 ```json 
 {
     "sender": "A",
     "receiver": "B",
-    "timestamp": 1773768458704306000,
+    "timestamp_ns": 1773768458704306000,
     "payload": "Execute the following task: ..."
 }
 ```
 
-Upon the server receiving the message from agent `A`, it inserts a new event into its event queue in timestamp order. When it's time to deliver the message, the server pops the event from the queue and executes `tmux send-keys` to type the message into the target agent's session.
+Upon receiving the event, the `omar` server inserts it into its event queue in timestamp order. When it's time to deliver, the runtime pops the event from the queue and executes `tmux send-keys` to type the message into the target agent's session.
 
 The same event queue is used for scheduling future tasks, which are useful for implementing *cron jobs* in `omar`. Cron jobs are essentially a special type of event that carries a predefined period. When a cron job fires, the `omar` server automatically reschedules it into the future based on its period.
+
+### Why MCP: the interface that can't be forgotten
+
+Early `omar` used a local REST server. Tools like [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) take the same approach, with agents calling `POST /invocations` over HTTP to drive orchestration. The server works. The failure mode is subtler.
+
+For an agent to use a REST API, it has to *know* the API: the exact endpoint paths, field names, and schemas. That knowledge lives somewhere in the model's context, typically the system prompt or early conversation history. As conversations go on, context windows fill. In long sessions, chat and coding agents will summarize earlier turns to reclaim space. Anything not recently used is a candidate to be dropped: an endpoint the agent hasn't touched in a hundred turns gets compressed to "there were some API endpoints" or disappears entirely. The agent then hallucinates a slightly wrong URL, forgets a required field, or silently stops scheduling events because it "forgot" the scheduler existed. In the Kalshi experiment, we watched `omar`'s own REST-based EA drift this way mid-run, not because the model was broken but because the API docs had been squeezed out of context.
+
+MCP solves this at the protocol level. **MCP tools are delivered as function definitions in a dedicated part of the LLM API call — outside the message history and outside the context window.** Every inference call, regardless of conversation length or how many summarizations have fired, receives the full, fresh list of tools with their complete schemas. An agent at turn 500, mid-summarization, still sees every tool `omar` exposes: `create_task`, `check_task`, `complete_task`, `replace_stuck_task_agent`, `schedule_event`, `notify_parent`, and the rest. There is no path by which the agent can forget that `replace_stuck_task_agent` exists, because it was never in the context to begin with.
+
+It's worth noting that Amazon built another product, [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator), which has a REST layer underneath that wraps its agent interface in MCP tools for exactly this reason. The industry is slowly converging on the same conclusion.
 
 ### User interface
 
@@ -314,7 +324,7 @@ A number of recent tools focus on running several coding agents in parallel, typ
 
 ### Multi-agent orchestration frameworks
 
-A second cluster targets agent coordination as a framework or service rather than a UI. Steve Yegge's [Gas Town](https://github.com/gastownhall/gastown) (which Sourcegraph has been promoting as "Kubernetes for coding agents") coordinates 20 to 30 Claude Code instances under named roles like Mayor, Polecats, and Refinery, with work units stored as git-backed "Beads." [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) offers a serverless runtime with supervisor and collaborator agents and an A2A protocol. AWS Labs' [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) and Composio's [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) take a more CLI-centric approach. Compared to these, `omar` is opinionated about the user experience: hierarchy is not just an internal abstraction, it is the navigation model in the TUI, and the user can drop into any agent at any depth at any time.
+A second cluster targets agent coordination as a framework or service rather than a UI. Steve Yegge's [Gas Town](https://github.com/gastownhall/gastown) (which Sourcegraph has been promoting as "Kubernetes for coding agents") coordinates 20 to 30 Claude Code instances under named roles like Mayor, Polecats, and Refinery, with work units ("Beads") stored in a [Dolt](https://github.com/dolthub/dolt) SQL database. Gas Town takes an interesting alternative approach to the context-window problem we described above: rather than MCP, it uses a re-runnable `gt prime` command that re-injects full context from the Dolt database on demand, and a hook system that persists work assignments to the filesystem so agents can rediscover their tasks without relying on memory. [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) offers a serverless REST-based runtime with supervisor and collaborator agents and an A2A protocol. AWS Labs' [cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) and Composio's [agent-orchestrator](https://github.com/ComposioHQ/agent-orchestrator) take a more CLI-centric approach. Compared to these, `omar` is opinionated about the user experience: hierarchy is not just an internal abstraction, it is the navigation model in the TUI, and the user can drop into any agent at any depth at any time.
 
 ### IDE-integrated multi-agent products
 
@@ -326,11 +336,12 @@ A separate but adjacent line of work focuses on giving each agent a safe place t
 
 ### What's different about `omar`
 
-Putting it all together, we see three things that distinguish `omar` from the projects above:
+Putting it all together, we see four things that distinguish `omar` from the projects above:
 
-1. **Recursive hierarchies as a first-class concept**, not a flat fan-out. Agents in `omar` can spawn their own teams using the same APIs the user uses, which is what makes the NCAA experiment with 100+ agents tractable from a single prompt.
-2. **Heterogeneous backends in one session**, with the same orchestration primitives applied uniformly to Claude Code, Codex, Cursor, Opencode, and others. This allows users and agents to manage budgets and abilties. 
-3. **A terminal-native TUI built specifically for navigating large agent organizations**, including the ability to attach to any agent at any depth and watch or steer it directly.
+1. **Recursive hierarchies as a first-class concept**, not a flat fan-out. Agents in `omar` can spawn their own teams using the same MCP tools the user uses, which is what makes the NCAA experiment with 100+ agents tractable from a single prompt.
+2. **Heterogeneous backends in one session**, with the same orchestration primitives applied uniformly to Claude Code, Codex, Cursor, Opencode, and others. This allows users and agents to manage budgets and abilities.
+3. **MCP-native orchestration**, meaning agents always have access to the full tool catalog regardless of context length or summarization — a structural guarantee no REST-based orchestrator can offer.
+4. **A terminal-native TUI built specifically for navigating large agent organizations**, including the ability to attach to any agent at any depth and watch or steer it directly.
 
 If we missed your project or got something wrong, please let us know and we will update this section.
 
