@@ -1,6 +1,6 @@
 ---
 title: "Introducing OMAR"
-date: "2026-04-21" # UTC
+date: "2026-04-20"
 author:
   - name: "Shaokai Lin"
     url: "https://www.shaok.ai"

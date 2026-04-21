@@ -1,6 +1,6 @@
 ---
 title: "介绍一下OMAR"
-date: "2026-04-21" # UTC
+date: "2026-04-20"
 author:
   - name: "林少凯"
     url: "https://www.shaok.ai"
