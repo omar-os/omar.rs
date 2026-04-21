@@ -20,6 +20,7 @@ const posts = (await getCollection("zh-blog")).sort(
                 year: "numeric",
                 month: "short",
                 day: "numeric",
+                timeZone: "UTC",
               })}
             </time>
             <h2>{post.data.title}</h2>
