@@ -10,7 +10,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <section class="hero">
     <div class="container hero-inner">
       <h1 class="hero-title">
-        Lead a swarm of <span class="hero-accent">100 agents</span><br
+        Lead a swarm of <span class="hero-accent">100s of agents</span><br
         />from a single terminal.
       </h1>
       <p class="hero-subtitle">
@@ -18,7 +18,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         />Deep hierarchies of parallel AI agents, managed like a company.
       </p>
       <div class="hero-actions">
-        <a href="/docs/" class="btn btn-primary">Get Started</a>
+        <a href={`${import.meta.env.BASE_URL}docs/`} class="btn btn-primary">Get Started</a>
         <a
           href="https://github.com/lsk567/omar"
           class="btn btn-outline"

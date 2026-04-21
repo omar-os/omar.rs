@@ -1,4 +1,4 @@
-# omarmy.ai
+# omar.tech
 
 Website for the OMAR (One-Man Army) project. Built with [Astro](https://astro.build/).
 

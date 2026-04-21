@@ -6,31 +6,32 @@ interface Props {
 const { lang = "en" } = Astro.props;
 const isZh = lang.startsWith("zh");
 const pathname = Astro.url.pathname;
+const base = import.meta.env.BASE_URL;
 
 const navItems = isZh
   ? [
-      { href: "/zh/", label: "首页" },
-      { href: "/zh/docs/", label: "文档" },
-      { href: "/zh/blog/", label: "博客" },
+      { href: `${base}zh/`, label: "首页" },
+      { href: `${base}zh/docs/`, label: "文档" },
+      { href: `${base}zh/blog/`, label: "博客" },
     ]
   : [
-      { href: "/", label: "Home" },
-      { href: "/docs/", label: "Docs" },
-      { href: "/blog/", label: "Blog" },
+      { href: base, label: "Home" },
+      { href: `${base}docs/`, label: "Docs" },
+      { href: `${base}blog/`, label: "Blog" },
     ];
 
 function getLangSwitchUrl() {
   if (isZh) {
-    return pathname.replace(/^\/zh/, "") || "/";
+    return pathname.replace(`${base}zh/`, base) || base;
   } else {
-    return `/zh${pathname}`;
+    return pathname.replace(base, `${base}zh/`);
   }
 }
 ---
 
 <header class="header">
   <div class="container header-inner">
-    <a href={isZh ? "/zh/" : "/"} class="logo">
+    <a href={isZh ? `${base}zh/` : base} class="logo">
       OMAR<span class="brand-suffix" id="brand-typewriter"></span>
     </a>
     <nav class="nav">
@@ -43,8 +44,8 @@ function getLangSwitchUrl() {
               {
                 active:
                   pathname === item.href ||
-                  (item.href !== "/" &&
-                    item.href !== "/zh/" &&
+                  (item.href !== base &&
+                    item.href !== `${base}zh/` &&
                     pathname.startsWith(item.href)),
               },
             ]}
