@@ -1,5 +1,5 @@
 ---
-title: "OMAR 介绍"
+title: "介绍一下OMAR"
 date: "2026-04-21" # UTC
 author:
   - name: "林少凯"
