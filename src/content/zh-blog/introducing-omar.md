@@ -1,6 +1,6 @@
 ---
 title: "OMAR 介绍"
-date: "2026-04-12"
+date: "2026-04-21" # UTC
 author:
   - name: "林少凯"
     url: "https://www.shaok.ai"
@@ -283,7 +283,7 @@ HELIX，全称 *Hierarchical Evolution via LLM-Informed eXploration*，扩展了
 
 我们还偶然发现了另一个洞察。当提示很复杂且智能体在单个会话中被反复输入相同的提示时，智能体会开始偷工减料、跳过指令中的关键步骤。这是一个已知的现象，叫做"上下文腐蚀"（context rot），我们在向量化公司智能体输入一个关于如何运行交易周期的大型 skill 文件时观察到了这一点。通过 `omar`，我们让一个持久化的父智能体使用 `omar` API 为指令中的每个步骤生成临时子智能体，从而修复了这个问题。当子智能体以全新的上下文启动时，它对指令的遵循更加忠实。
 
-由于有了 `omar`，执行这个实验比在不同窗口中启动没有通信手段的编程智能体要容易得多。在撰写本文时，Kalshi 实验仍在实时运行。在 [omar.tech/kalshi](https://omar.tech/kalshi) 查看智能体的实时交易数据。
+由于有了 `omar`，执行这个实验比在不同窗口中启动无法通信的编程智能体要容易得多。在 [omar.tech/kalshi](https://omar.tech/kalshi) 查看智能体的详细交易数据。
 
 ## AI 安全
 
