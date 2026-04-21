@@ -1,6 +1,6 @@
 ---
 title: "Introducing OMAR"
-date: "2026-04-18"
+date: "2026-04-21" # UTC
 author:
   - name: "Shaokai Lin"
     url: "https://www.shaok.ai"
@@ -283,7 +283,7 @@ We still believe that multi-agent interactions could unlock potential not access
 
 We also stumbled upon another insight. When a prompt is complex and an agent has been fed the same prompt multiple times in a single session, the agent starts to cut corners and skip critical steps in the instructions. This is a known phenomenon called "context rot," and we observed it when feeding a big skill file on how to run a trading cycle to the quant firm agent. With `omar`, we fixed this issue by letting a persistent parent spawn ephemeral subagents for every step in the instructions using the `omar` APIs. When a subagent starts with a fresh context, it follows the instructions much more faithfully.
 
-Because of `omar`, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. At the time of this writing, the Kalshi experiment is still running live. Check out agents' live trading data at [omar.tech/kalshi](https://omar.tech/kalshi).
+Because of `omar`, performing this experiment is made much easier compared to launching coding agents in separate windows that provide no means for communication. Check out agents' detailed trading data at [omar.tech/kalshi](https://omar.tech/kalshi).
 
 ## AI Safety
 
