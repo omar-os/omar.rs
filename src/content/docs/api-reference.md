@@ -1,243 +1,158 @@
 ---
-title: "HTTP API Reference"
-description: "OMAR's REST API for agent orchestration, events, and computer use"
+title: "MCP Tool Reference"
+description: "OMAR's MCP stdio tool surface for agent orchestration, events, and computer use"
 order: 4
 ---
 
 ## Overview
 
-OMAR runs an HTTP API on port 9876 (configurable) for programmatic agent control. Any tool that can make HTTP calls can orchestrate agents - Claude, opencode, Python scripts, curl, etc.
+OMAR exposes its orchestration surface as an **MCP (Model Context Protocol) server over stdio**. Each agent backend spawns its own `omar mcp-server` child and talks to it over JSON-RPC framed by line-delimited messages. There is no listening port, no auth surface, and no shared daemon — when the agent dies, its MCP child dies with it.
 
-CORS is fully enabled (`Access-Control-Allow-Origin: *`).
+Tools are typed and have JSON-Schema input definitions; from the agent's perspective every tool is `omar.<tool_name>`.
 
-## Backend Endpoints
+### How an agent reaches the server
 
-### `GET /api/backends`
+The manager writes a per-EA `McpLaunchContext` to `~/.omar/mcp/ea-<id>/context.json` and configures the backend's MCP integration to launch:
 
-List installed agent backends and their availability.
+```
+omar mcp-server --context-file ~/.omar/mcp/ea-<id>/context.json
+```
 
-```json
+The launch context bakes in the EA id, so every tool call from that agent is automatically scoped to its EA — no per-call routing argument, no risk of cross-EA action.
+
+## EA Registry
+
+| Tool             | Purpose                                                             |
+| ---------------- | ------------------------------------------------------------------- |
+| `list_eas`       | List registered EAs with `is_active` markers (read-only).           |
+| `get_active_ea`  | Read the persisted active EA pointer used by the dashboard / CLI.   |
+| `switch_ea`      | Update the persisted active-EA pointer. Does **not** rescope this MCP server — already-running children stay pinned to their launch EA. |
+| `create_ea`      | Register a new EA by name (server-assigned monotonic id).           |
+| `delete_ea`      | Unregister an EA. Refuses to delete the only remaining EA, or one with attached tmux sessions; surfaces filesystem errors instead of silently succeeding. |
+
+## Agents
+
+| Tool                  | Purpose                                                                      |
+| --------------------- | ---------------------------------------------------------------------------- |
+| `list_agents`         | Live agents in the pinned EA, with health and last-output summary.           |
+| `get_agent`           | Detailed view of a single agent: pane tail, parent, status, task.            |
+| `get_agent_summary`   | Lightweight card view (health, task, status, children).                      |
+| `update_agent_status` | Write the agent's self-reported status (persisted under `~/.omar/ea/<id>/status/<session>.md`). |
+| `spawn_agent`         | Single unified spawn path. Requires `project_id`. Returns the agent's session name. |
+| `kill_agent`          | Kill the tmux session and mark the corresponding `Running` task `Failed`.    |
+| `send_input`          | Inject text into an agent's tmux session (e.g. answer a confirmation).       |
+
+`spawn_agent` arguments:
+
+```jsonc
 {
-  "backends": [
-    {
-      "name": "claude",
-      "command": "claude --dangerously-skip-permissions",
-      "available": true
-    },
-    {
-      "name": "codex",
-      "command": "codex --no-alt-screen ...",
-      "available": true
-    },
-    { "name": "cursor", "command": "cursor agent --yolo", "available": false },
-    { "name": "gemini", "command": "gemini --yolo", "available": false },
-    { "name": "opencode", "command": "opencode", "available": false }
-  ]
+  "name":       "auth",
+  "task":       "Implement JWT auth",
+  "project_id": 1,
+  "parent":     "ea",
+  "workdir":    "/path/to/project",        // optional, defaults to launch workdir
+  "backend":    "codex",                   // optional override (claude/codex/cursor/gemini/opencode)
+  "model":      "o3"                       // optional --model override
 }
 ```
 
-## Agent Endpoints
+There is no `track` flag; every spawn is tracked. `complete_task` and `replace_stuck_task_agent` resolve short names (`auth`) or UUIDs.
 
-### `POST /api/agents`
+## Projects
 
-Spawn a new agent. If `task` is provided, the agent receives `agent.md` as its system prompt with the task injected.
+| Tool               | Purpose                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `list_projects`    | List projects in the pinned EA.                                                          |
+| `add_project`      | Register a project bucket; returns `project_id` for `spawn_agent`.                       |
+| `complete_project` | Remove a project. Blocks while any of its tasks are still `Running`; `Failed`/`Replaced` rows count as history. |
 
-```json
-// Request
+## Events / Scheduler
+
+| Tool                  | Purpose                                                                |
+| --------------------- | ---------------------------------------------------------------------- |
+| `schedule_omar_event` | Enqueue a one-shot or recurring event in OMAR's durable scheduler.     |
+| `list_events`         | Inspect pending events for the pinned EA.                              |
+| `cancel_event`        | Cancel an event by id (only if it belongs to this EA).                 |
+
+The tool is named `schedule_omar_event` to disambiguate from same-named tools published by other MCP servers — muscle-memory `schedule_event` calls fail loudly instead of silently routing to a different server.
+
+`schedule_omar_event` arguments:
+
+```jsonc
 {
-  "name": "worker-1",
-  "task": "Implement feature X",
-  "workdir": "/path/to/project",
-  "backend": "codex",
-  "model": "o3",
-  "parent": "ea"
-}
-
-// Response
-{
-  "id": "worker-1",
-  "status": "running",
-  "session": "omar-agent-worker-1",
-  "created_at": "2025-01-26T12:00:00Z"
+  "receiver":          "auth",                      // agent short name, or "ea"
+  "payload":           "Status check on auth?",
+  "sender":            "ea",                        // optional, defaults to "ea"
+  "delay_seconds":     300,                         // wake in 5 minutes
+  "recurring_seconds": 300                          // OR auto-reschedule every 5 minutes
 }
 ```
 
-Fields:
+For an immediate parent notification on completion, use `delay_seconds: 0` with payload `"[CHILD COMPLETE] <your_name>: <summary>"`.
 
-- `name` — Agent name (auto-generated if omitted)
-- `task` — Task description; triggers `agent.md` prompt injection
-- `workdir` — Working directory
-- `backend` — Backend shorthand: `"claude"`, `"codex"`, `"cursor"`, `"opencode"`. Cannot be used with `command`.
-- `model` — Model override, appended as `--model <value>` to the base command
-- `command` — Explicit command to run. Cannot be used with `backend`.
-- `parent` — Parent agent name for hierarchy tracking
+Backend-native wake tools (`ScheduleWakeup`, `TaskReminder`, `task_reminder`, `scheduled_tasks`) are denied at the spawn level via `--disallowedTools` and per-backend deny configs — agents must use `schedule_omar_event` so wake-ups appear in OMAR's event queue and survive restarts.
 
-### `GET /api/agents`
+## Auditing
 
-List all agents with health and status.
+| Tool                | Purpose                                                                         |
+| ------------------- | ------------------------------------------------------------------------------- |
+| `log_justification` | Append a structured JSONL audit entry before significant state-changing actions (spawn, kill, send-input, schedule, project change). |
+
+## Slack
+
+| Tool          | Purpose                                                                            |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `slack_reply` | Queue a Slack reply file in `~/.omar/slack_outbox/`. The Slack bridge polls this directory and posts to Slack via Web API. |
+
+`slack_reply` is the only Slack-touching tool — the EA never talks to Slack directly. The bridge is a separate process (`omar-slack`) and its EA target is read from `[slack_bridge].active_ea` in `config.toml`.
+
+## Computer Use
+
+The computer-use surface holds an exclusive lock; one agent at a time can issue input. All computer tools require the agent to identify itself by name to prove lock ownership.
+
+| Tool                     | Purpose                                              |
+| ------------------------ | ---------------------------------------------------- |
+| `computer_status`        | Check availability and current lock owner.           |
+| `computer_lock_acquire`  | Acquire exclusive computer access for the named agent.|
+| `computer_lock_release`  | Release the lock.                                    |
+| `computer_screenshot`    | Take a screenshot (lock required).                   |
+| `computer_mouse`         | `move`/`click`/`double_click`/`drag`/`scroll`.       |
+| `computer_keyboard`      | `type` text, or `key` for a key combination.         |
+| `computer_screen_size`   | Read display dimensions.                             |
+| `computer_mouse_position`| Read current cursor position.                        |
+
+## Backends
+
+| Tool             | Purpose                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| `list_backends`  | Probe installed agent backends (claude / codex / cursor / gemini / opencode) with bounded `--version` checks; useful for listing options in the dashboard or external tools. |
+
+## Caller's perspective
+
+Most agent harnesses surface MCP tools by name — for example, in Claude Code's tool palette they appear as `omar.spawn_agent`, `omar.schedule_omar_event`, etc. A direct JSON-RPC client (such as the Slack bridge) calls them as:
 
 ```json
 {
-  "agents": [
-    {
-      "id": "worker-1",
-      "status": "running",
-      "health": "working",
-      "idle_seconds": 5,
-      "last_output": "Writing tests..."
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tools/call",
+  "params": {
+    "name": "spawn_agent",
+    "arguments": {
+      "name": "auth",
+      "task": "Implement JWT auth",
+      "project_id": 1
     }
-  ],
-  "manager": {
-    "id": "omar-agent-ea",
-    "status": "running",
-    "health": "working"
   }
 }
 ```
 
-### `GET /api/agents/:id`
+## Error semantics
 
-Get agent details including recent output tail.
+- `tools/call` returns `isError: true` with a single text content block on tool-level failure (e.g. unknown agent, attached session, validation rejection).
+- JSON-RPC `error` only carries protocol-level failures (malformed JSON, unknown method, bad framing).
+- Tools document their retry safety in the schema description — read-only tools are always safe to retry; mutating tools that aren't idempotent (e.g. `add_project`) advise calling the corresponding `list_*` tool after uncertain results.
 
-### `GET /api/agents/:id/summary`
+## Migration notes
 
-Lightweight card view: health, task, status, children.
-
-### `PUT /api/agents/:id/status`
-
-Update an agent's self-reported status (stored in `~/.omar/status/<session>.md`).
-
-```json
-{ "status": "Implementing auth module - 60% done" }
-```
-
-### `POST /api/agents/:id/send`
-
-Send text input to an agent's tmux session.
-
-```json
-{ "text": "Yes, proceed", "enter": true }
-```
-
-### `DELETE /api/agents/:id`
-
-Kill an agent session.
-
-**Note:** Session names accept both short form (`worker-1`) and full form (`omar-agent-worker-1`).
-
-## Event Endpoints
-
-### `POST /api/events`
-
-Schedule an event for delivery to an agent.
-
-```json
-{
-  "sender": "ea",
-  "receiver": "worker-1",
-  "payload": "Status check: how is the implementation going?",
-  "timestamp": 1772904000000000000,
-  "recurring_ns": 300000000000
-}
-```
-
-### `GET /api/events`
-
-List scheduled events. Supports `?receiver=<name>` query filter.
-
-### `DELETE /api/events/:id`
-
-Cancel a scheduled event.
-
-## Project Endpoints
-
-### `GET /api/projects`
-
-List projects from `~/.omar/tasks.md`.
-
-### `POST /api/projects`
-
-Add a new project.
-
-### `DELETE /api/projects/:id`
-
-Complete/remove a project.
-
-## Computer Use Endpoints
-
-### `GET /api/computer/status`
-
-Check if computer use is available and who holds the lock.
-
-### `POST /api/computer/lock`
-
-Acquire exclusive computer access (one agent at a time).
-
-### `DELETE /api/computer/lock`
-
-Release computer lock.
-
-### `POST /api/computer/screenshot`
-
-Take a screenshot (must hold lock). Returns base64-encoded image.
-
-### `POST /api/computer/mouse`
-
-Mouse control: move, click, drag, scroll.
-
-### `POST /api/computer/keyboard`
-
-Keyboard input: type text or press key combinations.
-
-### `GET /api/computer/screen-size`
-
-Get display dimensions.
-
-### `GET /api/computer/mouse-position`
-
-Get current cursor position.
-
-## System Endpoints
-
-### `GET /api/health`
-
-Health check.
-
-```json
-{ "status": "ok", "version": "0.2.3" }
-```
-
-## Configuration
-
-```toml
-# ~/.config/omar/config.toml
-[api]
-enabled = true
-port = 9876
-host = "127.0.0.1"
-```
-
-## Usage Examples
-
-```bash
-# Spawn a worker
-curl -X POST http://localhost:9876/api/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name": "auth", "task": "Implement JWT auth", "parent": "ea"}'
-
-# Check status
-curl http://localhost:9876/api/agents/auth
-
-# Send input
-curl -X POST http://localhost:9876/api/agents/auth/send \
-  -H "Content-Type: application/json" \
-  -d '{"text": "y", "enter": true}'
-
-# Schedule recurring status check
-curl -X POST http://localhost:9876/api/events \
-  -H "Content-Type: application/json" \
-  -d '{"sender": "ea", "receiver": "auth", "payload": "Status?", "recurring_ns": 300000000000}'
-
-# Kill agent
-curl -X DELETE http://localhost:9876/api/agents/auth
-```
+OMAR 0.3+ replaces the legacy `:9876` REST API. If you have an out-of-tree integration that talked to `http://127.0.0.1:9876/api/...`, switch to spawning `omar mcp-server` and calling tools via JSON-RPC over stdio — see the Slack bridge (`bridges/slack/src/omar.rs`) for a reference implementation.

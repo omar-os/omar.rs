@@ -6,96 +6,102 @@ order: 5
 
 ## 概览
 
-OMAR 采用层级化智能体模型，由执行助理（EA）编排工作智能体。EA 将高层任务拆分为可并行的子任务，并创建智能体来执行。
+OMAR 采用层级化智能体模型。执行助理（EA）将高层任务拆分为可并行的子任务，并派生工作智能体 —— 每个智能体又可以派生自己的子智能体，从而构成任意深度的层级。每个智能体都通过自己专属的 `omar mcp-server` stdio 子进程暴露的 **MCP 工具表面** 来驱动 OMAR。
 
 ## 统一智能体模型
 
-除 EA 外，所有智能体使用相同的提示词（`agent.md`）。没有 PM/Worker 的区分 —— 每个创建的智能体都是自主的：接收任务后自行决定是直接完成还是创建子智能体，完成后报告结果。
+所有派生出来的智能体都使用同一份提示词（`agent.md`）。代码层面没有 PM/Worker 之分 —— 每个被派生的智能体都是自治的：它接到任务，决定亲自完成还是再派生子智能体，并在完成后报告。
 
-EA（`executive-assistant.md`）比较特殊：它纯粹作为调度器 —— 从不直接工作，只负责创建智能体、监控进度和管理项目。它的提示词会前置记忆上下文。
+执行助理（`executive-assistant.md`）则比较特殊：它纯粹作为调度者，从不亲自动手 —— 只派生智能体、监控它们、管理项目。它的提示词前会拼上记忆上下文。
 
 ## 智能体生命周期
 
 ```
-用户向 EA 下达任务
+用户向 EA 提交任务
         │
         ▼
-EA 提出计划 (JSON)
+EA 注册项目（add_project），并派生智能体（spawn_agent）
         │
         ▼
-OMAR 解析计划，通过 API 创建智能体
+  agent-1（工作中）   agent-2（工作中）   agent-3（空闲）
         │
         ▼
-  agent-1 (工作中)   agent-2 (工作中)   agent-3 (等待中)
+智能体完成时通过 schedule_omar_event 唤醒父智能体
         │
         ▼
-智能体通过 [TASK COMPLETE] 报告完成
-        │
-        ▼
-EA 汇总结果
+EA 汇总结果，完成后调用 complete_project
 ```
 
 ## 父子层级
 
-智能体通过 `~/.omar/agent_parents.json` 追踪父节点。这使得：
+智能体的父子关系记录在 `~/.omar/ea/<id>/agent_parents.json`。它带来：
 
-- TUI 中的树形可视化（使用制表符绘制的命令树）
-- 导航：`↑/↓` 移动选择，`←/→` 切换面板，`Tab` 深入子节点，`Shift+Tab` 返回父节点
-- 层级化状态监控
+- TUI 中的命令树可视化（带 box-drawing 字符）
+- 导航：`↑/↓` 移动选中项，`←/→` 切换面板，`Tab` 钻入子智能体，`Shift+Tab` 返回父智能体
+- 层级化的状态监控
 
-任何智能体都可以创建子节点，支持任意深度。
+任意智能体都可以派生子智能体，构成任意深度的层级。
 
 ## EA 协议
 
-EA 完全通过 HTTP API 与 OMAR 通信。它从不直接执行工作 —— 只负责创建智能体、监控输出和管理项目。
+EA 与 OMAR 的所有交互都通过 MCP 工具调用完成。EA 永远不会亲自动手 —— 它只派生智能体、监控它们的输出、管理项目。下面以智能体在工具盘中看到的形式书写工具名（例如 `omar.spawn_agent`）。
 
-### 创建智能体
+### 注册项目
 
-```bash
-curl -X POST http://localhost:9876/api/agents \
-  -H "Content-Type: application/json" \
-  -d '{"name": "api", "task": "创建 Express 服务器，包含 /users 和 /posts 端点"}'
+每次派生都需要 `project_id`，所以 EA 会先开一个项目再委派任务：
+
+```jsonc
+omar.add_project({ "name": "构建 REST API" })
+// → { "project_id": 1, "name": "构建 REST API" }
+```
+
+### 派生智能体
+
+```jsonc
+omar.spawn_agent({
+  "name":       "api",
+  "task":       "搭建一个 Express 服务，提供 /users 与 /posts 接口",
+  "project_id": 1,
+  "parent":     "ea"
+})
 ```
 
 ### 监控智能体
 
-```bash
-# 查看特定智能体的输出
-curl http://localhost:9876/api/agents/api
-
-# 列出所有智能体及健康状态
-curl http://localhost:9876/api/agents
+```jsonc
+omar.list_agents()                         // → 当前 EA 中所有智能体及其健康状态
+omar.get_agent({ "name": "api" })          // → 窗格尾部 + 状态 + 父智能体
+omar.get_agent_summary({ "name": "api" })  // → 轻量卡片视图
 ```
 
 ### 向智能体发送输入
 
-```bash
-curl -X POST http://localhost:9876/api/agents/api/send \
-  -H "Content-Type: application/json" \
-  -d '{"text": "也添加 /comments 端点", "enter": true}'
+```jsonc
+omar.send_input({
+  "name": "api",
+  "text": "再加一个 /comments 接口",
+  "enter": true
+})
 ```
 
-### 完成时终止智能体
+### 杀死智能体
 
-```bash
-curl -X DELETE http://localhost:9876/api/agents/api
+```jsonc
+omar.kill_agent({ "name": "api" })
 ```
+
+`kill_agent` 会把该智能体所有 `Running` 任务行翻为 `Failed` 并取消其已调度的事件，所以项目板上不会留下孤儿行。
 
 ### 管理项目
 
-```bash
-# 添加项目
-curl -X POST http://localhost:9876/api/projects \
-  -H "Content-Type: application/json" \
-  -d '{"name": "构建 REST API"}'
-
-# 完成项目
-curl -X DELETE http://localhost:9876/api/projects/<id>
+```jsonc
+omar.list_projects()
+omar.complete_project({ "project_id": 1 })   // 只要还有任务在 Running 就会拒绝
 ```
 
 ## 智能体上下文
 
-创建带任务的智能体时，OMAR 注入统一的 `agent.md` 提示词。每个智能体都是自主的 —— 自行决定是直接工作还是创建子智能体：
+派生带任务的智能体时，OMAR 会注入统一的 `agent.md` 提示词。每个智能体都是自治的 —— 自己决定是亲自完成还是再派生子智能体：
 
 ```
 You are an Agent in the OMAR system.
@@ -105,50 +111,57 @@ it yourself or by spawning sub-agents.
 
 YOUR NAME: api
 YOUR PARENT: ea
-YOUR TASK: 创建 Express 服务器，包含 /users 和 /posts 端点
+YOUR TASK: 搭建一个 Express 服务，提供 /users 与 /posts 接口
 ```
 
-智能体通过输出 `[TASK COMPLETE]` 加上结果摘要来标记完成。
+智能体通过输出 `[TASK COMPLETE]` 加一段总结来标记完成，并立刻唤醒父智能体：
+
+```jsonc
+omar.schedule_omar_event({
+  "receiver":      "ea",
+  "payload":       "[CHILD COMPLETE] api: 完成了 Express 服务，含 /users 与 /posts",
+  "delay_seconds": 0
+})
+```
+
+父智能体（EA 或别的智能体）会在自己的 tmux 会话里看到这条消息落地，然后据此进行汇总。
 
 ## 事件驱动协调
 
-调度器支持智能体间的定时协调：
+OMAR 的调度器是定时等待的唯一协调原语。后端原生的唤醒工具（`ScheduleWakeup`、`TaskReminder` 等）在派生层面就被禁用 —— 智能体必须使用 `schedule_omar_event`，这样唤醒事件才会出现在仪表盘的事件队列里并在重启后存活。
 
-- **唤醒**：智能体调度自唤醒事件以检查子智能体进度
-- **任务交接**：智能体 A 在依赖就绪时为智能体 B 调度事件
-- **定时任务**：周期性事件在每次投递后自动重新调度
+### 一次性唤醒
 
-事件通过向目标智能体的 tmux 会话注入文本来投递。
-
-```bash
-# 调度一次性唤醒事件
-curl -X POST http://localhost:9876/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sender": "ea",
-    "receiver": "api",
-    "payload": "检查 API 实现进度",
-    "timestamp": 1772904000000000000
-  }'
-
-# 调度周期性定时任务（每 5 分钟）
-curl -X POST http://localhost:9876/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "sender": "ea",
-    "receiver": "api",
-    "payload": "进度检查",
-    "recurring_ns": 300000000000
-  }'
+```jsonc
+omar.schedule_omar_event({
+  "receiver":      "api",
+  "payload":       "检查一下 API 实现的进度",
+  "delay_seconds": 60
+})
 ```
+
+### 周期性 cron 风格签到
+
+```jsonc
+omar.schedule_omar_event({
+  "receiver":          "api",
+  "payload":           "进度签到",
+  "recurring_seconds": 300
+})
+```
+
+事件是持久化的：会被写入 `~/.omar/scheduled_events.json`，仪表盘重启后仍会按时回放。事件的投递方式是把 payload 注入接收方的 tmux 会话。
 
 ## 记忆持久化
 
-OMAR 跨会话维护状态：
+OMAR 在多次会话之间维持状态，按 EA 隔离：
 
-- **`~/.omar/memory.md`** —— 活跃项目、智能体和任务的快照
-- **`~/.omar/worker_tasks.json`** —— 会话名到任务描述的映射
-- **`~/.omar/agent_parents.json`** —— 父子关系
-- **`~/.omar/status/<session>.md`** —— 智能体自报告状态
+- **`~/.omar/ea/<id>/memory.md`** —— 活动项目、智能体与任务的快照
+- **`~/.omar/ea/<id>/worker_tasks.json`** —— 会话名 → 任务描述的映射
+- **`~/.omar/ea/<id>/task_registry.json`** —— 权威任务记录（id、状态、历史）
+- **`~/.omar/ea/<id>/agent_parents.json`** —— 父子关系
+- **`~/.omar/ea/<id>/status/<session>.md`** —— 智能体自报状态
+- **`~/.omar/manager_notes_ea<id>.md`** —— EA 通过 shell heredoc 写下的自由格式笔记
+- **`~/.omar/scheduled_events.json`** —— 持久化事件队列（跨 EA 共享，按 `ea_id` 隔离）
 
-重启时，EA 提示词会包含上次的记忆快照以保持上下文连续性。
+重启时，EA 的提示词会带上最近的记忆快照以延续上下文，未触发的事件也会按计划继续触发。
