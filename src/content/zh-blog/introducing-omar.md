@@ -2,7 +2,7 @@
 title: "介绍一下OMAR"
 date: "2026-04-20"
 author:
-  - name: "林少凯"
+  - name: "Shaokai Lin"
     url: "https://www.shaok.ai"
   - name: "Karim Elmaaroufi"
     url: "https://kael.tech.blog"
