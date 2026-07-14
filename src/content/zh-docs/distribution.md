@@ -19,7 +19,7 @@ OMAR 是一个 Rust 工作区，包含 3 个二进制：
 ### 一键安装（推荐）
 
 ```bash
-curl -fsSL https://omar.tech/install.sh | sh
+curl -fsSL https://omar.rs/install.sh | sh
 ```
 
 自动检测操作系统（macOS/Linux）和架构（amd64/arm64），将 3 个二进制安装到 `/usr/local/bin`。
@@ -28,10 +28,10 @@ curl -fsSL https://omar.tech/install.sh | sh
 
 ```bash
 # 指定版本
-OMAR_VERSION=0.2.3 curl -fsSL https://omar.tech/install.sh | sh
+OMAR_VERSION=0.2.3 curl -fsSL https://omar.rs/install.sh | sh
 
 # 自定义安装目录
-OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.tech/install.sh | sh
+OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.rs/install.sh | sh
 ```
 
 ### Homebrew
