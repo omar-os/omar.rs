@@ -1,4 +1,4 @@
-# omar.tech
+# omar.rs
 
 Website for the OMAR (One-Man Army) project. Built with [Astro](https://astro.build/).
 

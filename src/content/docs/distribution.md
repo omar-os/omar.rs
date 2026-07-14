@@ -19,7 +19,7 @@ Runtime dependency: **tmux 3.0+**
 ### One-Liner (Recommended)
 
 ```bash
-curl -fsSL https://omar.tech/install.sh | sh
+curl -fsSL https://omar.rs/install.sh | sh
 ```
 
 Auto-detects OS (macOS/Linux) and architecture (amd64/arm64). Installs all 3 binaries to `/usr/local/bin`.
@@ -28,10 +28,10 @@ Options:
 
 ```bash
 # Pin a specific version
-OMAR_VERSION=0.2.3 curl -fsSL https://omar.tech/install.sh | sh
+OMAR_VERSION=0.2.3 curl -fsSL https://omar.rs/install.sh | sh
 
 # Custom install directory
-OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.tech/install.sh | sh
+OMAR_INSTALL_DIR=~/.local/bin curl -fsSL https://omar.rs/install.sh | sh
 ```
 
 ### Homebrew
