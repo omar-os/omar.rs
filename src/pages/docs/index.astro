@@ -4,137 +4,92 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 
 <DocsLayout
   title="Getting Started"
-  description="Get started with OMAR - a TUI for managing AI agent organizations"
+  description="Install OMAR and launch your first multi-agent workflow."
 >
-  <h2>What is OMAR?</h2>
-  <p>
-    OMAR is a TUI for creating powerful agentic organizations. It
-    runs on tmux and lets you orchestrate deep hierarchies of parallel AI agents
-    from a single terminal.
+  <p class="docs-lead">
+    OMAR is a deterministic orchestration runtime for agentic systems. It runs
+    on tmux and lets you direct deep hierarchies of parallel AI agents from one
+    terminal.
   </p>
 
   <h2>Prerequisites</h2>
   <ul>
     <li>
-      <strong>tmux 3.0+</strong> &mdash; <code>brew install tmux</code> (macOS) or
-      <code>apt install tmux</code> (Debian/Ubuntu)
+      <strong>tmux 3.0+</strong> — <code>brew install tmux</code> on macOS or
+      <code>apt install tmux</code> on Debian/Ubuntu.
     </li>
     <li>
-      <strong>At least one agent backend:</strong>
-      <a
-        href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-        >Claude Code</a
-      >,
-      <a href="https://developers.openai.com/codex/cli">Codex CLI</a>,
-      <a href="https://github.com/anomalyco/opencode">Opencode</a>,
-      <a href="https://cursor.com/cli">Cursor CLI</a>, or
-      <a href="https://ai.google.dev/gemini-api/docs/gemini-cli">Gemini CLI</a>
+      At least one supported coding agent: Claude Code, Codex CLI, Cursor CLI,
+      Opencode, or Google Antigravity CLI.
     </li>
   </ul>
 
-  <h2>Installation</h2>
-  <h3>One-Liner (Recommended)</h3>
-  <pre><code>$ curl -fsSL https://omar.rs/install.sh | sh</code></pre>
+  <h2>Install</h2>
+  <h3>One-liner (recommended)</h3>
+  <pre><code>curl -fsSL https://omar.rs/install.sh | sh</code></pre>
   <p>
-    Works on macOS and Linux. Installs all binaries to <code
-      >/usr/local/bin</code
-    >.
+    The installer supports macOS and Linux and installs OMAR binaries to
+    <code>/usr/local/bin</code> by default.
   </p>
 
   <h3>Homebrew</h3>
-  <pre><code>$ brew install lsk567/omar/omar</code></pre>
-  <p>Automatically installs tmux as a dependency.</p>
+  <pre><code>brew install omar-os/omar/omar</code></pre>
+  <p>The OMAR tap installs tmux as a dependency.</p>
 
-  <h3>From Source</h3>
-  <pre><code>$ git clone https://github.com/lsk567/omar.git
-$ cd omar && make install</code></pre>
-  <p>Requires Rust 1.70+ and GNU Make.</p>
+  <h3>Build from source</h3>
+  <pre><code>git clone https://github.com/omar-os/omar.git
+cd omar
+make install</code></pre>
+  <p>Building from source requires Rust 1.70+ and GNU Make.</p>
 
-  <h2>Launch</h2>
-  <pre><code>$ omar</code></pre>
+  <h2>Launch OMAR</h2>
+  <pre><code>omar</code></pre>
   <p>
-    This starts the OMAR dashboard with the default agent backend (Claude Code).
-    To use a different backend:
+    OMAR detects installed backends automatically. Select one explicitly with
+    <code>-a</code>:
   </p>
   <table>
     <thead>
       <tr><th>Backend</th><th>Command</th></tr>
     </thead>
     <tbody>
-      <tr
-        ><td>Claude Code</td><td
-          ><code>omar</code> or <code>omar --agent claude</code></td
-        ></tr
-      >
-      <tr><td>Codex CLI</td><td><code>omar --agent codex</code></td></tr>
-      <tr><td>Opencode</td><td><code>omar --agent opencode</code></td></tr>
-      <tr><td>Cursor CLI</td><td><code>omar --agent cursor</code></td></tr>
-      <tr><td>Gemini CLI</td><td><code>omar --agent gemini</code></td></tr>
+      <tr><td>Claude Code</td><td><code>omar -a claude</code></td></tr>
+      <tr><td>Codex CLI</td><td><code>omar -a codex</code></td></tr>
+      <tr><td>Cursor CLI</td><td><code>omar -a cursor</code></td></tr>
+      <tr><td>Opencode</td><td><code>omar -a opencode</code></td></tr>
+      <tr><td>Google Antigravity CLI</td><td><code>omar -a agy</code></td></tr>
     </tbody>
   </table>
 
-  <h2>Your First Session</h2>
+  <h2>Run your first workflow</h2>
   <ol>
     <li>
-      Launch <code>omar</code> &mdash; you'll see the TUI dashboard with your Executive
-      Assistant (EA)
+      Launch <code>omar</code> to open the dashboard and Executive Assistant.
     </li>
     <li>
-      Copy a test prompt into your EA window:
-      <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
+      Paste this task into the Executive Assistant window:
+      <pre><code>Run https://github.com/omar-os/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
-      Watch agents spawn. Use <strong>&uarr;&darr;</strong> to navigate, <strong
-        >Tab</strong
-      > to drill into an agent, <strong>Shift+Tab</strong> to back out
+      Watch the team form. Use the arrow keys to move between agents,
+      <code>Tab</code> to drill down, and <code>Shift+Tab</code> to move back up.
     </li>
     <li>
-      To shut down:
+      When you are finished, tell the Executive Assistant:
       <pre><code>Shutdown the test project and its agents.</code></pre>
     </li>
   </ol>
 
-  <h2>Key Bindings</h2>
-  <table>
-    <thead>
-      <tr><th>Key</th><th>Action</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>&larr;/&rarr;</code> or <code>h/l</code></td><td>Switch panel (sidebar / main)</td></tr>
-      <tr><td><code>&uarr;/&darr;</code> or <code>j/k</code></td><td>Move selection up/down</td></tr>
-      <tr><td><code>Tab</code></td><td>Drill into selected agent</td></tr>
-      <tr><td><code>Shift+Tab</code> or <code>Esc</code></td><td>Back (drill up)</td></tr>
-      <tr><td><code>Enter</code></td><td>Attach to selected agent</td></tr>
-      <tr><td><code>n</code></td><td>Spawn new agent</td></tr>
-      <tr><td><code>d</code></td><td>Kill selected agent</td></tr>
-      <tr><td><code>N</code></td><td>Spawn new EA (prompts for name)</td></tr>
-      <tr><td><code>D</code></td><td>Delete current EA</td></tr>
-      <tr><td><code>[</code></td><td>Previous EA</td></tr>
-      <tr><td><code>]</code></td><td>Next EA</td></tr>
-      <tr><td><code>p</code></td><td>Add a project</td></tr>
-      <tr><td><code>e</code></td><td>Show scheduled events</td></tr>
-      <tr><td><code>S</code></td><td>Settings</td></tr>
-      <tr><td><code>G</code></td><td>Debug console</td></tr>
-      <tr><td><code>r</code></td><td>Refresh agent list</td></tr>
-      <tr><td><code>z</code></td><td>Detach (dashboard keeps running)</td></tr>
-      <tr><td><code>?</code></td><td>Toggle help</td></tr>
-      <tr><td><code>Q</code></td><td>Quit</td></tr>
-    </tbody>
-  </table>
-
-  <h2>Next Steps</h2>
-  <ul>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}docs/architecture/`}>Architecture & Design</a> &mdash; understand how
-      OMAR works
-    </li>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}docs/api-reference/`}>HTTP API Reference</a> &mdash; programmatic agent
-      control
-    </li>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}docs/agent-orchestration/`}>Agent Orchestration</a> &mdash; manager-worker
-      patterns
-    </li>
-  </ul>
+  <p>
+    Browse the source, releases, and issue tracker on
+    <a href="https://github.com/omar-os/omar">GitHub</a>.
+  </p>
 </DocsLayout>
+
+<style>
+  .docs-lead {
+    color: var(--text-bright);
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+</style>

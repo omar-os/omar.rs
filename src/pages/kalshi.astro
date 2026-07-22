@@ -428,7 +428,7 @@ const DATA_BASE =
           yref: "paper",
           text: t.label,
           showarrow: false,
-          font: { size: 11, color: "#666" },
+          font: { size: 11, color: "#d7d2df" },
           yanchor: "bottom",
           yshift: 5,
         };
@@ -460,14 +460,14 @@ const DATA_BASE =
       ];
 
       const layout = {
-        xaxis: { title: "Date", gridcolor: "#eee", tickformat: "%b %d" },
-        yaxis: { title: "Account Value ($)", gridcolor: "#eee" },
+        xaxis: { title: "Date", gridcolor: "#2a2535", tickformat: "%b %d" },
+        yaxis: { title: "Account Value ($)", gridcolor: "#2a2535" },
         hovermode: "x unified",
         legend: { orientation: "h", y: -0.15 },
         margin: { t: 30, r: 20, b: 60, l: 60 },
-        plot_bgcolor: "#fafafa",
-        paper_bgcolor: "white",
-        font: { family: "Inter, sans-serif", size: 13 },
+        plot_bgcolor: "#0a090e",
+        paper_bgcolor: "#0e0d13",
+        font: { family: "Inter, sans-serif", size: 13, color: "#d7d2df" },
         shapes: [
           {
             type: "line",
@@ -525,14 +525,14 @@ const DATA_BASE =
 
       const layout = {
         annotations: orgAnnotations(endDate),
-        xaxis: { title: "Date", gridcolor: "#eee", tickformat: "%b %d" },
-        yaxis: { title: "Account Value ($)", gridcolor: "#eee" },
+        xaxis: { title: "Date", gridcolor: "#2a2535", tickformat: "%b %d" },
+        yaxis: { title: "Account Value ($)", gridcolor: "#2a2535" },
         hovermode: "x unified",
         legend: { orientation: "h", y: -0.15 },
         margin: { t: 30, r: 20, b: 60, l: 60 },
-        plot_bgcolor: "#fafafa",
-        paper_bgcolor: "white",
-        font: { family: "Inter, sans-serif", size: 13 },
+        plot_bgcolor: "#0a090e",
+        paper_bgcolor: "#0e0d13",
+        font: { family: "Inter, sans-serif", size: 13, color: "#d7d2df" },
         shapes: [
           ...orgShapes(endDate),
           {
@@ -718,19 +718,19 @@ const DATA_BASE =
       const layout = {
         xaxis: {
           title: "Date",
-          gridcolor: "#eee",
+          gridcolor: "#2a2535",
           tickformat: "%b %d",
         },
         yaxis: {
           title: "Account Value ($)",
-          gridcolor: "#eee",
+          gridcolor: "#2a2535",
         },
         hovermode: "closest",
         legend: { orientation: "h", y: -0.15, traceorder: "normal" },
         margin: { t: 30, r: 20, b: 60, l: 60 },
-        plot_bgcolor: "#fafafa",
-        paper_bgcolor: "white",
-        font: { family: "Inter, sans-serif", size: 13 },
+        plot_bgcolor: "#0a090e",
+        paper_bgcolor: "#0e0d13",
+        font: { family: "Inter, sans-serif", size: 13, color: "#d7d2df" },
         shapes: [
           {
             type: "line",
@@ -855,7 +855,7 @@ const DATA_BASE =
   .chart-container {
     width: 100%;
     min-height: 420px;
-    background: white;
+    background: var(--bg-code);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;

@@ -4,127 +4,88 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
 
 <DocsLayout
   title="快速开始"
-  description="开始使用 OMAR —— 一个用于管理 AI 智能体组织的 TUI 工具"
+  description="安装 OMAR 并启动你的第一个多智能体工作流。"
   lang="zh-CN"
 >
-  <h2>什么是 OMAR？</h2>
-  <p>
-    OMAR 是一个用于创建强大智能体组织的 TUI 工具。它运行在 tmux
-    之上，让你在一个终端内编排深层并行 AI 智能体。
+  <p class="docs-lead">
+    OMAR 是面向智能体系统的确定性编排运行时。它基于
+    tmux，让你在一个终端内指挥深层并行 AI 智能体团队。
   </p>
 
   <h2>前置依赖</h2>
   <ul>
     <li>
-      <strong>tmux 3.0+</strong> —— <code>brew install tmux</code>（macOS）或 <code
-        >apt install tmux</code
-      >（Debian/Ubuntu）
+      <strong>tmux 3.0+</strong> — macOS 运行 <code>brew install tmux</code
+      >，Debian/Ubuntu 运行
+      <code>apt install tmux</code>。
     </li>
     <li>
-      <strong>至少一个智能体后端：</strong>
-      <a
-        href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-        >Claude Code</a
-      >、
-      <a href="https://developers.openai.com/codex/cli">Codex CLI</a>、
-      <a href="https://github.com/anomalyco/opencode">Opencode</a>、
-      <a href="https://cursor.com/cli">Cursor CLI</a> 或
-      <a href="https://ai.google.dev/gemini-api/docs/gemini-cli">Gemini CLI</a>
+      至少安装一个受支持的编程智能体：Claude Code、Codex CLI、Cursor
+      CLI、Opencode 或 Google Antigravity CLI。
     </li>
   </ul>
 
   <h2>安装</h2>
   <h3>一键安装（推荐）</h3>
-  <pre><code>$ curl -fsSL https://omar.rs/install.sh | sh</code></pre>
-  <p>支持 macOS 和 Linux，默认安装到 <code>/usr/local/bin</code>。</p>
+  <pre><code>curl -fsSL https://omar.rs/install.sh | sh</code></pre>
+  <p>
+    安装脚本支持 macOS 和 Linux，默认将 OMAR 二进制安装到 <code
+      >/usr/local/bin</code
+    >。
+  </p>
 
   <h3>Homebrew</h3>
-  <pre><code>$ brew install lsk567/omar/omar</code></pre>
-  <p>自动安装 tmux 依赖。</p>
+  <pre><code>brew install omar-os/omar/omar</code></pre>
+  <p>OMAR 的 Homebrew tap 会自动安装 tmux 依赖。</p>
 
   <h3>从源码编译</h3>
-  <pre><code>$ git clone https://github.com/lsk567/omar.git
-$ cd omar && make install</code></pre>
-  <p>需要 Rust 1.70+ 和 GNU Make。</p>
+  <pre><code>git clone https://github.com/omar-os/omar.git
+cd omar
+make install</code></pre>
+  <p>从源码编译需要 Rust 1.70+ 和 GNU Make。</p>
 
-  <h2>启动</h2>
-  <pre><code>$ omar</code></pre>
-  <p>这会使用默认智能体后端（Claude Code）启动 OMAR 仪表盘。使用其他后端：</p>
+  <h2>启动 OMAR</h2>
+  <pre><code>omar</code></pre>
+  <p>OMAR 会自动检测已安装的后端。也可使用 <code>-a</code> 明确选择：</p>
   <table>
     <thead>
       <tr><th>后端</th><th>命令</th></tr>
     </thead>
     <tbody>
-      <tr
-        ><td>Claude Code</td><td
-          ><code>omar</code> 或 <code>omar --agent claude</code></td
-        ></tr
-      >
-      <tr><td>Codex CLI</td><td><code>omar --agent codex</code></td></tr>
-      <tr><td>Opencode</td><td><code>omar --agent opencode</code></td></tr>
-      <tr><td>Cursor CLI</td><td><code>omar --agent cursor</code></td></tr>
-      <tr><td>Gemini CLI</td><td><code>omar --agent gemini</code></td></tr>
+      <tr><td>Claude Code</td><td><code>omar -a claude</code></td></tr>
+      <tr><td>Codex CLI</td><td><code>omar -a codex</code></td></tr>
+      <tr><td>Cursor CLI</td><td><code>omar -a cursor</code></td></tr>
+      <tr><td>Opencode</td><td><code>omar -a opencode</code></td></tr>
+      <tr><td>Google Antigravity CLI</td><td><code>omar -a agy</code></td></tr>
     </tbody>
   </table>
 
-  <h2>第一次使用</h2>
+  <h2>运行第一个工作流</h2>
   <ol>
+    <li>运行 <code>omar</code>，打开仪表盘和执行助理。</li>
     <li>
-      运行 <code>omar</code> —— 你会看到 TUI 仪表盘和你的执行助理（EA）
+      将以下任务粘贴到执行助理窗口：
+      <pre><code>Run https://github.com/omar-os/omar/blob/main/prompts/tests/project-factory.md</code></pre>
     </li>
     <li>
-      将测试提示词粘贴到 EA 窗口：
-      <pre><code>Load and run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md</code></pre>
+      观察智能体团队自动组建。使用方向键切换智能体，按 <code>Tab</code> 进入下层，按
+      <code>Shift+Tab</code> 返回上层。
     </li>
     <li>
-      观察智能体自动创建。用 <strong>&uarr;&darr;</strong> 导航，<strong
-        >Tab</strong
-      > 深入智能体，<strong>Shift+Tab</strong> 返回上层
-    </li>
-    <li>
-      关闭时：
+      完成后告诉执行助理：
       <pre><code>Shutdown the test project and its agents.</code></pre>
     </li>
   </ol>
 
-  <h2>快捷键</h2>
-  <table>
-    <thead>
-      <tr><th>按键</th><th>操作</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><code>&larr;/&rarr;</code> 或 <code>h/l</code></td><td>切换面板（侧栏 / 主区域）</td></tr>
-      <tr><td><code>&uarr;/&darr;</code> 或 <code>j/k</code></td><td>上下移动选择</td></tr>
-      <tr><td><code>Tab</code></td><td>深入选中的智能体</td></tr>
-      <tr><td><code>Shift+Tab</code> 或 <code>Esc</code></td><td>返回上层</td></tr>
-      <tr><td><code>Enter</code></td><td>附加到选中的智能体</td></tr>
-      <tr><td><code>n</code></td><td>创建新智能体</td></tr>
-      <tr><td><code>d</code></td><td>终止选中的智能体</td></tr>
-      <tr><td><code>N</code></td><td>创建新 EA（输入名称）</td></tr>
-      <tr><td><code>D</code></td><td>删除当前 EA</td></tr>
-      <tr><td><code>[</code></td><td>上一个 EA</td></tr>
-      <tr><td><code>]</code></td><td>下一个 EA</td></tr>
-      <tr><td><code>p</code></td><td>添加项目</td></tr>
-      <tr><td><code>e</code></td><td>显示定时事件</td></tr>
-      <tr><td><code>S</code></td><td>设置</td></tr>
-      <tr><td><code>G</code></td><td>调试控制台</td></tr>
-      <tr><td><code>r</code></td><td>刷新智能体列表</td></tr>
-      <tr><td><code>z</code></td><td>脱离（仪表盘继续运行）</td></tr>
-      <tr><td><code>?</code></td><td>帮助</td></tr>
-      <tr><td><code>Q</code></td><td>退出</td></tr>
-    </tbody>
-  </table>
-
-  <h2>下一步</h2>
-  <ul>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}zh/docs/architecture/`}>架构与设计</a> —— 了解 OMAR 的工作原理
-    </li>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}zh/docs/api-reference/`}>HTTP API 参考</a> —— 程序化管理智能体
-    </li>
-    <li>
-      <a href={`${import.meta.env.BASE_URL}zh/docs/agent-orchestration/`}>智能体编排</a> —— 管理者-执行者模式
-    </li>
-  </ul>
+  <p>
+    可在 <a href="https://github.com/omar-os/omar">GitHub</a> 查看源码、版本发布和问题追踪。
+  </p>
 </DocsLayout>
+
+<style>
+  .docs-lead {
+    color: var(--text-bright);
+    font-size: 1.1rem;
+    line-height: 1.85;
+  }
+</style>

@@ -11,7 +11,7 @@ interface Props {
 
 const {
   title,
-  description = "TUI for creating powerful agentic organizations",
+  description = "Deterministic orchestration for agentic systems",
   lang = "en",
 } = Astro.props;
 ---
@@ -22,7 +22,13 @@ const {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <meta name="theme-color" content="#050507" />
+    <meta name="color-scheme" content="dark" />
+    <link
+      rel="icon"
+      type="image/png"
+      href={`${import.meta.env.BASE_URL}omar-favicon.png`}
+    />
     <title>{title} | OMAR</title>
   </head>
   <body>

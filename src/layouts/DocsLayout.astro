@@ -12,22 +12,8 @@ const isZh = lang.startsWith("zh");
 const base = import.meta.env.BASE_URL;
 
 const sidebarItems = isZh
-  ? [
-      { href: `${base}zh/docs/`, label: "快速开始" },
-      { href: `${base}zh/docs/architecture/`, label: "架构与设计" },
-      { href: `${base}zh/docs/implementation/`, label: "实现细节" },
-      { href: `${base}zh/docs/api-reference/`, label: "HTTP API 参考" },
-      { href: `${base}zh/docs/agent-orchestration/`, label: "智能体编排" },
-      { href: `${base}zh/docs/distribution/`, label: "安装与分发" },
-    ]
-  : [
-      { href: `${base}docs/`, label: "Getting Started" },
-      { href: `${base}docs/architecture/`, label: "Architecture & Design" },
-      { href: `${base}docs/implementation/`, label: "Implementation" },
-      { href: `${base}docs/api-reference/`, label: "HTTP API Reference" },
-      { href: `${base}docs/agent-orchestration/`, label: "Agent Orchestration" },
-      { href: `${base}docs/distribution/`, label: "Distribution" },
-    ];
+  ? [{ href: `${base}zh/docs/`, label: "快速开始" }]
+  : [{ href: `${base}docs/`, label: "Getting Started" }];
 
 const pathname = Astro.url.pathname;
 ---
@@ -70,9 +56,9 @@ const pathname = Astro.url.pathname;
 <style>
   .docs-layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 3rem;
-    padding-top: 2.5rem;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    padding-top: 3.5rem;
     padding-bottom: 4rem;
     min-height: calc(100vh - 3.5rem);
   }
@@ -87,7 +73,7 @@ const pathname = Astro.url.pathname;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-dim);
+    color: var(--accent-bright);
     margin-bottom: 0.75rem;
     padding-left: 0.75rem;
     font-weight: 500;
@@ -114,8 +100,8 @@ const pathname = Astro.url.pathname;
 
   .sidebar-link.active {
     color: var(--text-bright);
-    background: var(--bg-surface);
-    border-left-color: var(--text-bright);
+    background: var(--accent-soft);
+    border-left-color: var(--accent);
     font-weight: 500;
   }
 
@@ -156,8 +142,8 @@ const pathname = Astro.url.pathname;
     }
 
     .sidebar-link.active {
-      background: var(--text-bright);
-      color: #ffffff;
+      background: var(--accent);
+      color: var(--accent-contrast);
       border-left-color: transparent;
     }
 
