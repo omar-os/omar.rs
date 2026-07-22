@@ -41,7 +41,7 @@ author:
 
 你可以通过向执行助理发送以下提示来尝试此演示（需要安装一种以上的智能体后端）：
 ```
-Run https://github.com/lsk567/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
+Run https://github.com/omar-os/omar/blob/main/prompts/tests/project-factory.md and use different agent backends for the subagents spawned.
 ```
 
 ## OMAR 概览
@@ -345,6 +345,6 @@ HELIX，全称 *Hierarchical Evolution via LLM-Informed eXploration*，扩展了
 
 查看[文档](/zh/docs/)开始使用，加入我们的 [Discord](https://discord.gg/X76PSzmfWr) 与社区交流。
 
-如果你觉得 `omar` 有趣的话，请在 [GitHub](https://github.com/lsk567/omar) 上给我们加颗星。
+如果你觉得 `omar` 有趣的话，请在 [GitHub](https://github.com/omar-os/omar) 上给我们加颗星。
 
 `omar` 在加利福尼亚州伯克利用 ❤️ 打造。

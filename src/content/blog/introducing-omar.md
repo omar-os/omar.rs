@@ -345,6 +345,6 @@ At the time of writing, we're actively working on a few exciting features:
 
 Check out the [docs](/docs/) to get started, and join our [Discord](https://discord.gg/X76PSzmfWr) to connect with the community.
 
-Star us on [GitHub](https://github.com/lsk567/omar) if you find `omar` interesting.
+Star us on [GitHub](https://github.com/omar-os/omar) if you find `omar` interesting.
 
 `omar` is made with ❤️ in Berkeley, CA.

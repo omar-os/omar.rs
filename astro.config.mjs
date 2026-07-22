@@ -17,7 +17,10 @@ function remarkBaseUrl() {
             : `${attr}=${quote}${prefix}${url}${quote}`,
       );
     visit(tree, (node) => {
-      if ((node.type === "html" || node.type === "mdxJsxFlowElement") && typeof node.value === "string") {
+      if (
+        (node.type === "html" || node.type === "mdxJsxFlowElement") &&
+        typeof node.value === "string"
+      ) {
         node.value = rewriteAttr(node.value);
       }
       if (node.type === "image" && typeof node.url === "string") {
@@ -43,7 +46,7 @@ export default defineConfig({
   },
   markdown: {
     shikiConfig: {
-      theme: "github-light",
+      theme: "github-dark",
     },
     remarkPlugins: [remarkBaseUrl],
   },
