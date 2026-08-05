@@ -4,18 +4,19 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="Home"
-  description="OMAR is a deterministic orchestration runtime for deep hierarchies of parallel AI agents."
+  description="LLM agents are unpredictable. Their coordination doesn't have to be. OMAR delivers deterministic, formally specified orchestration for multi-agent systems."
 >
   <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
       <h1 class="hero-title">
-        Lead a swarm of <span class="hero-accent">100s of agents</span><br
-        />from a single terminal.
+        LLM agents are unpredictable.<br />Their coordination<br /><span
+          class="hero-accent">doesn't have to be.</span
+        >
       </h1>
       <p class="hero-subtitle">
-        <code>omar</code> is a TUI for creating powerful agentic organizations.<br
-        />Deep hierarchies of parallel AI agents, managed like a company.
+        <code>omar</code> delivers deterministic, formally specified orchestration
+        for multi-agent systems.
       </p>
       <div class="hero-actions">
         <a href={`${import.meta.env.BASE_URL}docs/`} class="btn btn-primary"
@@ -34,11 +35,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <!-- Demo -->
   <section class="demo">
     <div class="container">
-      <iframe
-        src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
-        allowfullscreen
-        loading="lazy"
-        scrolling="no"></iframe>
+      <figure class="demo-figure">
+        {
+          /* Silent screen capture, so it may autoplay muted and loop the way
+             the terminal cast beside it does. `playsinline` keeps iOS from
+             taking it fullscreen; controls are there because it runs for three
+             minutes and nobody should have to watch it from the top. */
+        }
+        <video
+          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
+          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
+          width="1280"
+          height="694"
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"></video>
+        <figcaption>Mission Control</figcaption>
+      </figure>
+      <figure class="demo-figure">
+        <iframe
+          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
+          allowfullscreen
+          loading="lazy"
+          scrolling="no"></iframe>
+        <figcaption>Terminal UI</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -57,8 +81,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <div class="feature-card">
           <h3>Heterogeneous backends</h3>
           <p>
-            Let Claude, Codex, Cursor, and Opencode collaborate as a team. Mix
-            and match the best model for each task.
+            Let Claude, Codex, Cursor, Opencode, and Google Antigravity
+            collaborate as a team. Mix and match the best model for each task.
           </p>
         </div>
         <div class="feature-card">
@@ -137,25 +161,33 @@ import BaseLayout from "../layouts/BaseLayout.astro";
                 >Claude Code</a
               >,
               <a href="https://developers.openai.com/codex/cli">Codex CLI</a>,
-              <a href="https://github.com/anomalyco/opencode">Opencode</a>, or
-              <a href="https://cursor.com/cli">Cursor CLI</a>.
+              <a href="https://github.com/anomalyco/opencode">Opencode</a>,
+              <a href="https://cursor.com/cli">Cursor CLI</a>, or
+              <a href="https://antigravity.google/product/antigravity-cli"
+                >Google Antigravity CLI</a
+              >.
             </p>
           </div>
         </div>
         <div class="step">
           <div class="step-num">2</div>
           <div class="step-content">
-            <h3>Launch</h3>
-            <pre><code><span class="prompt">$</span> omar</code></pre>
+            <h3>Launch Mission Control</h3>
+            <pre><code><span class="prompt">$</span> omar serve --ui</code></pre>
+            <p>
+              Opens the web UI in your browser. Describe a workflow, confirm the
+              program it drafts, and watch the run on a live diagram.
+            </p>
           </div>
         </div>
         <div class="step">
           <div class="step-num">3</div>
           <div class="step-content">
-            <h3>Give your EA a task</h3>
+            <h3>Or drive it from the terminal</h3>
+            <pre><code><span class="prompt">$</span> omar</code></pre>
             <p>
-              Copy a prompt into your Executive Assistant window and watch
-              agents spawn.
+              The same runtime in tmux. Copy a prompt into your Executive
+              Assistant window and watch agents spawn.
             </p>
           </div>
         </div>
@@ -184,7 +216,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   .hero-title {
-    font-size: clamp(2.35rem, 6vw, 4.6rem);
+    /* Smaller than the old headline needed: this one is two sentences,
+       and at 4.6rem the first alone took two lines. */
+    font-size: clamp(2rem, 4.4vw, 3.35rem);
     font-weight: 700;
     letter-spacing: -0.045em;
     margin-bottom: 1.5rem;
@@ -236,14 +270,41 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     padding: 0 0 4rem;
   }
 
+  .demo-figure {
+    margin: 0 0 2.5rem;
+  }
+
+  .demo-figure:last-child {
+    margin-bottom: 0;
+  }
+
+  .demo figcaption {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .demo video,
   .demo iframe {
+    display: block;
     width: 100%;
-    height: 600px;
     border: 1px solid rgba(140, 99, 242, 0.38);
     border-radius: var(--radius);
     overflow: hidden;
     background: #000;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Its own aspect ratio, so nothing jumps while it loads. */
+  .demo video {
+    height: auto;
+    aspect-ratio: 1280 / 694;
+  }
+
+  .demo iframe {
+    height: 600px;
   }
 
   /* Features */

@@ -7,9 +7,9 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
   description="Install OMAR and launch your first multi-agent workflow."
 >
   <p class="docs-lead">
-    OMAR is a deterministic orchestration runtime for agentic systems. It runs
-    on tmux and lets you direct deep hierarchies of parallel AI agents from one
-    terminal.
+    OMAR is a deterministic orchestration runtime for agentic systems. You
+    describe what a team should do; OMAR compiles that into a program with an
+    explicit topology, then runs it — in your browser, or from a terminal.
   </p>
 
   <h2>Prerequisites</h2>
@@ -42,11 +42,25 @@ cd omar
 make install</code></pre>
   <p>Building from source requires Rust 1.70+ and GNU Make.</p>
 
-  <h2>Launch OMAR</h2>
+  <h2>Launch Mission Control</h2>
+  <pre><code>omar serve --ui</code></pre>
+  <p>
+    Serves the web UI from the daemon's own address and opens it in your
+    browser. The page and the API share an origin, so there is nothing to point
+    at anything.
+  </p>
+  <p>
+    Describe a workflow. The assistant drafts an OMAR program and shows you the
+    topology it compiles to; nothing runs until you confirm. Then the diagram
+    goes live — ports carry values, reactions light up as their agents work, and
+    double-clicking an agent opens its terminal.
+  </p>
+
+  <h2>Launch the terminal UI</h2>
   <pre><code>omar</code></pre>
   <p>
-    OMAR detects installed backends automatically. Select one explicitly with
-    <code>-a</code>:
+    The same runtime, driven from tmux instead. OMAR detects installed backends
+    automatically; select one explicitly with <code>-a</code>:
   </p>
   <table>
     <thead>
@@ -61,7 +75,7 @@ make install</code></pre>
     </tbody>
   </table>
 
-  <h2>Run your first workflow</h2>
+  <h2>Run your first workflow in the terminal</h2>
   <ol>
     <li>
       Launch <code>omar</code> to open the dashboard and Executive Assistant.
