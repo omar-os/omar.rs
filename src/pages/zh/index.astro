@@ -4,20 +4,19 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
 <BaseLayout
   title="首页"
-  description="OMAR 是一个用于创建强大智能体组织的 TUI 工具。在一个终端内编排深层并行 AI 智能体。"
+  description="LLM 智能体难以预测，它们的协作不必如此。OMAR 为多智能体系统提供确定性的、有形式化规约的编排。"
   lang="zh-CN"
 >
   <!-- Hero -->
   <section class="hero">
     <div class="container hero-inner">
       <h1 class="hero-title">
-        一人成团，<br />在一个终端指挥 <span class="hero-accent"
-          >数百个智能体</span
+        LLM 智能体难以预测。<br />它们的协作 <span class="hero-accent"
+          >不必如此</span
         >。
       </h1>
       <p class="hero-subtitle">
-        <code>omar</code> 是一个用于创建强大智能体组织的 TUI 工具。<br
-        />像管理公司一样管理AI智能体。
+        <code>omar</code> 为多智能体系统提供确定性的、有形式化规约的编排。
       </p>
       <div class="hero-actions">
         <a href={`${import.meta.env.BASE_URL}zh/docs/`} class="btn btn-primary"
@@ -36,11 +35,29 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   <!-- Demo -->
   <section class="demo">
     <div class="container">
-      <iframe
-        src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
-        allowfullscreen
-        loading="lazy"
-        scrolling="no"></iframe>
+      <figure class="demo-figure">
+        {/* 无声录屏，因此可以像旁边的终端录像一样静音自动循环播放。 */}
+        <video
+          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
+          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
+          width="1280"
+          height="694"
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"></video>
+        <figcaption>Mission Control</figcaption>
+      </figure>
+      <figure class="demo-figure">
+        <iframe
+          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
+          allowfullscreen
+          loading="lazy"
+          scrolling="no"></iframe>
+        <figcaption>终端界面</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -166,7 +183,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
   }
 
   .hero-title {
-    font-size: clamp(2.35rem, 6vw, 4.6rem);
+    /* Smaller than the old headline needed: this one is two sentences,
+       and at 4.6rem the first alone took two lines. */
+    font-size: clamp(2rem, 4.4vw, 3.35rem);
     font-weight: 700;
     letter-spacing: -0.045em;
     margin-bottom: 1.5rem;
@@ -218,14 +237,41 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     padding: 0 0 4rem;
   }
 
+  .demo-figure {
+    margin: 0 0 2.5rem;
+  }
+
+  .demo-figure:last-child {
+    margin-bottom: 0;
+  }
+
+  .demo figcaption {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+  }
+
+  .demo video,
   .demo iframe {
+    display: block;
     width: 100%;
-    height: 600px;
     border: 1px solid rgba(140, 99, 242, 0.38);
     border-radius: var(--radius);
     overflow: hidden;
     background: #000;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Its own aspect ratio, so nothing jumps while it loads. */
+  .demo video {
+    height: auto;
+    aspect-ratio: 1280 / 694;
+  }
+
+  .demo iframe {
+    height: 600px;
   }
 
   /* Features */
