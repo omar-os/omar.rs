@@ -8,8 +8,8 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
   lang="zh-CN"
 >
   <p class="docs-lead">
-    OMAR 是面向智能体系统的确定性编排运行时。它基于
-    tmux，让你在一个终端内指挥深层并行 AI 智能体团队。
+    OMAR 是面向智能体系统的确定性编排运行时。你描述团队要做什么，OMAR
+    将其编译为拓扑结构明确的程序，然后运行它——在浏览器中，或在终端里。
   </p>
 
   <h2>前置依赖</h2>
@@ -44,9 +44,23 @@ cd omar
 make install</code></pre>
   <p>从源码编译需要 Rust 1.70+ 和 GNU Make。</p>
 
-  <h2>启动 OMAR</h2>
+  <h2>启动 Mission Control</h2>
+  <pre><code>omar serve --ui</code></pre>
+  <p>
+    从守护进程自身的地址提供 Web 界面，并在浏览器中打开。页面与 API
+    同源，因此无需配置任何地址。
+  </p>
+  <p>
+    描述你的工作流。助理会起草一个 OMAR
+    程序，并展示它编译出的拓扑；在你确认之前不会运行任何东西。确认后拓扑图即时生效——端口传递数值，反应随其智能体工作而高亮，双击智能体即可打开它的终端。
+  </p>
+
+  <h2>启动终端界面</h2>
   <pre><code>omar</code></pre>
-  <p>OMAR 会自动检测已安装的后端。也可使用 <code>-a</code> 明确选择：</p>
+  <p>
+    同一个运行时，改为在 tmux 中驱动。OMAR 会自动检测已安装的后端，也可使用
+    <code>-a</code> 明确选择：
+  </p>
   <table>
     <thead>
       <tr><th>后端</th><th>命令</th></tr>
@@ -60,7 +74,7 @@ make install</code></pre>
     </tbody>
   </table>
 
-  <h2>运行第一个工作流</h2>
+  <h2>在终端中运行第一个工作流</h2>
   <ol>
     <li>运行 <code>omar</code>，打开仪表盘和执行助理。</li>
     <li>
