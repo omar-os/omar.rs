@@ -49,7 +49,7 @@ const backends = [
   { name: "OpenAI", icon: "openai" },
   { name: "Cursor", icon: "cursor" },
   { name: "OpenCode", icon: "opencode" },
-  { name: "Antigravity", icon: "antigravity" },
+  { name: "Antigravity (Google)", icon: "google" },
 ];
 const points = [
   [42, 105],
@@ -104,7 +104,7 @@ const states = [
       </div>
     </div>
   </div>
-  <div class="diagram-wrap" role="group" aria-label={copy.alt}>
+  <agent-diagram class="diagram-wrap" role="group" aria-label={copy.alt}>
     <div class="diagram-labels">
       <div>
         <p class="swarm-warning">
@@ -148,20 +148,22 @@ const states = [
       <ellipse cx="700" cy="220" rx="310" ry="200" fill="url(#machine-glow)"
       ></ellipse>
       <g class="swarm" fill="none" stroke="var(--coral)">
-        <path
-          class="tangle"
-          d="M42 105 Q300 5 192 173 T39 295 T258 346 Q360 180 133 63 T82 197 T307 146 Q90 440 145 320 T237 102 Q0 260 279 231 T93 382"
-        ></path>
-        <path
-          class="tangle secondary"
-          d="M93 382 Q320 210 42 105 L279 231 L133 63 L145 320 L307 146 L39 295 L237 102 L258 346 L82 197 L192 173"
-        ></path>
+        <g class="swarm-links">
+          {
+            points.map(([x, y], i) => {
+              const [endX, endY] = points[(i + 3) % points.length];
+              return (
+                <path
+                  class="swarm-link"
+                  d={`M${x} ${y} Q${(x + endX) / 2 + 35} ${(y + endY) / 2 - 35} ${endX} ${endY}`}
+                />
+              );
+            })
+          }
+        </g>
         {
           points.map(([x, y], i) => (
-            <g
-              class="wander"
-              style={`--i:${i};--dx:${i % 2 ? 12 : -15}px;--dy:${i % 3 ? -12 : 17}px`}
-            >
+            <g class="wander" data-x={x} data-y={y}>
               <>
                 <circle
                   cx={x}
@@ -264,7 +266,7 @@ const states = [
         ></g
       >
     </svg>
-  </div>
+  </agent-diagram>
 </section>
 
 <style>
@@ -314,8 +316,19 @@ const states = [
     gap: 1.6rem;
   }
   .diagram-wrap {
+    position: relative;
     display: grid;
     grid-template-columns: 36% 64%;
+  }
+  .diagram-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 36%;
+    width: 1px;
+    background: var(--border);
+    pointer-events: none;
   }
   .diagram-labels {
     display: contents;
@@ -352,19 +365,11 @@ const states = [
     width: 100%;
     height: auto;
   }
-  .tangle {
-    stroke-width: 0.8;
-    opacity: 0.5;
-    stroke-dasharray: 5 7;
-    animation: drift 20s linear infinite;
-  }
-  .secondary {
-    opacity: 0.22;
-    animation-direction: reverse;
-  }
-  .wander {
-    animation: wander 5s ease-in-out infinite alternate;
-    animation-delay: calc(var(--i) * -0.47s);
+  .swarm-link {
+    stroke-width: 1.1;
+    opacity: 0.4;
+    fill: none;
+    stroke-linecap: round;
   }
   .rail {
     fill: none;
@@ -430,16 +435,6 @@ const states = [
     font: 9px var(--font-mono);
     letter-spacing: 0.5px;
   }
-  @keyframes wander {
-    to {
-      transform: translate(var(--dx), var(--dy));
-    }
-  }
-  @keyframes drift {
-    to {
-      stroke-dashoffset: -120;
-    }
-  }
   @keyframes signal {
     from {
       stroke-dashoffset: 24;
@@ -491,10 +486,14 @@ const states = [
     .diagram-wrap {
       grid-template-columns: 1fr;
     }
+    .diagram-wrap::after {
+      display: none;
+    }
     .diagram-labels > div {
       padding: 1rem 1rem 0;
     }
     .diagram-labels > div:last-child {
+      border-top: 1px solid var(--border);
       grid-row: 3;
     }
     .swarm-diagram {
@@ -517,3 +516,114 @@ const states = [
     }
   }
 </style>
+
+<script>
+  class AgentDiagram extends HTMLElement {
+    cleanup?: () => void;
+
+    connectedCallback() {
+      const nodes = Array.from(this.querySelectorAll<SVGGElement>(".wander"));
+      const paths = Array.from(
+        this.querySelectorAll<SVGPathElement>(".swarm-link"),
+      );
+      const origins = nodes.map((node) => ({
+        x: Number(node.dataset.x),
+        y: Number(node.dataset.y),
+      }));
+      const initialPaths = paths.map((path) => path.getAttribute("d") ?? "");
+      const motion = matchMedia("(prefers-reduced-motion: reduce)");
+      let visible = true;
+      let frame = 0;
+      let previous = 0;
+      let elapsed = 0;
+      const edges = paths.map((_, i) => ({
+        from: i,
+        to: (i + 3) % nodes.length,
+        bend: (i % 2 ? 1 : -1) * (25 + Math.random() * 55),
+        born: -Math.random() * 2000,
+        duration: 2400 + Math.random() * 3000,
+      }));
+      const reconnect = (edge: (typeof edges)[number]) => {
+        // Pick an unused pair; each edge independently fades out and reconnects.
+        const candidates: [number, number][] = [];
+        for (let a = 0; a < nodes.length; a++) {
+          for (let b = a + 1; b < nodes.length; b++) {
+            if (
+              !edges.some(
+                (other) =>
+                  (other.from === a && other.to === b) ||
+                  (other.from === b && other.to === a),
+              )
+            )
+              candidates.push([a, b]);
+          }
+        }
+        const pair = candidates[Math.floor(Math.random() * candidates.length)];
+        if (pair) [edge.from, edge.to] = pair;
+        edge.born = elapsed;
+        edge.duration = 2400 + Math.random() * 3000;
+        edge.bend = (Math.random() < 0.5 ? -1 : 1) * (25 + Math.random() * 55);
+      };
+      const render = (timestamp: number) => {
+        elapsed += previous ? Math.min(timestamp - previous, 100) : 0;
+        previous = timestamp;
+        const positions = origins.map((origin, i) => {
+          const dx = Math.sin(elapsed / (1700 + i * 65) + i * 1.7) * 13;
+          const dy = Math.cos(elapsed / (2100 + i * 45) + i * 2.1) * 15;
+          nodes[i].setAttribute("transform", `translate(${dx} ${dy})`);
+          return { x: origin.x + dx, y: origin.y + dy };
+        });
+        edges.forEach((edge, i) => {
+          if (elapsed - edge.born >= edge.duration) reconnect(edge);
+          const progress = (elapsed - edge.born) / edge.duration;
+          const opacity =
+            Math.min(1, progress / 0.2, (1 - progress) / 0.2) * 0.55;
+          const a = positions[edge.from],
+            b = positions[edge.to];
+          const distance = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+          const cx = (a.x + b.x) / 2 - ((b.y - a.y) / distance) * edge.bend;
+          const cy = (a.y + b.y) / 2 + ((b.x - a.x) / distance) * edge.bend;
+          paths[i].setAttribute(
+            "d",
+            `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`,
+          );
+          paths[i].style.opacity = String(Math.max(0, opacity));
+        });
+        frame = requestAnimationFrame(render);
+      };
+      const sync = () => {
+        cancelAnimationFrame(frame);
+        previous = 0;
+        if (motion.matches) {
+          nodes.forEach((node) => node.removeAttribute("transform"));
+          paths.forEach((path, i) => {
+            path.setAttribute("d", initialPaths[i]);
+            path.style.removeProperty("opacity");
+          });
+        } else if (visible && !document.hidden) {
+          frame = requestAnimationFrame(render);
+        }
+      };
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        sync();
+      });
+      observer.observe(this);
+      motion.addEventListener("change", sync);
+      document.addEventListener("visibilitychange", sync);
+      sync();
+      this.cleanup = () => {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+        motion.removeEventListener("change", sync);
+        document.removeEventListener("visibilitychange", sync);
+      };
+    }
+
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get("agent-diagram"))
+    customElements.define("agent-diagram", AgentDiagram);
+</script>
