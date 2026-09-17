@@ -366,6 +366,7 @@ const states = [
     height: auto;
   }
   .swarm-link {
+    stroke-dasharray: 4 7;
     stroke-width: 1.1;
     opacity: 0.4;
     fill: none;
@@ -540,6 +541,8 @@ const states = [
         from: i,
         to: (i + 3) % nodes.length,
         bend: (i % 2 ? 1 : -1) * (25 + Math.random() * 55),
+        direction: i % 2 ? 1 : -1,
+        speed: 18 + Math.random() * 14,
         born: -Math.random() * 2000,
         duration: 2400 + Math.random() * 3000,
       }));
@@ -560,6 +563,8 @@ const states = [
         }
         const pair = candidates[Math.floor(Math.random() * candidates.length)];
         if (pair) [edge.from, edge.to] = pair;
+        edge.direction = Math.random() < 0.5 ? -1 : 1;
+        edge.speed = 18 + Math.random() * 14;
         edge.born = elapsed;
         edge.duration = 2400 + Math.random() * 3000;
         edge.bend = (Math.random() < 0.5 ? -1 : 1) * (25 + Math.random() * 55);
@@ -588,6 +593,9 @@ const states = [
             `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`,
           );
           paths[i].style.opacity = String(Math.max(0, opacity));
+          paths[i].style.strokeDashoffset = String(
+            -edge.direction * ((elapsed - edge.born) / 1000) * edge.speed,
+          );
         });
         frame = requestAnimationFrame(render);
       };
@@ -599,6 +607,7 @@ const states = [
           paths.forEach((path, i) => {
             path.setAttribute("d", initialPaths[i]);
             path.style.removeProperty("opacity");
+            path.style.removeProperty("stroke-dashoffset");
           });
         } else if (visible && !document.hidden) {
           frame = requestAnimationFrame(render);
