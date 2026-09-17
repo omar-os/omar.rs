@@ -18,7 +18,7 @@ const copy = zh
       swarmWarning: "智能体蜂群不可预测且危险。请查看",
       incident: "OpenAI / Hugging Face 事件",
       machine: "智能体机器是确定性的、可验证的。",
-      alt: "左侧 Anthropic、OpenAI、Cursor、OpenCode 和 Antigravity 智能体沿杂乱路径漂移；右侧固定的 OMAR 拓扑依次执行规划、团队并行工作、分发汇聚、审查、反馈和发布。",
+      alt: "智能体蜂群与确定性 OMAR 拓扑的轮播对比。",
     }
   : {
       no: "Say no to agent “swarms”.",
@@ -33,7 +33,7 @@ const copy = zh
       swarmWarning: "Agent swarm is unpredictable and dangerous. Check the",
       incident: "OpenAI / Hugging Face incident",
       machine: "An agentic machine is deterministic and verifiable.",
-      alt: "Anthropic, OpenAI, Cursor, OpenCode, and Antigravity agents drift along tangled paths on the left. On the right, a fixed OMAR topology executes planning, parallel teams, scatter-gather, review, feedback, and publishing.",
+      alt: "A carousel comparing an ephemeral agent swarm with a deterministic OMAR topology.",
     };
 const backends = [
   { name: "Anthropic", icon: "anthropic" },
@@ -42,20 +42,10 @@ const backends = [
   { name: "OpenCode", icon: "opencode" },
   { name: "Antigravity (Google)", icon: "google" },
 ];
-const points = [
-  [42, 105],
-  [133, 63],
-  [237, 102],
-  [82, 197],
-  [192, 173],
-  [279, 231],
-  [39, 295],
-  [145, 320],
-  [258, 346],
-  [307, 146],
-  [188, 265],
-  [93, 382],
-];
+const points = Array.from({ length: 36 }, (_, i) => [
+  70 + (i % 9) * 140 + Math.sin(i * 2.7) * 20,
+  70 + Math.floor(i / 9) * 120 + Math.cos(i * 1.9) * 20,
+]);
 ---
 
 <section class="machine-hero">
@@ -88,78 +78,117 @@ const points = [
       </div>
     </div>
   </div>
-  <agent-diagram class="diagram-wrap" role="group" aria-label={copy.alt}>
-    <div class="diagram-labels">
-      <div>
-        <p class="swarm-warning">
+  <agent-carousel
+    class="diagram-carousel"
+    role="region"
+    aria-roledescription={zh ? "轮播" : "carousel"}
+    aria-label={copy.alt}
+  >
+    <div class="carousel-stage">
+      <section
+        class="carousel-slide"
+        data-slide="0"
+        role="group"
+        aria-roledescription={zh ? "幻灯片" : "slide"}
+        aria-label={zh ? "1 / 2：智能体蜂群" : "1 of 2: Agent swarm"}
+      >
+        <p class="slide-label swarm-warning">
           {copy.swarmWarning}
           <a
             href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#agents-were-very-interested-in-manipulating-their-own-transcripts,-and-their-tests-successfully-“spoofed”-some-tool-calls-in-our-transcripts"
             >{copy.incident}</a
           >.
         </p>
-      </div><div>
-        <p class="machine-label">{copy.machine}</p>
-      </div>
-    </div>
-    <svg
-      class="diagram swarm-diagram"
-      viewBox="0 30 360 400"
-      aria-hidden="true"
-    >
-      <defs>
-        <pattern
-          id="machine-grid"
-          width="24"
-          height="24"
-          patternUnits="userSpaceOnUse"
-          ><circle cx="1" cy="1" r=".7" fill="var(--accent)" opacity=".22"
-          ></circle></pattern
+        <svg
+          class="diagram swarm-diagram"
+          viewBox="0 0 1285 510"
+          aria-hidden="true"
         >
-      </defs>
-      <rect width="1000" height="430" fill="url(#machine-grid)"></rect>
-      <g class="swarm" fill="none" stroke="var(--coral)">
-        <g class="swarm-links">
-          {
-            points.map(([x, y], i) => {
-              const [endX, endY] = points[(i + 3) % points.length];
-              return (
-                <path
-                  class="swarm-link"
-                  d={`M${x} ${y} Q${(x + endX) / 2 + 35} ${(y + endY) / 2 - 35} ${endX} ${endY}`}
-                />
-              );
-            })
-          }
-        </g>
-        {
-          points.map(([x, y], i) => (
-            <g class="wander" data-x={x} data-y={y}>
-              <>
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="19"
-                  fill="var(--coral-soft)"
-                  stroke-opacity=".6"
-                />
-                <image
-                  href={`${import.meta.env.BASE_URL}logos/backends/${backends[i % backends.length].icon}.svg`}
-                  x={x - 11}
-                  y={y - 11}
-                  width="22"
-                  height="22"
-                >
-                  <title>{backends[i % backends.length].name}</title>
-                </image>
-              </>
+          <defs>
+            <pattern
+              id="machine-grid"
+              width="24"
+              height="24"
+              patternUnits="userSpaceOnUse"
+              ><circle cx="1" cy="1" r=".7" fill="var(--accent)" opacity=".22"
+              ></circle></pattern
+            >
+          </defs>
+          <rect width="1285" height="510" fill="url(#machine-grid)"></rect>
+          <g class="swarm" fill="none" stroke="var(--coral)">
+            <g class="swarm-links">
+              {
+                points.map(([x, y], i) => {
+                  const [endX, endY] = points[(i + 3) % points.length];
+                  return (
+                    <path
+                      class="swarm-link"
+                      d={`M${x} ${y} Q${(x + endX) / 2 + 35} ${(y + endY) / 2 - 35} ${endX} ${endY}`}
+                    />
+                  );
+                })
+              }
             </g>
-          ))
-        }
-      </g>
-    </svg>
-    <div class="machine-diagram"><MachineTopology lang={lang} /></div>
-  </agent-diagram>
+            {
+              points.map(([x, y], i) => (
+                <g class="wander" data-x={x} data-y={y}>
+                  <>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r="19"
+                      fill="var(--coral-soft)"
+                      stroke-opacity=".6"
+                    />
+                    <image
+                      href={`${import.meta.env.BASE_URL}logos/backends/${backends[i % backends.length].icon}.svg`}
+                      x={x - 11}
+                      y={y - 11}
+                      width="22"
+                      height="22"
+                    >
+                      <title>{backends[i % backends.length].name}</title>
+                    </image>
+                  </>
+                </g>
+              ))
+            }
+          </g>
+        </svg>
+      </section>
+      <section
+        class="carousel-slide"
+        data-slide="1"
+        role="group"
+        aria-roledescription={zh ? "幻灯片" : "slide"}
+        aria-label={zh ? "2 / 2：智能体机器" : "2 of 2: Agentic machine"}
+      >
+        <p class="slide-label machine-label">{copy.machine}</p>
+        <MachineTopology lang={lang} />
+      </section>
+    </div>
+    <div class="carousel-controls" hidden>
+      <div
+        class="slide-buttons"
+        role="group"
+        aria-label={zh ? "选择幻灯片" : "Choose slide"}
+      >
+        <button type="button" data-select="0" aria-pressed="true"
+          >{zh ? "01 蜂群" : "01 Swarm"}</button
+        >
+        <button type="button" data-select="1" aria-pressed="false"
+          >{zh ? "02 机器" : "02 Machine"}</button
+        >
+      </div>
+      <button
+        type="button"
+        data-pause
+        data-pause-label={zh ? "暂停轮播" : "Pause slideshow"}
+        data-play-label={zh ? "播放轮播" : "Play slideshow"}
+        >{zh ? "暂停轮播" : "Pause slideshow"}</button
+      >
+    </div>
+  </agent-carousel>
 </section>
 
 <style>
@@ -208,42 +237,53 @@ const points = [
   .actions a {
     gap: 1.6rem;
   }
-  .diagram-wrap {
-    position: relative;
-    display: grid;
-    grid-template-columns: 36% 64%;
+  .diagram-carousel {
+    display: block;
   }
-  .diagram-wrap::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 36%;
-    width: 1px;
-    background: var(--border);
-    pointer-events: none;
+  .carousel-stage {
+    min-height: calc(3.5rem + 100vw * 510 / 1285);
   }
-  .diagram-labels {
-    display: contents;
+  .carousel-slide[hidden] {
+    display: none;
   }
-  .diagram-labels > div {
-    padding: 1.5rem 1.5rem 0;
-    grid-row: 1;
-  }
-  .swarm-diagram {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  .machine-diagram {
-    min-width: 0;
-    align-self: center;
-    grid-column: 2;
-    grid-row: 2;
-  }
-  .diagram-labels p {
+  .slide-label {
+    min-height: 3.5rem;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
     font-size: 13px;
     line-height: 1.7;
-    margin-top: 0;
+  }
+  .carousel-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .carousel-controls[hidden] {
+    display: none;
+  }
+  .slide-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .carousel-controls button {
+    font: 11px var(--font-mono);
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+  }
+  .carousel-controls button[aria-pressed="true"] {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .carousel-controls button:hover {
+    color: var(--text-bright);
+    border-color: var(--accent-bright);
   }
   .swarm-warning {
     color: var(--coral);
@@ -283,149 +323,174 @@ const points = [
     .hero-copy {
       margin-bottom: 2rem;
     }
-    .diagram-wrap {
-      grid-template-columns: 1fr;
+    .carousel-stage {
+      min-height: calc(4.5rem + 960px * 510 / 1285);
     }
-    .diagram-wrap::after {
-      display: none;
+    .slide-label {
+      min-height: 4.5rem;
+      padding-inline: 1rem;
     }
-    .diagram-labels > div {
-      padding: 1rem 1rem 0;
+    .carousel-controls {
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
-    .diagram-labels > div:last-child {
-      border-top: 1px solid var(--border);
-      grid-row: 3;
-    }
-    .swarm-diagram {
-      height: 260px;
-    }
-    .machine-diagram {
-      grid-column: 1;
-      grid-row: 4;
+    .carousel-controls button {
+      padding: 0.6rem 0.8rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .diagram-wrap * {
+    .diagram-carousel * {
       animation: none !important;
     }
   }
 </style>
 
 <script>
-  class AgentDiagram extends HTMLElement {
+  import { createSwarm } from "../lib/swarm-demo";
+  import { MACHINE_CYCLE_MS } from "../lib/machine-demo";
+  class AgentCarousel extends HTMLElement {
     cleanup?: () => void;
-
     connectedCallback() {
-      const nodes = Array.from(this.querySelectorAll<SVGGElement>(".wander"));
-      const paths = Array.from(
-        this.querySelectorAll<SVGPathElement>(".swarm-link"),
-      );
-      const origins = nodes.map((node) => ({
-        x: Number(node.dataset.x),
-        y: Number(node.dataset.y),
-      }));
-      const initialPaths = paths.map((path) => path.getAttribute("d") ?? "");
+      const slides = [...this.querySelectorAll<HTMLElement>("[data-slide]")];
+      const buttons = [
+        ...this.querySelectorAll<HTMLButtonElement>("[data-select]"),
+      ];
+      const pause = this.querySelector<HTMLButtonElement>("[data-pause]")!;
+      const controls = this.querySelector<HTMLElement>(".carousel-controls")!;
+      const svg = this.querySelector<SVGSVGElement>(".swarm-diagram")!;
+      const nodes = [...this.querySelectorAll<SVGGElement>(".wander")];
+      const paths = [...this.querySelectorAll<SVGPathElement>(".swarm-link")];
+      const topology = this.querySelector<HTMLElement>("machine-topology")!;
       const motion = matchMedia("(prefers-reduced-motion: reduce)");
-      let visible = true;
-      let frame = 0;
-      let previous = 0;
-      let elapsed = 0;
-      const edges = paths.map((_, i) => ({
-        from: i,
-        to: (i + 3) % nodes.length,
-        bend: (i % 2 ? 1 : -1) * (25 + Math.random() * 55),
-        direction: i % 2 ? 1 : -1,
-        speed: 18 + Math.random() * 14,
-        born: -Math.random() * 2000,
-        duration: 2400 + Math.random() * 3000,
-      }));
-      const reconnect = (edge: (typeof edges)[number]) => {
-        // Pick an unused pair; each edge independently fades out and reconnects.
-        const candidates: [number, number][] = [];
-        for (let a = 0; a < nodes.length; a++) {
-          for (let b = a + 1; b < nodes.length; b++) {
-            if (
-              !edges.some(
-                (other) =>
-                  (other.from === a && other.to === b) ||
-                  (other.from === b && other.to === a),
-              )
-            )
-              candidates.push([a, b]);
-          }
-        }
-        const pair = candidates[Math.floor(Math.random() * candidates.length)];
-        if (pair) [edge.from, edge.to] = pair;
-        edge.direction = Math.random() < 0.5 ? -1 : 1;
-        edge.speed = 18 + Math.random() * 14;
-        edge.born = elapsed;
-        edge.duration = 2400 + Math.random() * 3000;
-        edge.bend = (Math.random() < 0.5 ? -1 : 1) * (25 + Math.random() * 55);
+      const narrow = matchMedia("(max-width: 640px)");
+      let simulation = createSwarm(nodes.length, narrow.matches ? 640 : 1285);
+      let active = 0,
+        slideTime = 0,
+        swarmTime = 0,
+        previous = 0,
+        frame = 0;
+      let visible = true,
+        paused = false,
+        focused = false;
+      const updateTopology = (reset = false) => {
+        topology.dataset.playbackActive = String(active === 1);
+        topology.dispatchEvent(
+          new CustomEvent("topology-playback", { detail: { reset } }),
+        );
       };
-      const render = (timestamp: number) => {
-        elapsed += previous ? Math.min(timestamp - previous, 100) : 0;
-        previous = timestamp;
-        const positions = origins.map((origin, i) => {
-          const dx = Math.sin(elapsed / (1700 + i * 65) + i * 1.7) * 13;
-          const dy = Math.cos(elapsed / (2100 + i * 45) + i * 2.1) * 15;
-          nodes[i].setAttribute("transform", `translate(${dx} ${dy})`);
-          return { x: origin.x + dx, y: origin.y + dy };
+      const show = (index: number) => {
+        active = index;
+        slideTime = 0;
+        slides.forEach((slide, i) => {
+          slide.hidden = i !== active;
         });
-        edges.forEach((edge, i) => {
-          if (elapsed - edge.born >= edge.duration) reconnect(edge);
-          const progress = (elapsed - edge.born) / edge.duration;
-          const opacity =
-            Math.min(1, progress / 0.2, (1 - progress) / 0.2) * 0.55;
-          const a = positions[edge.from],
-            b = positions[edge.to];
-          const distance = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-          const cx = (a.x + b.x) / 2 - ((b.y - a.y) / distance) * edge.bend;
-          const cy = (a.y + b.y) / 2 + ((b.x - a.x) / distance) * edge.bend;
-          paths[i].setAttribute(
-            "d",
-            `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`,
+        buttons.forEach((button, i) =>
+          button.setAttribute("aria-pressed", String(i === active)),
+        );
+        updateTopology(active === 1);
+      };
+      const draw = (time: number) => {
+        const { positions, links } = simulation.sample(time);
+        nodes.forEach((node, i) => {
+          const p = positions[i];
+          const x = Number(node.dataset.x),
+            y = Number(node.dataset.y);
+          node.setAttribute(
+            "transform",
+            `translate(${p.x} ${p.y}) scale(${p.scale}) translate(${-x} ${-y})`,
           );
-          paths[i].style.opacity = String(Math.max(0, opacity));
-          paths[i].style.strokeDashoffset = String(
-            -edge.direction * ((elapsed - edge.born) / 1000) * edge.speed,
-          );
+          node.style.opacity = String(p.opacity);
         });
+        paths.forEach((path, i) => {
+          path.setAttribute("d", links[i].path);
+          path.style.opacity = String(links[i].opacity);
+          path.style.strokeDashoffset = String(links[i].offset);
+        });
+      };
+      const render = (now: number) => {
+        const delta = previous ? Math.min(now - previous, 100) : 0;
+        previous = now;
+        if (!focused && !paused) slideTime += delta;
+        if (active === 0) {
+          swarmTime += delta;
+          draw(swarmTime);
+        }
+        if (!paused && slideTime >= (active === 0 ? 5000 : MACHINE_CYCLE_MS))
+          show(1 - active);
         frame = requestAnimationFrame(render);
       };
       const sync = () => {
         cancelAnimationFrame(frame);
         previous = 0;
-        if (motion.matches) {
-          nodes.forEach((node) => node.removeAttribute("transform"));
-          paths.forEach((path, i) => {
-            path.setAttribute("d", initialPaths[i]);
-            path.style.removeProperty("opacity");
-            path.style.removeProperty("stroke-dashoffset");
-          });
-        } else if (visible && !document.hidden) {
+        pause.hidden = motion.matches;
+        pause.textContent =
+          (paused ? pause.dataset.playLabel : pause.dataset.pauseLabel) ?? "";
+        pause.setAttribute("aria-pressed", String(paused));
+        updateTopology();
+        if (!motion.matches && visible && !document.hidden)
           frame = requestAnimationFrame(render);
-        }
+      };
+      const resize = () => {
+        svg.setAttribute("viewBox", `0 0 ${narrow.matches ? 640 : 1285} 510`);
+        simulation = createSwarm(nodes.length, narrow.matches ? 640 : 1285);
+        swarmTime = 0;
+        draw(0);
+      };
+      const select = (event: Event) => {
+        show(Number((event.currentTarget as HTMLButtonElement).dataset.select));
+        // Manual selection holds the chosen slide until autoplay is resumed.
+        paused = true;
+        sync();
+      };
+      const toggle = () => {
+        paused = !paused;
+        slideTime = 0;
+        sync();
+      };
+      const focusIn = (event: FocusEvent) => {
+        focused =
+          event.target instanceof Node &&
+          slides.some((slide) => slide.contains(event.target as Node));
+      };
+      const focusOut = (event: FocusEvent) => {
+        focused =
+          event.relatedTarget instanceof Node &&
+          slides.some((slide) => slide.contains(event.relatedTarget as Node));
       };
       const observer = new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         sync();
       });
+      resize();
+      show(0);
+      controls.hidden = false;
       observer.observe(this);
-      motion.addEventListener("change", sync);
-      document.addEventListener("visibilitychange", sync);
       sync();
+      buttons.forEach((button) => button.addEventListener("click", select));
+      pause.addEventListener("click", toggle);
+      this.addEventListener("focusin", focusIn);
+      this.addEventListener("focusout", focusOut);
+      motion.addEventListener("change", sync);
+      narrow.addEventListener("change", resize);
+      document.addEventListener("visibilitychange", sync);
       this.cleanup = () => {
         cancelAnimationFrame(frame);
         observer.disconnect();
+        buttons.forEach((button) =>
+          button.removeEventListener("click", select),
+        );
+        pause.removeEventListener("click", toggle);
+        this.removeEventListener("focusin", focusIn);
+        this.removeEventListener("focusout", focusOut);
         motion.removeEventListener("change", sync);
+        narrow.removeEventListener("change", resize);
         document.removeEventListener("visibilitychange", sync);
       };
     }
-
     disconnectedCallback() {
       this.cleanup?.();
     }
   }
-  if (!customElements.get("agent-diagram"))
-    customElements.define("agent-diagram", AgentDiagram);
+  if (!customElements.get("agent-carousel"))
+    customElements.define("agent-carousel", AgentCarousel);
 </script>

@@ -10,36 +10,6 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
 >
   <AgentMachineHero lang="zh" />
 
-  <!-- Demo -->
-  <section class="demo">
-    <div class="container">
-      <figure class="demo-figure">
-        {/* 无声录屏，因此可以像旁边的终端录像一样静音自动循环播放。 */}
-        <video
-          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
-          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
-          width="1280"
-          height="694"
-          autoplay
-          muted
-          loop
-          playsinline
-          controls
-          preload="metadata"></video>
-        <figcaption>Mission Control</figcaption>
-      </figure>
-      <figure class="demo-figure">
-        <iframe
-          title="Terminal UI demo"
-          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
-          allowfullscreen
-          loading="lazy"
-          scrolling="no"></iframe>
-        <figcaption>终端界面</figcaption>
-      </figure>
-    </div>
-  </section>
-
   <!-- Features -->
   <section class="features">
     <div class="container">
@@ -75,6 +45,36 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <div class="container">
+      <figure class="demo-figure">
+        {/* 无声录屏，因此可以像旁边的终端录像一样静音自动循环播放。 */}
+        <video
+          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
+          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
+          width="1280"
+          height="694"
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"></video>
+        <figcaption>Mission Control</figcaption>
+      </figure>
+      <figure class="demo-figure">
+        <iframe
+          title="Terminal UI demo"
+          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
+          allowfullscreen
+          loading="lazy"
+          scrolling="no"></iframe>
+        <figcaption>终端界面</figcaption>
+      </figure>
     </div>
   </section>
 

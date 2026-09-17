@@ -9,41 +9,6 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
 >
   <AgentMachineHero lang="en" />
 
-  <!-- Demo -->
-  <section class="demo">
-    <div class="container">
-      <figure class="demo-figure">
-        {
-          /* Silent screen capture, so it may autoplay muted and loop the way
-             the terminal cast beside it does. `playsinline` keeps iOS from
-             taking it fullscreen; controls are there because it runs for three
-             minutes and nobody should have to watch it from the top. */
-        }
-        <video
-          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
-          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
-          width="1280"
-          height="694"
-          autoplay
-          muted
-          loop
-          playsinline
-          controls
-          preload="metadata"></video>
-        <figcaption>Mission Control</figcaption>
-      </figure>
-      <figure class="demo-figure">
-        <iframe
-          title="Terminal UI demo"
-          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
-          allowfullscreen
-          loading="lazy"
-          scrolling="no"></iframe>
-        <figcaption>Terminal UI</figcaption>
-      </figure>
-    </div>
-  </section>
-
   <!-- Features -->
   <section class="features">
     <div class="container">
@@ -92,6 +57,41 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section class="demo">
+    <div class="container">
+      <figure class="demo-figure">
+        {
+          /* Silent screen capture, so it may autoplay muted and loop the way
+             the terminal cast beside it does. `playsinline` keeps iOS from
+             taking it fullscreen; controls are there because it runs for three
+             minutes and nobody should have to watch it from the top. */
+        }
+        <video
+          src={`${import.meta.env.BASE_URL}video/hierarchy.mp4`}
+          poster={`${import.meta.env.BASE_URL}video/hierarchy-poster.jpg`}
+          width="1280"
+          height="694"
+          autoplay
+          muted
+          loop
+          playsinline
+          controls
+          preload="metadata"></video>
+        <figcaption>Mission Control</figcaption>
+      </figure>
+      <figure class="demo-figure">
+        <iframe
+          title="Terminal UI demo"
+          src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
+          allowfullscreen
+          loading="lazy"
+          scrolling="no"></iframe>
+        <figcaption>Terminal UI</figcaption>
+      </figure>
     </div>
   </section>
 

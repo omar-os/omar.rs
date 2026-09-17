@@ -740,9 +740,22 @@ const actions = [
         cancelAnimationFrame(frame);
         previous = 0;
         if (motion.matches) paint(22000, true);
-        else if (visible && !document.hidden)
+        else if (
+          visible &&
+          !document.hidden &&
+          this.dataset.playbackActive !== "false" &&
+          this.dataset.playbackPaused !== "true"
+        )
           frame = requestAnimationFrame(render);
       };
+      const playback = (event: Event) => {
+        if ((event as CustomEvent).detail?.reset) {
+          elapsed = 0;
+          paint(0);
+        }
+        sync();
+      };
+      this.addEventListener("topology-playback", playback);
       const observer = new IntersectionObserver(([entry]) => {
         visible = entry.isIntersecting;
         sync();
@@ -754,6 +767,7 @@ const actions = [
       this.cleanup = () => {
         cancelAnimationFrame(frame);
         observer.disconnect();
+        this.removeEventListener("topology-playback", playback);
         motion.removeEventListener("change", sync);
         document.removeEventListener("visibilitychange", sync);
       };
