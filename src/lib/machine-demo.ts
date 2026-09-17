@@ -6,6 +6,14 @@ export const reactionSchedule: Record<string, readonly Window[]> = {
     [800, 2400],
     [12400, 13600],
   ],
+  dispatch: [
+    [2700, 3100],
+    [13900, 14200],
+  ],
+  gather: [
+    [8400, 8600],
+    [17900, 17950],
+  ],
   research: [
     [4000, 6000],
     [14500, 16000],
