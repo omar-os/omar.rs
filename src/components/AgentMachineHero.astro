@@ -22,7 +22,7 @@ const copy = zh
       execute: "执行",
       verify: "验证",
       done: "完成",
-      alt: "左侧智能体沿杂乱路径漂移；右侧工作流依次经过输入、规划、执行、验证和完成。",
+      alt: "左侧 Anthropic、OpenAI、Cursor、OpenCode 和 Antigravity 智能体沿杂乱路径漂移；右侧工作流依次经过输入、规划、执行、验证和完成。",
     }
   : {
       no: "Say no to agent “swarms”.",
@@ -42,8 +42,15 @@ const copy = zh
       execute: "EXECUTE",
       verify: "VERIFY",
       done: "DONE",
-      alt: "Agents drift along tangled paths on the left. On the right, an ordered workflow moves through input, plan, execute, verify, and done.",
+      alt: "Anthropic, OpenAI, Cursor, OpenCode, and Antigravity agents drift along tangled paths on the left. On the right, an ordered workflow moves through input, plan, execute, verify, and done.",
     };
+const backends = [
+  { name: "Anthropic", icon: "anthropic" },
+  { name: "OpenAI", icon: "openai" },
+  { name: "Cursor", icon: "cursor" },
+  { name: "OpenCode", icon: "opencode" },
+  { name: "Antigravity", icon: "antigravity" },
+];
 const points = [
   [42, 105],
   [133, 63],
@@ -113,7 +120,7 @@ const states = [
     </div>
     <svg
       class="diagram swarm-diagram"
-      viewBox="0 40 360 370"
+      viewBox="0 30 360 400"
       aria-hidden="true"
     >
       <defs>
@@ -159,11 +166,19 @@ const states = [
                 <circle
                   cx={x}
                   cy={y}
-                  r="13"
+                  r="19"
                   fill="var(--coral-soft)"
                   stroke-opacity=".6"
                 />
-                <circle cx={x} cy={y} r="3" fill="var(--coral)" stroke="none" />
+                <image
+                  href={`${import.meta.env.BASE_URL}logos/backends/${backends[i % backends.length].icon}.svg`}
+                  x={x - 11}
+                  y={y - 11}
+                  width="22"
+                  height="22"
+                >
+                  <title>{backends[i % backends.length].name}</title>
+                </image>
               </>
             </g>
           ))
@@ -337,9 +352,6 @@ const states = [
     width: 100%;
     height: auto;
   }
-  .swarm {
-    opacity: 0.66;
-  }
   .tangle {
     stroke-width: 0.8;
     opacity: 0.5;
@@ -486,7 +498,7 @@ const states = [
       grid-row: 3;
     }
     .swarm-diagram {
-      height: 150px;
+      height: 260px;
     }
     .machine-diagram {
       grid-column: 1;
