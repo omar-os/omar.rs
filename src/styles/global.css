@@ -9,22 +9,28 @@
 
 :root {
   color-scheme: dark;
-  --bg: #050507;
-  --bg-surface: #0e0d13;
-  --bg-surface-2: #16131e;
-  --bg-code: #0a090e;
-  --border: #2a2535;
+  --bg: #190f23;
+  --bg-surface: #26172f;
+  --bg-surface-2: #33203e;
+  --bg-code: #160d20;
+  --border: #4a3555;
   --border-hover: #8c63f2;
-  --text: #d7d2df;
-  --text-dim: #a39aaa;
-  --text-bright: #fbfaff;
+  --text: #e7dfe7;
+  --text-dim: #baadbf;
+  --text-bright: #fcf7f0;
   --accent: #8c63f2;
-  --accent-bright: #b99df9;
-  --accent-dim: #6844c7;
+  --accent-bright: #c3a6ff;
+  --accent-dim: #7049d8;
   --accent-soft: rgba(140, 99, 242, 0.14);
-  --accent-contrast: #100a1b;
-  --link: #b99df9;
-  --link-hover: #d2c2ff;
+  --accent-contrast: #190f23;
+  --coral: #f1a391;
+  --coral-soft: #38212f;
+  --success: #addbc5;
+  --success-surface: #1b302d;
+  --success-border: #4e7565;
+  --header-bg: rgba(25, 15, 35, 0.9);
+  --link: #c3a6ff;
+  --link-hover: #e0cfff;
   --font-mono:
     "JetBrains Mono", "Fira Code", "SF Mono", "Cascadia Code", monospace;
   --font-sans:
@@ -43,8 +49,13 @@ body {
   background:
     radial-gradient(
       circle at 50% -12rem,
-      rgba(140, 99, 242, 0.16),
+      rgba(140, 99, 242, 0.2),
       transparent 36rem
+    ),
+    radial-gradient(
+      ellipse at 100% 22rem,
+      rgba(241, 163, 145, 0.045),
+      transparent 42rem
     ),
     var(--bg);
   color: var(--text);
@@ -149,7 +160,7 @@ h4 {
 .btn-primary {
   background: var(--accent);
   color: var(--accent-contrast);
-  box-shadow: 0 0 28px rgba(140, 99, 242, 0.26);
+  box-shadow: 0 4px 24px rgba(140, 99, 242, 0.18);
 }
 
 .btn-primary:hover {

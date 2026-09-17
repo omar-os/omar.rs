@@ -1,0 +1,784 @@
+---
+interface Props {
+  lang?: "en" | "zh";
+}
+const { lang = "en" } = Astro.props;
+const zh = lang === "zh";
+const text = (en: string, cn: string) => (zh ? cn : en);
+const teams = [
+  {
+    x: 45,
+    y: 125,
+    w: 320,
+    h: 400,
+    name: "coordinator",
+    icon: "anthropic",
+    backend: "Anthropic",
+  },
+  {
+    x: 460,
+    y: 125,
+    w: 340,
+    h: 165,
+    name: "research",
+    icon: "openai",
+    backend: "OpenAI",
+  },
+  {
+    x: 460,
+    y: 345,
+    w: 340,
+    h: 180,
+    name: "builder",
+    icon: "cursor",
+    backend: "Cursor",
+  },
+  {
+    x: 895,
+    y: 125,
+    w: 350,
+    h: 400,
+    name: "release",
+    icon: "opencode",
+    backend: "OpenCode",
+  },
+];
+const reactions = [
+  {
+    id: "plan",
+    x: 145,
+    y: 243,
+    w: 140,
+    order: 1,
+    label: text("plan", "规划"),
+    backend: "Claude",
+  },
+  {
+    id: "dispatch",
+    x: 145,
+    y: 390,
+    w: 140,
+    order: 2,
+    label: text("dispatch", "分发"),
+    backend: "Claude",
+  },
+  {
+    id: "research",
+    x: 520,
+    y: 193,
+    w: 150,
+    order: 1,
+    label: text("research", "调研"),
+    backend: "Codex",
+  },
+  {
+    id: "build",
+    x: 520,
+    y: 402,
+    w: 150,
+    order: 1,
+    label: text("implement", "实现"),
+    backend: "Cursor",
+  },
+  {
+    id: "gather",
+    x: 1005,
+    y: 245,
+    w: 140,
+    order: 1,
+    label: text("gather", "汇聚"),
+    backend: "OpenCode",
+  },
+  {
+    id: "review",
+    x: 1005,
+    y: 350,
+    w: 140,
+    order: 2,
+    label: text("review", "审查"),
+    backend: "OpenCode",
+  },
+  {
+    id: "publish",
+    x: 1005,
+    y: 450,
+    w: 140,
+    order: 3,
+    label: text("publish", "发布"),
+    backend: "OpenCode",
+  },
+];
+// Keep the geometry stable, as Mission Control does between state snapshots.
+const connections = [
+  {
+    id: "tick",
+    from: "timer:tick",
+    to: "prompt:plan",
+    kind: "trigger",
+    d: "M100 217V260Q100 268 108 268H156",
+    windows: [[0, 800]],
+  },
+  {
+    id: "request",
+    from: "input:request",
+    to: "prompt:plan",
+    kind: "trigger",
+    d: "M45 268H156",
+    windows: [[0, 800]],
+  },
+  {
+    id: "plan",
+    from: "prompt:plan",
+    to: "action:tasks",
+    kind: "effect",
+    d: "M285 268H307Q315 268 315 276V322Q315 330 307 330H226",
+    windows: [
+      [2400, 2600],
+      [13600, 13800],
+    ],
+  },
+  {
+    id: "dispatch",
+    from: "action:tasks",
+    to: "prompt:dispatch",
+    kind: "trigger",
+    d: "M204 330H133Q125 330 125 338V407Q125 415 133 415H156",
+    windows: [
+      [2600, 2700],
+      [13800, 13900],
+    ],
+  },
+  {
+    id: "tasks",
+    from: "prompt:dispatch",
+    to: "output:tasks",
+    kind: "effect",
+    d: "M285 415H365",
+    windows: [
+      [3100, 3300],
+      [14200, 14300],
+    ],
+  },
+  {
+    id: "scatter-a",
+    from: "output:tasks",
+    to: "input:research",
+    kind: "connection",
+    d: "M365 415H407Q415 415 415 407V226Q415 218 423 218H460",
+    windows: [
+      [3300, 3800],
+      [14300, 14400],
+    ],
+  },
+  {
+    id: "scatter-b",
+    from: "output:tasks",
+    to: "input:build",
+    kind: "connection",
+    d: "M365 415H407Q415 415 415 421Q415 427 423 427H460",
+    windows: [
+      [3300, 3800],
+      [14300, 14400],
+    ],
+  },
+  {
+    id: "research-in",
+    from: "input:research",
+    to: "prompt:research",
+    kind: "trigger",
+    d: "M460 218H531",
+    windows: [
+      [3800, 4000],
+      [14400, 14500],
+    ],
+  },
+  {
+    id: "build-in",
+    from: "input:build",
+    to: "prompt:build",
+    kind: "trigger",
+    d: "M460 427H531",
+    windows: [
+      [3800, 4000],
+      [14400, 14500],
+    ],
+  },
+  {
+    id: "research-out",
+    from: "prompt:research",
+    to: "output:evidence",
+    kind: "effect",
+    d: "M670 218H800",
+    windows: [
+      [6000, 6300],
+      [16000, 16300],
+    ],
+  },
+  {
+    id: "build-out",
+    from: "prompt:build",
+    to: "output:patch",
+    kind: "effect",
+    d: "M670 427H800",
+    windows: [
+      [7000, 7300],
+      [17000, 17300],
+    ],
+  },
+  {
+    id: "gather-a",
+    from: "output:evidence",
+    to: "input:evidence",
+    kind: "connection",
+    d: "M800 218H837Q845 218 845 224Q845 230 853 230H895",
+    windows: [
+      [6300, 7100],
+      [16300, 16800],
+    ],
+  },
+  {
+    id: "gather-b",
+    from: "output:patch",
+    to: "input:patch",
+    kind: "connection",
+    d: "M800 427H857Q865 427 865 419V338Q865 330 873 330H895",
+    windows: [
+      [7300, 8100],
+      [17300, 17700],
+    ],
+  },
+  {
+    id: "evidence",
+    from: "input:evidence",
+    to: "prompt:gather",
+    kind: "trigger",
+    d: "M895 230H977Q985 230 985 238V262Q985 270 993 270H1016",
+    windows: [
+      [7100, 7600],
+      [16800, 17200],
+    ],
+  },
+  {
+    id: "patch",
+    from: "input:patch",
+    to: "prompt:gather",
+    kind: "trigger",
+    d: "M895 330H957Q965 330 965 322V278Q965 270 973 270H1016",
+    windows: [
+      [8100, 8400],
+      [17700, 17900],
+    ],
+  },
+  {
+    id: "ready",
+    from: "prompt:gather",
+    to: "action:ready",
+    kind: "effect",
+    d: "M1145 270H1172Q1180 270 1180 278V312Q1180 320 1172 320H1073",
+    windows: [
+      [8600, 8700],
+      [17950, 17975],
+    ],
+  },
+  {
+    id: "review",
+    from: "action:ready",
+    to: "prompt:review",
+    kind: "trigger",
+    d: "M1051 320H993Q985 320 985 328V367Q985 375 993 375H1016",
+    windows: [
+      [8700, 8800],
+      [17975, 18000],
+    ],
+  },
+  {
+    id: "feedback-out",
+    from: "prompt:review",
+    to: "output:retry",
+    kind: "effect",
+    d: "M1145 375H1184Q1192 375 1192 383V497Q1192 505 1200 505H1245",
+    windows: [[10500, 10800]],
+  },
+  {
+    id: "feedback",
+    from: "output:retry",
+    to: "input:feedback",
+    kind: "connection",
+    d: "M1245 505H1259Q1267 505 1267 513V560Q1267 568 1259 568H710 M610 568H28Q20 568 20 560V463Q20 455 28 455H45",
+    windows: [[10800, 11800]],
+  },
+  {
+    id: "revise",
+    from: "input:feedback",
+    to: "prompt:plan",
+    kind: "trigger",
+    d: "M45 455H77Q85 455 85 447V276Q85 268 93 268H156",
+    windows: [[11800, 12400]],
+  },
+  {
+    id: "approved",
+    from: "prompt:review",
+    to: "action:approved",
+    kind: "effect",
+    d: "M1145 375H1172Q1180 375 1180 383V407Q1180 415 1172 415H1073",
+    windows: [[19200, 19400]],
+  },
+  {
+    id: "publish",
+    from: "action:approved",
+    to: "prompt:publish",
+    kind: "trigger",
+    d: "M1051 415H993Q985 415 985 423V467Q985 475 993 475H1016",
+    windows: [[19400, 19600]],
+  },
+  {
+    id: "result",
+    from: "prompt:publish",
+    to: "output:result",
+    kind: "effect",
+    d: "M1145 475H1245",
+    windows: [[21000, 21800]],
+  },
+];
+const ports = [
+  { x: 45, y: 268, name: "request", input: true },
+  { x: 45, y: 455, name: "feedback", input: true },
+  { x: 365, y: 415, name: "tasks", input: false },
+  { x: 460, y: 218, name: "task", input: true },
+  { x: 800, y: 218, name: "evidence", input: false },
+  { x: 460, y: 427, name: "task", input: true },
+  { x: 800, y: 427, name: "patch", input: false },
+  { x: 895, y: 230, name: "evidence", input: true },
+  { x: 895, y: 330, name: "patch", input: true },
+  { x: 1245, y: 505, name: "retry", input: false },
+  { x: 1245, y: 475, name: "result", input: false },
+];
+const actions = [
+  {
+    x: 215,
+    y: 330,
+    name: "tasks",
+    windows: [
+      [2600, 2700],
+      [13800, 13900],
+    ],
+  },
+  {
+    x: 1062,
+    y: 320,
+    name: "ready",
+    windows: [
+      [8700, 8800],
+      [17975, 18000],
+    ],
+  },
+  { x: 1062, y: 415, name: "approved", windows: [[19400, 19600]] },
+];
+---
+
+<machine-topology
+  class="topology"
+  aria-label={text(
+    "Illustrative OMAR topology: a timer triggers planning, two teams work in parallel, both results gather for review, feedback triggers a revision, and publishing completes the chain.",
+    "OMAR 拓扑演示：定时器触发规划，两个团队并行工作，汇聚结果进行审查，反馈触发修订，最后发布结果。",
+  )}
+  role="img"
+  data-idle={text("idle", "空闲")}
+  data-running={text("running", "运行中")}
+  data-completed={text("completed", "已完成")}
+>
+  <svg viewBox="0 90 1285 510" aria-hidden="true">
+    <defs
+      ><pattern
+        id="topology-grid"
+        width="24"
+        height="24"
+        patternUnits="userSpaceOnUse"
+        ><circle cx="1" cy="1" r=".7" fill="var(--accent)" opacity=".2"
+        ></circle></pattern
+      ></defs
+    >
+    <rect width="1285" height="640" fill="url(#topology-grid)"></rect>
+    {
+      teams.map((team) => (
+        <g class="team">
+          <rect
+            x={team.x}
+            y={team.y}
+            width={team.w}
+            height={team.h}
+            rx="9"
+            class="team-body"
+          />
+          <text x={team.x + 15} y={team.y + 28} class="team-name">
+            {team.name}
+          </text>
+          <g transform={`translate(${team.x + team.w - 27} ${team.y + 23})`}>
+            <circle r="15" class="backend-circle" />
+            <image
+              href={`${import.meta.env.BASE_URL}logos/backends/${team.icon}.svg`}
+              x="-9"
+              y="-9"
+              width="18"
+              height="18"
+            >
+              <title>{team.backend}</title>
+            </image>
+          </g>
+        </g>
+      ))
+    }
+    {
+      connections.map((edge) => (
+        <g data-from={edge.from} data-to={edge.to}>
+          <path class:list={["connection", edge.kind]} d={edge.d} />
+          <path
+            class="message"
+            d={edge.d}
+            pathLength="100"
+            data-windows={JSON.stringify(edge.windows)}
+          />
+        </g>
+      ))
+    }
+    <text x="660" y="572" text-anchor="middle" class="delay-label"
+      >after 250 ms</text
+    >
+    <text x="410" y="308" text-anchor="middle" class="route-label"
+      >{text("scatter", "分发")}</text
+    >
+    <text x="840" y="307" text-anchor="middle" class="route-label"
+      >{text("gather", "汇聚")}</text
+    >
+    <g class="timer" transform="translate(100 200)" data-timer>
+      <circle r="17" class="timer-face"></circle><g data-hand
+        ><path d="M0 0V-10" class="timer-hand"></path></g
+      ><path d="M0 0H6" class="timer-hand short"></path><circle
+        r="2"
+        class="timer-pin"></circle>
+      <text x="26" y="-9" class="shape-label">tick</text><text
+        x="26"
+        y="4"
+        class="timer-meta">every 24 s</text
+      >
+    </g>
+    {
+      actions.map((action) => (
+        <g
+          class="action"
+          transform={`translate(${action.x} ${action.y})`}
+          data-action
+          data-windows={JSON.stringify(action.windows)}
+        >
+          <polygon points="0,-11 11,0 0,11 -11,0" />
+          <text y="26" text-anchor="middle" class="shape-label">
+            {action.name}
+          </text>
+        </g>
+      ))
+    }
+    {
+      reactions.map((reaction) => (
+        <g
+          class="reaction"
+          data-reaction={reaction.id}
+          data-state="idle"
+          transform={`translate(${reaction.x} ${reaction.y})`}
+        >
+          <polygon
+            class="reaction-body"
+            points={`0,0 ${reaction.w - 11},0 ${reaction.w},25 ${reaction.w - 11},50 0,50 11,25`}
+          />
+          <rect
+            class="reaction-badge"
+            x="17"
+            y="15"
+            width="20"
+            height="20"
+            rx="5"
+          />
+          <text class="reaction-index" x="27" y="29" text-anchor="middle">
+            {reaction.order}
+          </text>
+          <text class="reaction-name" x="46" y="23">
+            {reaction.label}
+          </text>
+          <text class="reaction-meta" x="42" y="37">
+            {reaction.backend} ·{" "}
+            <tspan data-status>{text("idle", "空闲")}</tspan>
+          </text>
+        </g>
+      ))
+    }
+    {
+      ports.map((port) => (
+        <g transform={`translate(${port.x} ${port.y})`} class="port">
+          <polygon points="-5,-6.5 6.5,0 -5,6.5" />
+          <text
+            x={port.input ? 10 : -10}
+            y="-11"
+            text-anchor={port.input ? "start" : "end"}
+          >
+            {port.name}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+</machine-topology>
+
+<style>
+  .topology {
+    display: block;
+    width: calc(100% - clamp(2rem, 8vw, 10rem));
+    max-width: 1440px;
+    margin-inline: auto;
+    min-width: 0;
+    align-self: start;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: var(--diagram-height, auto);
+    font-family: var(--font-mono);
+  }
+  .team-body {
+    fill: none;
+    stroke: #aa97b5;
+    stroke-width: 1;
+  }
+  .team-name {
+    fill: var(--text-bright);
+    font-size: 15px;
+    font-weight: 650;
+  }
+  .backend-circle {
+    fill: var(--bg-surface-2);
+    stroke: var(--border);
+  }
+  .connection {
+    fill: none;
+    stroke: #9a88a6;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+  }
+  .trigger,
+  .effect {
+    stroke: #777080;
+    stroke-dasharray: 3 3;
+  }
+  .message {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 6 106;
+    opacity: 0;
+  }
+  .delay-label,
+  .route-label {
+    fill: var(--text-dim);
+    font-size: 10px;
+  }
+  .reaction-body {
+    fill: #e9e5ed;
+    stroke: #918797;
+    stroke-width: 1;
+    stroke-linejoin: round;
+  }
+  .reaction-badge {
+    fill: #fff;
+    stroke: #b3a9bb;
+  }
+  .reaction-index {
+    fill: #55505e;
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+  .reaction-name {
+    fill: #241b2c;
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .reaction-meta {
+    fill: #6f6578;
+    font-size: 7.5px;
+  }
+  .reaction-body,
+  .reaction-badge,
+  .action polygon,
+  .timer-face {
+    transition:
+      fill 260ms,
+      stroke 260ms;
+  }
+  [data-state="running"] .reaction-body {
+    fill: #ece5ff;
+    stroke: #7049d8;
+    stroke-width: 1.6;
+  }
+  [data-state="running"] .reaction-badge {
+    fill: #7049d8;
+    stroke: #7049d8;
+  }
+  [data-state="running"] .reaction-index,
+  [data-state="completed"] .reaction-index {
+    fill: white;
+  }
+  [data-state="completed"] .reaction-body {
+    fill: #e2f1e8;
+    stroke: #5d9c7b;
+  }
+  [data-state="completed"] .reaction-badge {
+    fill: #4f9271;
+    stroke: #4f9271;
+  }
+  .port polygon {
+    fill: var(--accent-bright);
+    stroke: var(--accent-bright);
+    stroke-linejoin: round;
+  }
+  .port text,
+  .shape-label {
+    fill: var(--text);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .action polygon,
+  .timer-face {
+    fill: #fff;
+    stroke: #6b6173;
+    stroke-width: 1.4;
+  }
+  .action[data-active] polygon,
+  .timer[data-active] .timer-face {
+    fill: #d9c8ff;
+    stroke: #7049d8;
+  }
+  .timer-hand {
+    fill: none;
+    stroke: #6b6173;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+  }
+  .timer-pin {
+    fill: #6b6173;
+  }
+  .timer-meta {
+    fill: var(--text-dim);
+    font-size: 10px;
+  }
+  @media (max-width: 640px) {
+    .topology {
+      overflow-x: auto;
+    }
+    svg {
+      min-width: 960px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  import {
+    MACHINE_CYCLE_MS,
+    reactionState,
+    activeWindow,
+    type Window,
+  } from "../lib/machine-demo";
+  class MachineTopology extends HTMLElement {
+    cleanup?: () => void;
+    connectedCallback() {
+      const reactions = [
+        ...this.querySelectorAll<SVGGElement>("[data-reaction]"),
+      ];
+      const tracks = [
+        ...this.querySelectorAll<SVGElement>("[data-windows]"),
+      ].map((element) => ({
+        element,
+        windows: JSON.parse(element.dataset.windows ?? "[]") as Window[],
+      }));
+      const timer = this.querySelector<SVGGElement>("[data-timer]");
+      const hand = this.querySelector<SVGGElement>("[data-hand]");
+      const paint = (time: number, still = false) => {
+        reactions.forEach((reaction) => {
+          const state = reactionState(reaction.dataset.reaction ?? "", time);
+          if (reaction.dataset.state !== state) {
+            reaction.dataset.state = state;
+            const status = reaction.querySelector("[data-status]");
+            if (status) status.textContent = this.dataset[state] ?? state;
+          }
+        });
+        tracks.forEach(({ element, windows }) => {
+          const progress = still ? null : activeWindow(windows, time);
+          if (element.hasAttribute("data-action"))
+            element.toggleAttribute("data-active", progress !== null);
+          else {
+            element.style.opacity = progress === null ? "0" : "1";
+            element.style.strokeDashoffset = String(6 - (progress ?? 0) * 112);
+          }
+        });
+        timer?.toggleAttribute("data-active", !still && time < 800);
+        hand?.setAttribute(
+          "transform",
+          `rotate(${!still && time < 800 ? (time / 800) * 360 : 0})`,
+        );
+      };
+      const motion = matchMedia("(prefers-reduced-motion: reduce)");
+      let visible = true,
+        frame = 0,
+        previous = 0,
+        elapsed = 0;
+      const render = (now: number) => {
+        elapsed += previous ? Math.min(now - previous, 100) : 0;
+        previous = now;
+        paint(elapsed % MACHINE_CYCLE_MS);
+        frame = requestAnimationFrame(render);
+      };
+      const sync = () => {
+        cancelAnimationFrame(frame);
+        previous = 0;
+        if (motion.matches) paint(22000, true);
+        else if (
+          visible &&
+          !document.hidden &&
+          this.dataset.playbackActive !== "false" &&
+          this.dataset.playbackPaused !== "true"
+        )
+          frame = requestAnimationFrame(render);
+      };
+      const playback = (event: Event) => {
+        if ((event as CustomEvent).detail?.reset) {
+          elapsed = 0;
+          paint(0);
+        }
+        sync();
+      };
+      this.addEventListener("topology-playback", playback);
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        sync();
+      });
+      observer.observe(this);
+      motion.addEventListener("change", sync);
+      document.addEventListener("visibilitychange", sync);
+      sync();
+      this.cleanup = () => {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+        this.removeEventListener("topology-playback", playback);
+        motion.removeEventListener("change", sync);
+        document.removeEventListener("visibilitychange", sync);
+      };
+    }
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get("machine-topology"))
+    customElements.define("machine-topology", MachineTopology);
+</script>

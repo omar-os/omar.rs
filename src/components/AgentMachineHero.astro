@@ -1,0 +1,534 @@
+---
+import MachineTopology from "./MachineTopology.astro";
+interface Props {
+  lang?: "en" | "zh";
+}
+const { lang = "en" } = Astro.props;
+const zh = lang === "zh";
+const copy = zh
+  ? {
+      no: "拒绝智能体「蜂群」。",
+      deploy: "部署",
+      deterministic: "确定性、可验证的",
+      machinePrefix: "智能体",
+      machineWord: "协作体",
+      machinePeriod: "。",
+      description: "为多智能体系统提供确定性的、有形式化规约的编排。",
+      start: "快速开始",
+      swarmWarning: "不受控制的智能体蜂群可能难以预测且危险。",
+      incidentLead: "请查看",
+      incident: "OpenAI / Hugging Face 事件",
+      ensembleLead: "智能体协作体应当具有",
+      ensembleDeterministic: "确定性",
+      ensembleAnd: "和",
+      ensembleVerifiable: "可验证性",
+      alt: "智能体蜂群与确定性 OMAR 拓扑的轮播对比。",
+    }
+  : {
+      no: "Say no to agent “swarms”.",
+      deploy: "Deploy",
+      deterministic: "deterministic, verifiable",
+      machinePrefix: "agentic ",
+      machineWord: "ensembles",
+      machinePeriod: ".",
+      description:
+        "delivers deterministic, formally specified orchestration for multi-agent systems.",
+      start: "Get Started",
+      swarmWarning:
+        "An uncontrolled agent swarm can be unpredictable and dangerous.",
+      incidentLead: "Check the",
+      incident: "OpenAI / Hugging Face incident",
+      ensembleLead: "An agentic ensemble should be",
+      ensembleDeterministic: "deterministic",
+      ensembleAnd: "and",
+      ensembleVerifiable: "verifiable",
+      alt: "A carousel comparing an ephemeral agent swarm with a deterministic OMAR topology.",
+    };
+const backends = [
+  { name: "Anthropic", icon: "anthropic" },
+  { name: "OpenAI", icon: "openai" },
+  { name: "Cursor", icon: "cursor" },
+  { name: "OpenCode", icon: "opencode" },
+  { name: "Antigravity (Google)", icon: "google" },
+];
+const points = Array.from({ length: 36 }, (_, i) => [
+  70 + (i % 9) * 140 + Math.sin(i * 2.7) * 20,
+  70 + Math.floor(i / 9) * 120 + Math.cos(i * 1.9) * 20,
+]);
+---
+
+<section class="machine-hero">
+  <div class="container">
+    <div class="hero-copy">
+      <h1>
+        <span>{copy.no}</span><span
+          >{copy.deploy} <em>{copy.deterministic}</em></span
+        ><span
+          >{copy.machinePrefix}<span class="machine-word"
+            >{copy.machineWord}</span
+          >{copy.machinePeriod}</span
+        >
+      </h1>
+      <div class="description">
+        <p><code>omar</code> {copy.description}</p>
+      </div>
+      <div class="actions">
+        <a
+          class="btn btn-primary"
+          href={`${import.meta.env.BASE_URL}${zh ? "zh/" : ""}docs/`}
+          >{copy.start}<span aria-hidden="true">↗</span></a
+        >
+        <a
+          class="btn btn-outline"
+          href="https://github.com/omar-os/omar"
+          target="_blank"
+          rel="noopener">GitHub <span aria-hidden="true">↗</span></a
+        >
+      </div>
+    </div>
+  </div>
+  <agent-carousel
+    class="diagram-carousel"
+    role="region"
+    aria-roledescription={zh ? "轮播" : "carousel"}
+    aria-label={copy.alt}
+  >
+    <div class="carousel-stage">
+      <section
+        class="carousel-slide"
+        data-slide="0"
+        role="group"
+        aria-roledescription={zh ? "幻灯片" : "slide"}
+        aria-label={zh ? "1 / 2：智能体蜂群" : "1 of 2: Agent swarm"}
+      >
+        <div class="slide-label swarm-warning">
+          <h3>{copy.swarmWarning}</h3>
+          <p class="incident-note">
+            {copy.incidentLead}
+            <a
+              href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#agents-were-very-interested-in-manipulating-their-own-transcripts,-and-their-tests-successfully-“spoofed”-some-tool-calls-in-our-transcripts"
+              target="_blank"
+              rel="noopener noreferrer">{copy.incident}</a
+            >.
+          </p>
+        </div>
+        <svg
+          class="diagram swarm-diagram"
+          viewBox="0 0 1285 510"
+          aria-hidden="true"
+        >
+          <defs>
+            <pattern
+              id="machine-grid"
+              width="24"
+              height="24"
+              patternUnits="userSpaceOnUse"
+              ><circle cx="1" cy="1" r=".7" fill="var(--accent)" opacity=".22"
+              ></circle></pattern
+            >
+          </defs>
+          <rect width="1285" height="510" fill="url(#machine-grid)"></rect>
+          <g class="swarm" fill="none" stroke="var(--coral)">
+            <g class="swarm-links">
+              {
+                points.map(([x, y], i) => {
+                  const [endX, endY] = points[i % 9 === 8 ? i - 1 : i + 1];
+                  return (
+                    <path
+                      class="swarm-link"
+                      d={`M${x} ${y} Q${(x + endX) / 2 + 35} ${(y + endY) / 2 - 35} ${endX} ${endY}`}
+                    />
+                  );
+                })
+              }
+            </g>
+            {
+              points.map(([x, y], i) => (
+                <g class="wander" data-x={x} data-y={y}>
+                  <>
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r="19"
+                      fill="var(--coral-soft)"
+                      stroke-opacity=".6"
+                    />
+                    <image
+                      href={`${import.meta.env.BASE_URL}logos/backends/${backends[i % backends.length].icon}.svg`}
+                      x={x - 11}
+                      y={y - 11}
+                      width="22"
+                      height="22"
+                    >
+                      <title>{backends[i % backends.length].name}</title>
+                    </image>
+                  </>
+                </g>
+              ))
+            }
+          </g>
+        </svg>
+      </section>
+      <section
+        class="carousel-slide"
+        data-slide="1"
+        role="group"
+        aria-roledescription={zh ? "幻灯片" : "slide"}
+        aria-label={zh ? "2 / 2：智能体协作体" : "2 of 2: Agentic ensemble"}
+      >
+        <h3 class="slide-label machine-label">
+          {copy.ensembleLead}{" "}<em>{copy.ensembleDeterministic}</em>{" "}{
+            copy.ensembleAnd
+          }{" "}<em>{copy.ensembleVerifiable}</em>{copy.machinePeriod}
+        </h3>
+        <MachineTopology lang={lang} />
+      </section>
+    </div>
+    <div class="carousel-controls" hidden>
+      <div
+        class="slide-buttons"
+        role="group"
+        aria-label={zh ? "选择幻灯片" : "Choose slide"}
+      >
+        <button type="button" data-select="0" aria-pressed="true"
+          >{zh ? "蜂群" : "Swarm"}</button
+        >
+        <button type="button" data-select="1" aria-pressed="false"
+          >{zh ? "协作体" : "Ensemble"}</button
+        >
+      </div>
+    </div>
+  </agent-carousel>
+</section>
+
+<style>
+  .machine-hero {
+    padding: 5rem 0 4rem;
+    overflow: hidden;
+  }
+  .hero-copy {
+    text-align: center;
+    max-width: 960px;
+    margin: 0 auto 3rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 4.7vw, 3.6rem);
+    line-height: 1.13;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+  }
+  h1 > span {
+    display: block;
+  }
+  .machine-word {
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    text-decoration-thickness: 0.055em;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent-bright);
+    background: linear-gradient(110deg, #dac5ff, #a77bfa 65%, #d8c1ff);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .description {
+    max-width: 960px;
+    margin: 1.5rem auto 1.8rem;
+    color: var(--text-dim);
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+  .actions a {
+    gap: 1.6rem;
+  }
+  .diagram-carousel {
+    --diagram-height: max(10rem, min(40vw, 34rem, calc(100svh - 15rem)));
+    display: block;
+    scroll-margin-top: 4.5rem;
+  }
+  .diagram-carousel[data-ready] .carousel-stage {
+    display: grid;
+  }
+  .diagram-carousel[data-ready] .carousel-slide {
+    grid-area: 1 / 1;
+    min-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 700ms ease-in-out,
+      visibility 0s linear 700ms;
+  }
+  .diagram-carousel[data-ready] .carousel-slide[data-active="true"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+  .slide-label {
+    min-height: 5rem;
+    padding: 0.5rem 1.5rem;
+    text-align: center;
+    font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .slide-label h3 {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+  }
+  .incident-note {
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin-top: 0.35rem;
+    color: var(--text-dim);
+  }
+  .machine-label em {
+    font-style: italic;
+  }
+  .carousel-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 0.25rem;
+  }
+  .carousel-controls[hidden] {
+    display: none;
+  }
+  .slide-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .carousel-controls button {
+    font: 11px var(--font-mono);
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+  }
+  .carousel-controls button[aria-pressed="true"] {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+    background: linear-gradient(
+      90deg,
+      rgba(140, 99, 242, 0.38) var(--slide-progress, 0%),
+      var(--accent-soft) var(--slide-progress, 0%)
+    );
+  }
+  .carousel-controls button:hover {
+    color: var(--text-bright);
+    border-color: var(--accent-bright);
+  }
+  .swarm-warning {
+    color: var(--coral);
+  }
+  .machine-label {
+    color: var(--accent-bright);
+  }
+  .swarm-warning a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .diagram {
+    display: block;
+    width: 100%;
+    height: var(--diagram-height);
+  }
+  .swarm-link {
+    stroke-dasharray: 4 7;
+    stroke-width: 1.1;
+    opacity: 0.4;
+    fill: none;
+    stroke-linecap: round;
+  }
+  @media (max-width: 640px) {
+    .machine-hero {
+      padding: 3rem 0;
+    }
+    h1 {
+      font-size: clamp(1.85rem, 6.5vw, 2.7rem);
+    }
+    h1 em {
+      display: block;
+    }
+    .description {
+      font-size: 0.9rem;
+    }
+    .hero-copy {
+      margin-bottom: 2rem;
+    }
+    .diagram-carousel {
+      --diagram-height: max(10rem, min(80vw, 24rem, calc(100svh - 17rem)));
+    }
+    .slide-label {
+      min-height: 6rem;
+      padding-inline: 1rem;
+    }
+    .carousel-controls {
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .carousel-controls button {
+      padding: 0.6rem 0.8rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .diagram-carousel * {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  import { createSwarm } from "../lib/swarm-demo";
+  import { MACHINE_CYCLE_MS } from "../lib/machine-demo";
+  class AgentCarousel extends HTMLElement {
+    cleanup?: () => void;
+    connectedCallback() {
+      const slides = [...this.querySelectorAll<HTMLElement>("[data-slide]")];
+      const buttons = [
+        ...this.querySelectorAll<HTMLButtonElement>("[data-select]"),
+      ];
+      const controls = this.querySelector<HTMLElement>(".carousel-controls")!;
+      const svg = this.querySelector<SVGSVGElement>(".swarm-diagram")!;
+      const nodes = [...this.querySelectorAll<SVGGElement>(".wander")];
+      const paths = [...this.querySelectorAll<SVGPathElement>(".swarm-link")];
+      const topology = this.querySelector<HTMLElement>("machine-topology")!;
+      const motion = matchMedia("(prefers-reduced-motion: reduce)");
+      const narrow = matchMedia("(max-width: 640px)");
+      let simulation = createSwarm(nodes.length, narrow.matches ? 640 : 1285);
+      let active = 0,
+        slideTime = 0,
+        swarmTime = 0,
+        previous = 0,
+        frame = 0;
+      let visible = true,
+        focused = false;
+      const updateTopology = (reset = false) => {
+        topology.dataset.playbackActive = String(active === 1);
+        topology.dispatchEvent(
+          new CustomEvent("topology-playback", { detail: { reset } }),
+        );
+      };
+      const show = (index: number) => {
+        active = index;
+        slideTime = 0;
+        slides.forEach((slide, i) => {
+          slide.dataset.active = String(i === active);
+          slide.inert = i !== active;
+          slide.setAttribute("aria-hidden", String(i !== active));
+        });
+        buttons.forEach((button, i) => {
+          button.setAttribute("aria-pressed", String(i === active));
+          button.style.setProperty("--slide-progress", "0%");
+        });
+        updateTopology(active === 1);
+      };
+      const draw = (time: number) => {
+        const { positions, links } = simulation.sample(time);
+        nodes.forEach((node, i) => {
+          const p = positions[i];
+          const x = Number(node.dataset.x),
+            y = Number(node.dataset.y);
+          node.setAttribute(
+            "transform",
+            `translate(${p.x} ${p.y}) scale(${p.scale}) translate(${-x} ${-y})`,
+          );
+          node.style.opacity = String(p.opacity);
+        });
+        paths.forEach((path, i) => {
+          path.setAttribute("d", links[i].path);
+          path.style.opacity = String(links[i].opacity);
+          path.style.strokeDashoffset = String(links[i].offset);
+        });
+      };
+      const render = (now: number) => {
+        const delta = previous ? Math.min(now - previous, 100) : 0;
+        previous = now;
+        if (!focused) slideTime += delta;
+        if (active === 0) {
+          swarmTime += delta;
+          draw(swarmTime);
+        }
+        const duration = active === 0 ? 10000 : MACHINE_CYCLE_MS;
+        buttons[active].style.setProperty(
+          "--slide-progress",
+          `${Math.min(slideTime / duration, 1) * 100}%`,
+        );
+        if (slideTime >= duration) show(1 - active);
+        frame = requestAnimationFrame(render);
+      };
+      const sync = () => {
+        cancelAnimationFrame(frame);
+        previous = 0;
+        updateTopology();
+        if (!motion.matches && visible && !document.hidden)
+          frame = requestAnimationFrame(render);
+      };
+      const resize = () => {
+        svg.setAttribute("viewBox", `0 0 ${narrow.matches ? 640 : 1285} 510`);
+        simulation = createSwarm(nodes.length, narrow.matches ? 640 : 1285);
+        swarmTime = 0;
+        draw(0);
+      };
+      const select = (event: Event) => {
+        show(Number((event.currentTarget as HTMLButtonElement).dataset.select));
+        sync();
+      };
+      const focusIn = (event: FocusEvent) => {
+        focused =
+          event.target instanceof Node &&
+          slides.some((slide) => slide.contains(event.target as Node));
+      };
+      const focusOut = (event: FocusEvent) => {
+        focused =
+          event.relatedTarget instanceof Node &&
+          slides.some((slide) => slide.contains(event.relatedTarget as Node));
+      };
+      const observer = new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        sync();
+      });
+      resize();
+      this.dataset.ready = "";
+      show(0);
+      controls.hidden = false;
+      observer.observe(this);
+      sync();
+      buttons.forEach((button) => button.addEventListener("click", select));
+      this.addEventListener("focusin", focusIn);
+      this.addEventListener("focusout", focusOut);
+      motion.addEventListener("change", sync);
+      narrow.addEventListener("change", resize);
+      document.addEventListener("visibilitychange", sync);
+      this.cleanup = () => {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+        buttons.forEach((button) =>
+          button.removeEventListener("click", select),
+        );
+        this.removeEventListener("focusin", focusIn);
+        this.removeEventListener("focusout", focusOut);
+        motion.removeEventListener("change", sync);
+        narrow.removeEventListener("change", resize);
+        document.removeEventListener("visibilitychange", sync);
+      };
+    }
+    disconnectedCallback() {
+      this.cleanup?.();
+    }
+  }
+  if (!customElements.get("agent-carousel"))
+    customElements.define("agent-carousel", AgentCarousel);
+</script>
