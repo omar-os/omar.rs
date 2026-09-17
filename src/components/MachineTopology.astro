@@ -9,34 +9,34 @@ const teams = [
   {
     x: 45,
     y: 125,
-    w: 230,
+    w: 320,
     h: 400,
     name: "coordinator",
     icon: "anthropic",
     backend: "Anthropic",
   },
   {
-    x: 370,
-    y: 110,
-    w: 230,
+    x: 460,
+    y: 125,
+    w: 340,
     h: 165,
     name: "research",
     icon: "openai",
     backend: "OpenAI",
   },
   {
-    x: 370,
+    x: 460,
     y: 345,
-    w: 230,
-    h: 165,
+    w: 340,
+    h: 180,
     name: "builder",
     icon: "cursor",
     backend: "Cursor",
   },
   {
-    x: 695,
+    x: 895,
     y: 125,
-    w: 225,
+    w: 350,
     h: 400,
     name: "release",
     icon: "opencode",
@@ -46,7 +46,7 @@ const teams = [
 const reactions = [
   {
     id: "plan",
-    x: 113,
+    x: 145,
     y: 243,
     w: 140,
     order: 1,
@@ -55,7 +55,7 @@ const reactions = [
   },
   {
     id: "dispatch",
-    x: 113,
+    x: 145,
     y: 390,
     w: 140,
     order: 2,
@@ -64,8 +64,8 @@ const reactions = [
   },
   {
     id: "research",
-    x: 410,
-    y: 168,
+    x: 520,
+    y: 193,
     w: 150,
     order: 1,
     label: text("research", "调研"),
@@ -73,7 +73,7 @@ const reactions = [
   },
   {
     id: "build",
-    x: 410,
+    x: 520,
     y: 402,
     w: 150,
     order: 1,
@@ -82,7 +82,7 @@ const reactions = [
   },
   {
     id: "gather",
-    x: 748,
+    x: 1005,
     y: 245,
     w: 140,
     order: 1,
@@ -91,7 +91,7 @@ const reactions = [
   },
   {
     id: "review",
-    x: 748,
+    x: 1005,
     y: 350,
     w: 140,
     order: 2,
@@ -100,7 +100,7 @@ const reactions = [
   },
   {
     id: "publish",
-    x: 748,
+    x: 1005,
     y: 450,
     w: 140,
     order: 3,
@@ -115,7 +115,7 @@ const connections = [
     from: "timer:tick",
     to: "prompt:plan",
     kind: "trigger",
-    d: "M100 217V229H185V243",
+    d: "M100 217V260Q100 268 108 268H156",
     windows: [[0, 800]],
   },
   {
@@ -123,7 +123,7 @@ const connections = [
     from: "input:request",
     to: "prompt:plan",
     kind: "trigger",
-    d: "M45 268H124",
+    d: "M45 268H156",
     windows: [[0, 800]],
   },
   {
@@ -131,7 +131,7 @@ const connections = [
     from: "prompt:plan",
     to: "action:tasks",
     kind: "effect",
-    d: "M185 293V319",
+    d: "M285 268H307Q315 268 315 276V322Q315 330 307 330H226",
     windows: [
       [2400, 2600],
       [13600, 13800],
@@ -142,7 +142,7 @@ const connections = [
     from: "action:tasks",
     to: "prompt:dispatch",
     kind: "trigger",
-    d: "M185 341V390",
+    d: "M204 330H133Q125 330 125 338V407Q125 415 133 415H156",
     windows: [
       [2600, 2700],
       [13800, 13900],
@@ -153,7 +153,7 @@ const connections = [
     from: "prompt:dispatch",
     to: "output:tasks",
     kind: "effect",
-    d: "M253 415H275",
+    d: "M285 415H365",
     windows: [
       [3100, 3300],
       [14200, 14300],
@@ -164,7 +164,7 @@ const connections = [
     from: "output:tasks",
     to: "input:research",
     kind: "connection",
-    d: "M275 415H317Q325 415 325 407V201Q325 193 333 193H370",
+    d: "M365 415H407Q415 415 415 407V226Q415 218 423 218H460",
     windows: [
       [3300, 3800],
       [14300, 14400],
@@ -175,7 +175,7 @@ const connections = [
     from: "output:tasks",
     to: "input:build",
     kind: "connection",
-    d: "M275 415H317Q325 415 325 421Q325 427 333 427H370",
+    d: "M365 415H407Q415 415 415 421Q415 427 423 427H460",
     windows: [
       [3300, 3800],
       [14300, 14400],
@@ -186,7 +186,7 @@ const connections = [
     from: "input:research",
     to: "prompt:research",
     kind: "trigger",
-    d: "M370 193H421",
+    d: "M460 218H531",
     windows: [
       [3800, 4000],
       [14400, 14500],
@@ -197,7 +197,7 @@ const connections = [
     from: "input:build",
     to: "prompt:build",
     kind: "trigger",
-    d: "M370 427H421",
+    d: "M460 427H531",
     windows: [
       [3800, 4000],
       [14400, 14500],
@@ -208,7 +208,7 @@ const connections = [
     from: "prompt:research",
     to: "output:evidence",
     kind: "effect",
-    d: "M560 193H600",
+    d: "M670 218H800",
     windows: [
       [6000, 6300],
       [16000, 16300],
@@ -219,7 +219,7 @@ const connections = [
     from: "prompt:build",
     to: "output:patch",
     kind: "effect",
-    d: "M560 427H600",
+    d: "M670 427H800",
     windows: [
       [7000, 7300],
       [17000, 17300],
@@ -230,7 +230,7 @@ const connections = [
     from: "output:evidence",
     to: "input:evidence",
     kind: "connection",
-    d: "M600 193H637Q645 193 645 201V222Q645 230 653 230H695",
+    d: "M800 218H837Q845 218 845 224Q845 230 853 230H895",
     windows: [
       [6300, 7100],
       [16300, 16800],
@@ -241,7 +241,7 @@ const connections = [
     from: "output:patch",
     to: "input:patch",
     kind: "connection",
-    d: "M600 427H657Q665 427 665 419V338Q665 330 673 330H695",
+    d: "M800 427H857Q865 427 865 419V338Q865 330 873 330H895",
     windows: [
       [7300, 8100],
       [17300, 17700],
@@ -252,7 +252,7 @@ const connections = [
     from: "input:evidence",
     to: "prompt:gather",
     kind: "trigger",
-    d: "M695 230H722Q730 230 730 238V262Q730 270 738 270H759",
+    d: "M895 230H977Q985 230 985 238V262Q985 270 993 270H1016",
     windows: [
       [7100, 7600],
       [16800, 17200],
@@ -263,7 +263,7 @@ const connections = [
     from: "input:patch",
     to: "prompt:gather",
     kind: "trigger",
-    d: "M695 330H722Q730 330 730 322V278Q730 270 738 270H759",
+    d: "M895 330H957Q965 330 965 322V278Q965 270 973 270H1016",
     windows: [
       [8100, 8400],
       [17700, 17900],
@@ -274,7 +274,7 @@ const connections = [
     from: "prompt:gather",
     to: "action:ready",
     kind: "effect",
-    d: "M805 295V309",
+    d: "M1145 270H1172Q1180 270 1180 278V312Q1180 320 1172 320H1073",
     windows: [
       [8600, 8700],
       [17950, 17975],
@@ -285,7 +285,7 @@ const connections = [
     from: "action:ready",
     to: "prompt:review",
     kind: "trigger",
-    d: "M805 331V350",
+    d: "M1051 320H993Q985 320 985 328V367Q985 375 993 375H1016",
     windows: [
       [8700, 8800],
       [17975, 18000],
@@ -296,7 +296,7 @@ const connections = [
     from: "prompt:review",
     to: "output:retry",
     kind: "effect",
-    d: "M888 375H900V497Q900 505 908 505H920",
+    d: "M1145 375H1184Q1192 375 1192 383V497Q1192 505 1200 505H1245",
     windows: [[10500, 10800]],
   },
   {
@@ -304,7 +304,7 @@ const connections = [
     from: "output:retry",
     to: "input:feedback",
     kind: "connection",
-    d: "M920 505H934Q942 505 942 513V560Q942 568 934 568H560 M460 568H28Q20 568 20 560V463Q20 455 28 455H45",
+    d: "M1245 505H1259Q1267 505 1267 513V560Q1267 568 1259 568H710 M610 568H28Q20 568 20 560V463Q20 455 28 455H45",
     windows: [[10800, 11800]],
   },
   {
@@ -312,7 +312,7 @@ const connections = [
     from: "input:feedback",
     to: "prompt:plan",
     kind: "trigger",
-    d: "M45 455H77Q85 455 85 447V276Q85 268 93 268H124",
+    d: "M45 455H77Q85 455 85 447V276Q85 268 93 268H156",
     windows: [[11800, 12400]],
   },
   {
@@ -320,7 +320,7 @@ const connections = [
     from: "prompt:review",
     to: "action:approved",
     kind: "effect",
-    d: "M805 400V404",
+    d: "M1145 375H1172Q1180 375 1180 383V407Q1180 415 1172 415H1073",
     windows: [[19200, 19400]],
   },
   {
@@ -328,7 +328,7 @@ const connections = [
     from: "action:approved",
     to: "prompt:publish",
     kind: "trigger",
-    d: "M805 426V450",
+    d: "M1051 415H993Q985 415 985 423V467Q985 475 993 475H1016",
     windows: [[19400, 19600]],
   },
   {
@@ -336,26 +336,26 @@ const connections = [
     from: "prompt:publish",
     to: "output:result",
     kind: "effect",
-    d: "M888 475H920",
+    d: "M1145 475H1245",
     windows: [[21000, 21800]],
   },
 ];
 const ports = [
   { x: 45, y: 268, name: "request", input: true },
   { x: 45, y: 455, name: "feedback", input: true },
-  { x: 275, y: 415, name: "tasks", input: false },
-  { x: 370, y: 193, name: "task", input: true },
-  { x: 600, y: 193, name: "evidence", input: false },
-  { x: 370, y: 427, name: "task", input: true },
-  { x: 600, y: 427, name: "patch", input: false },
-  { x: 695, y: 230, name: "evidence", input: true },
-  { x: 695, y: 330, name: "patch", input: true },
-  { x: 920, y: 505, name: "retry", input: false },
-  { x: 920, y: 475, name: "result", input: false },
+  { x: 365, y: 415, name: "tasks", input: false },
+  { x: 460, y: 218, name: "task", input: true },
+  { x: 800, y: 218, name: "evidence", input: false },
+  { x: 460, y: 427, name: "task", input: true },
+  { x: 800, y: 427, name: "patch", input: false },
+  { x: 895, y: 230, name: "evidence", input: true },
+  { x: 895, y: 330, name: "patch", input: true },
+  { x: 1245, y: 505, name: "retry", input: false },
+  { x: 1245, y: 475, name: "result", input: false },
 ];
 const actions = [
   {
-    x: 185,
+    x: 215,
     y: 330,
     name: "tasks",
     windows: [
@@ -364,7 +364,7 @@ const actions = [
     ],
   },
   {
-    x: 805,
+    x: 1062,
     y: 320,
     name: "ready",
     windows: [
@@ -372,7 +372,7 @@ const actions = [
       [17975, 18000],
     ],
   },
-  { x: 805, y: 415, name: "approved", windows: [[19400, 19600]] },
+  { x: 1062, y: 415, name: "approved", windows: [[19400, 19600]] },
 ];
 ---
 
@@ -387,7 +387,7 @@ const actions = [
   data-running={text("running", "运行中")}
   data-completed={text("completed", "已完成")}
 >
-  <svg viewBox="0 90 960 510" aria-hidden="true">
+  <svg viewBox="0 90 1285 510" aria-hidden="true">
     <defs
       ><pattern
         id="topology-grid"
@@ -398,7 +398,7 @@ const actions = [
         ></circle></pattern
       ></defs
     >
-    <rect width="960" height="640" fill="url(#topology-grid)"></rect>
+    <rect width="1285" height="640" fill="url(#topology-grid)"></rect>
     {
       teams.map((team) => (
         <g class="team">
@@ -441,13 +441,13 @@ const actions = [
         </g>
       ))
     }
-    <text x="510" y="572" text-anchor="middle" class="delay-label"
+    <text x="660" y="572" text-anchor="middle" class="delay-label"
       >after 250 ms</text
     >
-    <text x="320" y="308" text-anchor="middle" class="route-label"
+    <text x="410" y="308" text-anchor="middle" class="route-label"
       >{text("scatter", "分发")}</text
     >
-    <text x="640" y="307" text-anchor="middle" class="route-label"
+    <text x="840" y="307" text-anchor="middle" class="route-label"
       >{text("gather", "汇聚")}</text
     >
     <g class="timer" transform="translate(100 200)" data-timer>
@@ -471,7 +471,7 @@ const actions = [
           data-windows={JSON.stringify(action.windows)}
         >
           <polygon points="0,-11 11,0 0,11 -11,0" />
-          <text x="17" y="4" class="shape-label">
+          <text y="26" text-anchor="middle" class="shape-label">
             {action.name}
           </text>
         </g>
@@ -516,7 +516,7 @@ const actions = [
           <polygon points="-5,-6.5 6.5,0 -5,6.5" />
           <text
             x={port.input ? 10 : -10}
-            y={port.input || port.name === "retry" ? -11 : -34}
+            y="-11"
             text-anchor={port.input ? "start" : "end"}
           >
             {port.name}
@@ -670,7 +670,7 @@ const actions = [
       overflow-x: auto;
     }
     svg {
-      min-width: 720px;
+      min-width: 960px;
     }
   }
   @media (prefers-reduced-motion: reduce) {
