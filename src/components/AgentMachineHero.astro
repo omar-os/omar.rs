@@ -1,4 +1,5 @@
 ---
+import MachineTopology from "./MachineTopology.astro";
 interface Props {
   lang?: "en" | "zh";
 }
@@ -17,12 +18,7 @@ const copy = zh
       swarmWarning: "智能体蜂群不可预测且危险。请查看",
       incident: "OpenAI / Hugging Face 事件",
       machine: "智能体机器是确定性的、可验证的。",
-      input: "输入",
-      plan: "规划",
-      execute: "执行",
-      verify: "验证",
-      done: "完成",
-      alt: "左侧 Anthropic、OpenAI、Cursor、OpenCode 和 Antigravity 智能体沿杂乱路径漂移；右侧工作流依次经过输入、规划、执行、验证和完成。",
+      alt: "左侧 Anthropic、OpenAI、Cursor、OpenCode 和 Antigravity 智能体沿杂乱路径漂移；右侧固定的 OMAR 拓扑依次执行规划、团队并行工作、分发汇聚、审查、反馈和发布。",
     }
   : {
       no: "Say no to agent “swarms”.",
@@ -37,12 +33,7 @@ const copy = zh
       swarmWarning: "Agent swarm is unpredictable and dangerous. Check the",
       incident: "OpenAI / Hugging Face incident",
       machine: "An agentic machine is deterministic and verifiable.",
-      input: "INPUT",
-      plan: "PLAN",
-      execute: "EXECUTE",
-      verify: "VERIFY",
-      done: "DONE",
-      alt: "Anthropic, OpenAI, Cursor, OpenCode, and Antigravity agents drift along tangled paths on the left. On the right, an ordered workflow moves through input, plan, execute, verify, and done.",
+      alt: "Anthropic, OpenAI, Cursor, OpenCode, and Antigravity agents drift along tangled paths on the left. On the right, a fixed OMAR topology executes planning, parallel teams, scatter-gather, review, feedback, and publishing.",
     };
 const backends = [
   { name: "Anthropic", icon: "anthropic" },
@@ -64,13 +55,6 @@ const points = [
   [307, 146],
   [188, 265],
   [93, 382],
-];
-const states = [
-  { x: 440, y: 224, label: copy.input },
-  { x: 557, y: 224, label: copy.plan },
-  { x: 674, y: 224, label: copy.execute },
-  { x: 791, y: 224, label: copy.verify },
-  { x: 908, y: 224, label: copy.done },
 ];
 ---
 
@@ -132,21 +116,8 @@ const states = [
           ><circle cx="1" cy="1" r=".7" fill="var(--accent)" opacity=".22"
           ></circle></pattern
         >
-        <linearGradient id="machine-line"
-          ><stop stop-color="var(--accent)"></stop><stop
-            offset="1"
-            stop-color="var(--success)"></stop></linearGradient
-        >
-        <radialGradient id="machine-glow"
-          ><stop stop-color="var(--accent)" stop-opacity=".18"></stop><stop
-            offset="1"
-            stop-color="var(--accent)"
-            stop-opacity="0"></stop></radialGradient
-        >
       </defs>
       <rect width="1000" height="430" fill="url(#machine-grid)"></rect>
-      <ellipse cx="700" cy="220" rx="310" ry="200" fill="url(#machine-glow)"
-      ></ellipse>
       <g class="swarm" fill="none" stroke="var(--coral)">
         <g class="swarm-links">
           {
@@ -187,85 +158,7 @@ const states = [
         }
       </g>
     </svg>
-    <svg
-      class="diagram machine-diagram"
-      viewBox="390 40 570 370"
-      aria-hidden="true"
-    >
-      <rect x="390" width="610" height="430" fill="url(#machine-grid)"></rect>
-      <ellipse cx="700" cy="220" rx="310" ry="200" fill="url(#machine-glow)"
-      ></ellipse>
-      <path class="rail" d="M440 224H908"></path>
-      <path class="return-rail" d="M791 246V319H557V246"></path>
-      <text x="674" y="344" class="svg-note" text-anchor="middle"
-        >{zh ? "有界重试" : "BOUNDED RETRY"}</text
-      >
-      <path class="signal" d="M440 224H908"></path>
-      {
-        states.map(({ x, y, label }, i) => (
-          <g
-            class:list={["state", { "final-state": i === 4 }]}
-            style={`--step:${i}`}
-          >
-            <rect
-              class="node-halo"
-              x={x - 31}
-              y={y - 31}
-              width="62"
-              height="62"
-              rx="19"
-            />
-            <rect
-              class="node"
-              x={x - 23}
-              y={y - 23}
-              width="46"
-              height="46"
-              rx="12"
-            />
-            {i === 4 ? (
-              <path class="node-icon" d={`m${x - 7} ${y} 5 5 10-10`} />
-            ) : i === 3 ? (
-              <path
-                class="node-icon"
-                d={`M${x} ${y - 10}l9 4v7l-9 7-9-7v-7z`}
-              />
-            ) : (
-              <>
-                <circle cx={x - 6} cy={y} r="2" fill="currentColor" />
-                <circle cx={x + 6} cy={y} r="2" fill="currentColor" />
-                <path d={`M${x - 4} ${y}h8`} stroke="currentColor" />
-              </>
-            )}
-            <text x={x} y={y - 48} text-anchor="middle" class="state-number">
-              0{i + 1}
-            </text>
-            <text x={x} y={y + 53} text-anchor="middle" class="state-label">
-              {label}
-            </text>
-          </g>
-        ))
-      }
-      <g class="verified"
-        ><rect
-          x="731"
-          y="92"
-          width="190"
-          height="31"
-          rx="15"
-          fill="var(--success-surface)"
-          stroke="var(--success-border)"></rect><circle
-          cx="749"
-          cy="107"
-          r="3"
-          fill="var(--success)"></circle><text
-          x="764"
-          y="111"
-          class="verified-label"
-          >{zh ? "转换条件已检查" : "TRANSITION CHECKED"}</text
-        ></g
-      >
-    </svg>
+    <div class="machine-diagram"><MachineTopology lang={lang} /></div>
   </agent-diagram>
 </section>
 
@@ -342,6 +235,8 @@ const states = [
     grid-row: 2;
   }
   .machine-diagram {
+    min-width: 0;
+    align-self: center;
     grid-column: 2;
     grid-row: 2;
   }
@@ -371,102 +266,6 @@ const states = [
     opacity: 0.4;
     fill: none;
     stroke-linecap: round;
-  }
-  .rail {
-    fill: none;
-    stroke: url(#machine-line);
-    stroke-width: 2;
-    opacity: 0.5;
-  }
-  .return-rail {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 1;
-    stroke-dasharray: 4 5;
-    opacity: 0.4;
-  }
-  .signal {
-    fill: none;
-    stroke: var(--accent-bright);
-    stroke-width: 3;
-    stroke-dasharray: 24 480;
-    animation: signal 8s linear infinite;
-    filter: drop-shadow(0 0 5px var(--accent-bright));
-  }
-  .state {
-    color: var(--accent-bright);
-  }
-  .node {
-    fill: var(--bg-surface-2);
-    stroke: var(--accent);
-    stroke-width: 1.3;
-    animation: node 8s infinite;
-    animation-delay: calc(var(--step) * 1.65s);
-  }
-  .node-halo {
-    fill: rgba(140, 99, 242, 0.04);
-    stroke: rgba(140, 99, 242, 0.2);
-  }
-  .node-icon {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .final-state {
-    color: var(--success);
-  }
-  .state-label {
-    fill: var(--text);
-    font: 10px var(--font-mono);
-    letter-spacing: 1px;
-  }
-  .state-number,
-  .svg-note {
-    fill: var(--text-dim);
-    font: 9px var(--font-mono);
-    letter-spacing: 1px;
-  }
-  .verified {
-    animation: verified 8s infinite;
-  }
-  .verified-label {
-    fill: var(--success);
-    font: 9px var(--font-mono);
-    letter-spacing: 0.5px;
-  }
-  @keyframes signal {
-    from {
-      stroke-dashoffset: 24;
-    }
-    to {
-      stroke-dashoffset: -480;
-    }
-  }
-  @keyframes node {
-    0%,
-    24%,
-    100% {
-      fill: var(--bg-surface-2);
-      stroke: var(--accent);
-    }
-    7%,
-    17% {
-      fill: #62418c;
-      stroke: var(--accent-bright);
-    }
-  }
-  @keyframes verified {
-    0%,
-    55%,
-    100% {
-      opacity: 0.35;
-    }
-    65%,
-    90% {
-      opacity: 1;
-    }
   }
   @media (max-width: 640px) {
     .machine-hero {
@@ -508,12 +307,6 @@ const states = [
   @media (prefers-reduced-motion: reduce) {
     .diagram-wrap * {
       animation: none !important;
-    }
-    .signal {
-      display: none;
-    }
-    .verified {
-      opacity: 1;
     }
   }
 </style>
