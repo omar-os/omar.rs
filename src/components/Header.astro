@@ -33,7 +33,7 @@ function getLangSwitchUrl() {
   <div class="container header-inner">
     <a href={isZh ? `${base}zh/` : base} class="logo">
       <img
-        src={`${base}omar-logo-black.jpg`}
+        src={`${base}omar-logo-transparent.png`}
         alt="OMAR"
         width="1182"
         height="1182"
@@ -107,7 +107,7 @@ function getLangSwitchUrl() {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(5, 5, 7, 0.86);
+    background: var(--header-bg);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     border-bottom: 1px solid var(--border);

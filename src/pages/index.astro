@@ -1,36 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import AgentMachineHero from "../components/AgentMachineHero.astro";
 ---
 
 <BaseLayout
   title="Home"
   description="LLM agents are unpredictable. Their coordination doesn't have to be. OMAR delivers deterministic, formally specified orchestration for multi-agent systems."
 >
-  <!-- Hero -->
-  <section class="hero">
-    <div class="container hero-inner">
-      <h1 class="hero-title">
-        LLM agents are unpredictable.<br />Their coordination<br /><span
-          class="hero-accent">doesn't have to be.</span
-        >
-      </h1>
-      <p class="hero-subtitle">
-        <code>omar</code> delivers deterministic, formally specified orchestration
-        for multi-agent systems.
-      </p>
-      <div class="hero-actions">
-        <a href={`${import.meta.env.BASE_URL}docs/`} class="btn btn-primary"
-          >Get Started</a
-        >
-        <a
-          href="https://github.com/omar-os/omar"
-          class="btn btn-outline"
-          target="_blank"
-          rel="noopener">GitHub</a
-        >
-      </div>
-    </div>
-  </section>
+  <AgentMachineHero lang="en" />
 
   <!-- Demo -->
   <section class="demo">
@@ -57,6 +34,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
       </figure>
       <figure class="demo-figure">
         <iframe
+          title="Terminal UI demo"
           src="https://asciinema.org/a/946195/iframe?autoplay=1&loop=1&speed=2&theme=asciinema"
           allowfullscreen
           loading="lazy"
@@ -197,72 +175,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <style>
-  /* Hero */
-  .hero {
-    padding: clamp(5rem, 11vw, 8rem) 0 clamp(4rem, 8vw, 6rem);
-  }
-
-  .hero-inner {
-    max-width: 820px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .hero-tag {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-bottom: 1rem;
-    letter-spacing: 0.02em;
-  }
-
-  .hero-title {
-    /* Smaller than the old headline needed: this one is two sentences,
-       and at 4.6rem the first alone took two lines. */
-    font-size: clamp(2rem, 4.4vw, 3.35rem);
-    font-weight: 700;
-    letter-spacing: -0.045em;
-    margin-bottom: 1.5rem;
-    line-height: 1.06;
-    color: var(--text-bright);
-  }
-
-  .hero-accent {
-    color: var(--accent-bright);
-    text-shadow: 0 0 38px rgba(140, 99, 242, 0.28);
-  }
-
-  .hero-subtitle {
-    font-size: 1.1rem;
-    color: var(--text);
-    margin-bottom: 2rem;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 620px;
-    line-height: 1.7;
-  }
-
-  .hero-subtitle code {
-    font-weight: 600;
-  }
-
-  .hero-install {
-    margin-bottom: 1.5rem;
-  }
-
-  .hero-install pre {
-    display: inline-block;
-  }
-
   .prompt {
     color: var(--text-dim);
     user-select: none;
-  }
-
-  .hero-actions {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    justify-content: center;
   }
 
   /* Demo */
@@ -270,12 +185,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     padding: 0 0 4rem;
   }
 
-  .demo-figure {
-    margin: 0 0 2.5rem;
+  .demo .container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    align-items: start;
   }
 
-  .demo-figure:last-child {
-    margin-bottom: 0;
+  .demo-figure {
+    min-width: 0;
+    margin: 0;
   }
 
   .demo figcaption {
@@ -298,20 +217,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   /* Its own aspect ratio, so nothing jumps while it loads. */
-  .demo video {
+  .demo video,
+  .demo iframe {
     height: auto;
     aspect-ratio: 1280 / 694;
-  }
-
-  .demo iframe {
-    height: 600px;
   }
 
   /* Features */
   .features {
     padding: 4rem 0;
     border-top: 1px solid var(--border);
-    background: rgba(0, 0, 0, 0.18);
+    background: var(--bg-surface);
   }
 
   .section-title {
@@ -333,8 +249,8 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border-radius: var(--radius);
     background: linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.025),
-      rgba(140, 99, 242, 0.035)
+      rgba(252, 247, 240, 0.035),
+      rgba(140, 99, 242, 0.07)
     );
     transition:
       border-color 0.15s ease,
@@ -378,7 +294,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     width: 100%;
     margin-bottom: 3rem;
     padding: 1.25rem;
-    background: rgba(14, 13, 19, 0.72);
+    background: var(--bg-surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
   }
@@ -479,8 +395,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
   /* Responsive */
   @media (max-width: 768px) {
-    .demo iframe {
-      height: 350px;
+    .demo .container {
+      grid-template-columns: 1fr;
+      gap: 2rem;
     }
 
     .features-grid {
@@ -500,10 +417,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   }
 
   @media (max-width: 480px) {
-    .demo iframe {
-      height: 260px;
-    }
-
     .install-methods {
       padding: 1rem;
     }
