@@ -3,28 +3,30 @@ export function createSwarm(
   width: number,
   random = Math.random,
 ) {
+  const radius = Math.min(220, width * 0.22);
   const agents = Array.from({ length: count }, (_, i) => ({
     x: 55 + ((i % 9) / 8) * (width - 110),
     y: 65 + Math.floor(i / 9) * 120,
-    born: -random() * 3000,
-    life: 2200 + random() * 2200,
+    born: -random() * 6000,
+    life: 6000 + random() * 4000,
     phase: random() * Math.PI * 2,
   }));
   const edges = Array.from({ length: count }, (_, i) => ({
     from: i,
-    to: (i + 5) % count,
+    to: i % 9 === 8 ? i - 1 : (i + 1) % count,
     born: -random() * 1000,
-    life: 800 + random() * 1600,
-    bend: (random() - 0.5) * 160,
+    life: 1600 + random() * 2200,
+    bend: (random() - 0.5) * 80,
     direction: random() < 0.5 ? -1 : 1,
     speed: 25 + random() * 20,
   }));
   return {
+    radius,
     sample(time: number) {
       const positions = agents.map((agent, i) => {
         if (time >= agent.born + agent.life) {
-          agent.born = time + 250 + random() * 700;
-          agent.life = 2200 + random() * 2200;
+          agent.born = time + 900 + random() * 900;
+          agent.life = 6000 + random() * 4000;
           // Respawn somewhere else, with space around other agent centers.
           for (let attempt = 0; attempt < 20; attempt++) {
             agent.x = 50 + random() * (width - 100);
@@ -42,7 +44,7 @@ export function createSwarm(
         const age = time - agent.born;
         const opacity = Math.max(
           0,
-          Math.min(1, age / 220, (agent.life - age) / 300),
+          Math.min(1, age / 650, (agent.life - age) / 900),
         );
         return {
           x: agent.x + Math.sin(time / 1400 + agent.phase) * 16,
@@ -55,7 +57,11 @@ export function createSwarm(
         if (
           time >= edge.born + edge.life ||
           positions[edge.from].opacity < 0.1 ||
-          positions[edge.to].opacity < 0.1
+          positions[edge.to].opacity < 0.1 ||
+          Math.hypot(
+            positions[edge.from].x - positions[edge.to].x,
+            positions[edge.from].y - positions[edge.to].y,
+          ) >= radius
         ) {
           const candidates: [number, number][] = [];
           positions.forEach((a, i) =>
@@ -64,6 +70,7 @@ export function createSwarm(
                 i < j &&
                 a.opacity > 0.2 &&
                 b.opacity > 0.2 &&
+                Math.hypot(a.x - b.x, a.y - b.y) < radius - 15 &&
                 !edges.some(
                   (other) =>
                     (other.from === i && other.to === j) ||
@@ -76,8 +83,8 @@ export function createSwarm(
           const pair = candidates[Math.floor(random() * candidates.length)];
           if (pair) [edge.from, edge.to] = pair;
           edge.born = time;
-          edge.life = 800 + random() * 1600;
-          edge.bend = (random() - 0.5) * 160;
+          edge.life = 1600 + random() * 2200;
+          edge.bend = (random() - 0.5) * 80;
           edge.direction = random() < 0.5 ? -1 : 1;
         }
         const a = positions[edge.from],
@@ -88,13 +95,14 @@ export function createSwarm(
           Math.min(1, age / 200, (edge.life - age) / 200),
         );
         const distance = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        const proximity = Math.max(0, Math.min(1, (radius - distance) / 24));
         const cx = (a.x + b.x) / 2 - ((b.y - a.y) / distance) * edge.bend;
         const cy = (a.y + b.y) / 2 + ((b.x - a.x) / distance) * edge.bend;
         return {
           from: edge.from,
           to: edge.to,
           path: `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`,
-          opacity: Math.min(a.opacity, b.opacity) * fade * 0.5,
+          opacity: Math.min(a.opacity, b.opacity) * fade * proximity * 0.5,
           offset: ((-edge.direction * age) / 1000) * edge.speed,
         };
       });

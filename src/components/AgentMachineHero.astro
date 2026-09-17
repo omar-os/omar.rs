@@ -119,7 +119,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
             <g class="swarm-links">
               {
                 points.map(([x, y], i) => {
-                  const [endX, endY] = points[(i + 3) % points.length];
+                  const [endX, endY] = points[i % 9 === 8 ? i - 1 : i + 1];
                   return (
                     <path
                       class="swarm-link"
@@ -174,19 +174,12 @@ const points = Array.from({ length: 36 }, (_, i) => [
         aria-label={zh ? "选择幻灯片" : "Choose slide"}
       >
         <button type="button" data-select="0" aria-pressed="true"
-          >{zh ? "01 蜂群" : "01 Swarm"}</button
+          >{zh ? "蜂群" : "Swarm"}</button
         >
         <button type="button" data-select="1" aria-pressed="false"
-          >{zh ? "02 机器" : "02 Machine"}</button
+          >{zh ? "机器" : "Machine"}</button
         >
       </div>
-      <button
-        type="button"
-        data-pause
-        data-pause-label={zh ? "暂停轮播" : "Pause slideshow"}
-        data-play-label={zh ? "播放轮播" : "Play slideshow"}
-        >{zh ? "暂停轮播" : "Pause slideshow"}</button
-      >
     </div>
   </agent-carousel>
 </section>
@@ -355,7 +348,6 @@ const points = Array.from({ length: 36 }, (_, i) => [
       const buttons = [
         ...this.querySelectorAll<HTMLButtonElement>("[data-select]"),
       ];
-      const pause = this.querySelector<HTMLButtonElement>("[data-pause]")!;
       const controls = this.querySelector<HTMLElement>(".carousel-controls")!;
       const svg = this.querySelector<SVGSVGElement>(".swarm-diagram")!;
       const nodes = [...this.querySelectorAll<SVGGElement>(".wander")];
@@ -370,7 +362,6 @@ const points = Array.from({ length: 36 }, (_, i) => [
         previous = 0,
         frame = 0;
       let visible = true,
-        paused = false,
         focused = false;
       const updateTopology = (reset = false) => {
         topology.dataset.playbackActive = String(active === 1);
@@ -410,22 +401,18 @@ const points = Array.from({ length: 36 }, (_, i) => [
       const render = (now: number) => {
         const delta = previous ? Math.min(now - previous, 100) : 0;
         previous = now;
-        if (!focused && !paused) slideTime += delta;
+        if (!focused) slideTime += delta;
         if (active === 0) {
           swarmTime += delta;
           draw(swarmTime);
         }
-        if (!paused && slideTime >= (active === 0 ? 5000 : MACHINE_CYCLE_MS))
+        if (slideTime >= (active === 0 ? 5000 : MACHINE_CYCLE_MS))
           show(1 - active);
         frame = requestAnimationFrame(render);
       };
       const sync = () => {
         cancelAnimationFrame(frame);
         previous = 0;
-        pause.hidden = motion.matches;
-        pause.textContent =
-          (paused ? pause.dataset.playLabel : pause.dataset.pauseLabel) ?? "";
-        pause.setAttribute("aria-pressed", String(paused));
         updateTopology();
         if (!motion.matches && visible && !document.hidden)
           frame = requestAnimationFrame(render);
@@ -438,13 +425,6 @@ const points = Array.from({ length: 36 }, (_, i) => [
       };
       const select = (event: Event) => {
         show(Number((event.currentTarget as HTMLButtonElement).dataset.select));
-        // Manual selection holds the chosen slide until autoplay is resumed.
-        paused = true;
-        sync();
-      };
-      const toggle = () => {
-        paused = !paused;
-        slideTime = 0;
         sync();
       };
       const focusIn = (event: FocusEvent) => {
@@ -467,7 +447,6 @@ const points = Array.from({ length: 36 }, (_, i) => [
       observer.observe(this);
       sync();
       buttons.forEach((button) => button.addEventListener("click", select));
-      pause.addEventListener("click", toggle);
       this.addEventListener("focusin", focusIn);
       this.addEventListener("focusout", focusOut);
       motion.addEventListener("change", sync);
@@ -479,7 +458,6 @@ const points = Array.from({ length: 36 }, (_, i) => [
         buttons.forEach((button) =>
           button.removeEventListener("click", select),
         );
-        pause.removeEventListener("click", toggle);
         this.removeEventListener("focusin", focusIn);
         this.removeEventListener("focusout", focusOut);
         motion.removeEventListener("change", sync);
