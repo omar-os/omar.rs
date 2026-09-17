@@ -178,7 +178,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
         <h3 class="slide-label machine-label">
           {copy.ensembleLead}{" "}<em>{copy.ensembleDeterministic}</em>{" "}{
             copy.ensembleAnd
-          }{" "}<em>{copy.ensembleVerifiable}</em>
+          }{" "}<em>{copy.ensembleVerifiable}</em>{copy.machinePeriod}
         </h3>
         <MachineTopology lang={lang} />
       </section>
@@ -193,7 +193,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
           >{zh ? "蜂群" : "Swarm"}</button
         >
         <button type="button" data-select="1" aria-pressed="false"
-          >{zh ? "机器" : "Machine"}</button
+          >{zh ? "协作体" : "Ensemble"}</button
         >
       </div>
     </div>
@@ -247,7 +247,9 @@ const points = Array.from({ length: 36 }, (_, i) => [
     gap: 1.6rem;
   }
   .diagram-carousel {
+    --diagram-height: max(10rem, min(40vw, 34rem, calc(100svh - 15rem)));
     display: block;
+    scroll-margin-top: 4.5rem;
   }
   .diagram-carousel[data-ready] .carousel-stage {
     display: grid;
@@ -269,8 +271,8 @@ const points = Array.from({ length: 36 }, (_, i) => [
     transition-delay: 0s;
   }
   .slide-label {
-    min-height: 6.5rem;
-    padding: 1rem 1.5rem;
+    min-height: 5rem;
+    padding: 0.5rem 1.5rem;
     text-align: center;
     font-size: clamp(1.1rem, 1.6vw, 1.45rem);
     font-weight: 600;
@@ -295,7 +297,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
     justify-content: center;
     align-items: center;
     gap: 1.5rem;
-    margin-top: 1rem;
+    margin-top: 0.25rem;
   }
   .carousel-controls[hidden] {
     display: none;
@@ -339,7 +341,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
   .diagram {
     display: block;
     width: 100%;
-    height: auto;
+    height: var(--diagram-height);
   }
   .swarm-link {
     stroke-dasharray: 4 7;
@@ -364,8 +366,11 @@ const points = Array.from({ length: 36 }, (_, i) => [
     .hero-copy {
       margin-bottom: 2rem;
     }
+    .diagram-carousel {
+      --diagram-height: max(10rem, min(80vw, 24rem, calc(100svh - 17rem)));
+    }
     .slide-label {
-      min-height: 9rem;
+      min-height: 6rem;
       padding-inline: 1rem;
     }
     .carousel-controls {
