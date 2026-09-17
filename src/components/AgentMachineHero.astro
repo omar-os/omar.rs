@@ -11,13 +11,17 @@ const copy = zh
       deploy: "部署",
       deterministic: "确定性、可验证的",
       machinePrefix: "智能体",
-      machineWord: "机器",
+      machineWord: "协作体",
       machinePeriod: "。",
       description: "为多智能体系统提供确定性的、有形式化规约的编排。",
       start: "快速开始",
-      swarmWarning: "智能体蜂群不可预测且危险。请查看",
+      swarmWarning: "不受控制的智能体蜂群可能难以预测且危险。",
+      incidentLead: "请查看",
       incident: "OpenAI / Hugging Face 事件",
-      machine: "智能体机器是确定性的、可验证的。",
+      ensembleLead: "智能体协作体应当具有",
+      ensembleDeterministic: "确定性",
+      ensembleAnd: "和",
+      ensembleVerifiable: "可验证性",
       alt: "智能体蜂群与确定性 OMAR 拓扑的轮播对比。",
     }
   : {
@@ -25,14 +29,19 @@ const copy = zh
       deploy: "Deploy",
       deterministic: "deterministic, verifiable",
       machinePrefix: "agentic ",
-      machineWord: "machines",
+      machineWord: "ensembles",
       machinePeriod: ".",
       description:
         "delivers deterministic, formally specified orchestration for multi-agent systems.",
       start: "Get Started",
-      swarmWarning: "Agent swarm is unpredictable and dangerous. Check the",
+      swarmWarning:
+        "An uncontrolled agent swarm can be unpredictable and dangerous.",
+      incidentLead: "Check the",
       incident: "OpenAI / Hugging Face incident",
-      machine: "An agentic machine is deterministic and verifiable.",
+      ensembleLead: "An agentic ensemble should be",
+      ensembleDeterministic: "deterministic",
+      ensembleAnd: "and",
+      ensembleVerifiable: "verifiable",
       alt: "A carousel comparing an ephemeral agent swarm with a deterministic OMAR topology.",
     };
 const backends = [
@@ -92,13 +101,16 @@ const points = Array.from({ length: 36 }, (_, i) => [
         aria-roledescription={zh ? "幻灯片" : "slide"}
         aria-label={zh ? "1 / 2：智能体蜂群" : "1 of 2: Agent swarm"}
       >
-        <h3 class="slide-label swarm-warning">
-          {copy.swarmWarning}
-          <a
-            href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#agents-were-very-interested-in-manipulating-their-own-transcripts,-and-their-tests-successfully-“spoofed”-some-tool-calls-in-our-transcripts"
-            >{copy.incident}</a
-          >.
-        </h3>
+        <div class="slide-label swarm-warning">
+          <h3>{copy.swarmWarning}</h3>
+          <p class="incident-note">
+            {copy.incidentLead}
+            <a
+              href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#agents-were-very-interested-in-manipulating-their-own-transcripts,-and-their-tests-successfully-“spoofed”-some-tool-calls-in-our-transcripts"
+              >{copy.incident}</a
+            >.
+          </p>
+        </div>
         <svg
           class="diagram swarm-diagram"
           viewBox="0 0 1285 510"
@@ -161,9 +173,13 @@ const points = Array.from({ length: 36 }, (_, i) => [
         data-slide="1"
         role="group"
         aria-roledescription={zh ? "幻灯片" : "slide"}
-        aria-label={zh ? "2 / 2：智能体机器" : "2 of 2: Agentic machine"}
+        aria-label={zh ? "2 / 2：智能体协作体" : "2 of 2: Agentic ensemble"}
       >
-        <h3 class="slide-label machine-label">{copy.machine}</h3>
+        <h3 class="slide-label machine-label">
+          {copy.ensembleLead}{" "}<em>{copy.ensembleDeterministic}</em>{" "}{
+            copy.ensembleAnd
+          }{" "}<em>{copy.ensembleVerifiable}</em>
+        </h3>
         <MachineTopology lang={lang} />
       </section>
     </div>
@@ -253,12 +269,26 @@ const points = Array.from({ length: 36 }, (_, i) => [
     transition-delay: 0s;
   }
   .slide-label {
-    min-height: 5rem;
+    min-height: 6.5rem;
     padding: 1rem 1.5rem;
     text-align: center;
     font-size: clamp(1.1rem, 1.6vw, 1.45rem);
     font-weight: 600;
     line-height: 1.5;
+  }
+  .slide-label h3 {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+  }
+  .incident-note {
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin-top: 0.35rem;
+    color: var(--text-dim);
+  }
+  .machine-label em {
+    font-style: italic;
   }
   .carousel-controls {
     display: flex;
