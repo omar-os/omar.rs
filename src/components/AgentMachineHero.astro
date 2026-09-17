@@ -92,13 +92,13 @@ const points = Array.from({ length: 36 }, (_, i) => [
         aria-roledescription={zh ? "幻灯片" : "slide"}
         aria-label={zh ? "1 / 2：智能体蜂群" : "1 of 2: Agent swarm"}
       >
-        <p class="slide-label swarm-warning">
+        <h3 class="slide-label swarm-warning">
           {copy.swarmWarning}
           <a
             href="https://metr.org/blog/2026-08-26-openai-hugging-face-incident-investigation/#agents-were-very-interested-in-manipulating-their-own-transcripts,-and-their-tests-successfully-“spoofed”-some-tool-calls-in-our-transcripts"
             >{copy.incident}</a
           >.
-        </p>
+        </h3>
         <svg
           class="diagram swarm-diagram"
           viewBox="0 0 1285 510"
@@ -163,7 +163,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
         aria-roledescription={zh ? "幻灯片" : "slide"}
         aria-label={zh ? "2 / 2：智能体机器" : "2 of 2: Agentic machine"}
       >
-        <p class="slide-label machine-label">{copy.machine}</p>
+        <h3 class="slide-label machine-label">{copy.machine}</h3>
         <MachineTopology lang={lang} />
       </section>
     </div>
@@ -233,18 +233,32 @@ const points = Array.from({ length: 36 }, (_, i) => [
   .diagram-carousel {
     display: block;
   }
-  .carousel-stage {
-    min-height: calc(3.5rem + 100vw * 510 / 1285);
+  .diagram-carousel[data-ready] .carousel-stage {
+    display: grid;
   }
-  .carousel-slide[hidden] {
-    display: none;
+  .diagram-carousel[data-ready] .carousel-slide {
+    grid-area: 1 / 1;
+    min-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 700ms ease-in-out,
+      visibility 0s linear 700ms;
+  }
+  .diagram-carousel[data-ready] .carousel-slide[data-active="true"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
   }
   .slide-label {
-    min-height: 3.5rem;
-    padding: 0.75rem 1.5rem;
+    min-height: 5rem;
+    padding: 1rem 1.5rem;
     text-align: center;
-    font-size: 13px;
-    line-height: 1.7;
+    font-size: clamp(1.1rem, 1.6vw, 1.45rem);
+    font-weight: 600;
+    line-height: 1.5;
   }
   .carousel-controls {
     display: flex;
@@ -272,7 +286,11 @@ const points = Array.from({ length: 36 }, (_, i) => [
   .carousel-controls button[aria-pressed="true"] {
     color: var(--accent-bright);
     border-color: var(--accent);
-    background: var(--accent-soft);
+    background: linear-gradient(
+      90deg,
+      rgba(140, 99, 242, 0.38) var(--slide-progress, 0%),
+      var(--accent-soft) var(--slide-progress, 0%)
+    );
   }
   .carousel-controls button:hover {
     color: var(--text-bright);
@@ -316,11 +334,8 @@ const points = Array.from({ length: 36 }, (_, i) => [
     .hero-copy {
       margin-bottom: 2rem;
     }
-    .carousel-stage {
-      min-height: calc(4.5rem + 960px * 510 / 1285);
-    }
     .slide-label {
-      min-height: 4.5rem;
+      min-height: 9rem;
       padding-inline: 1rem;
     }
     .carousel-controls {
@@ -334,6 +349,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
   @media (prefers-reduced-motion: reduce) {
     .diagram-carousel * {
       animation: none !important;
+      transition: none !important;
     }
   }
 </style>
@@ -373,11 +389,14 @@ const points = Array.from({ length: 36 }, (_, i) => [
         active = index;
         slideTime = 0;
         slides.forEach((slide, i) => {
-          slide.hidden = i !== active;
+          slide.dataset.active = String(i === active);
+          slide.inert = i !== active;
+          slide.setAttribute("aria-hidden", String(i !== active));
         });
-        buttons.forEach((button, i) =>
-          button.setAttribute("aria-pressed", String(i === active)),
-        );
+        buttons.forEach((button, i) => {
+          button.setAttribute("aria-pressed", String(i === active));
+          button.style.setProperty("--slide-progress", "0%");
+        });
         updateTopology(active === 1);
       };
       const draw = (time: number) => {
@@ -406,8 +425,12 @@ const points = Array.from({ length: 36 }, (_, i) => [
           swarmTime += delta;
           draw(swarmTime);
         }
-        if (slideTime >= (active === 0 ? 5000 : MACHINE_CYCLE_MS))
-          show(1 - active);
+        const duration = active === 0 ? 10000 : MACHINE_CYCLE_MS;
+        buttons[active].style.setProperty(
+          "--slide-progress",
+          `${Math.min(slideTime / duration, 1) * 100}%`,
+        );
+        if (slideTime >= duration) show(1 - active);
         frame = requestAnimationFrame(render);
       };
       const sync = () => {
@@ -442,6 +465,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
         sync();
       });
       resize();
+      this.dataset.ready = "";
       show(0);
       controls.hidden = false;
       observer.observe(this);
