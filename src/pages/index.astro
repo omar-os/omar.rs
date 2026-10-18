@@ -5,7 +5,7 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
 
 <BaseLayout
   title="Home"
-  description="LLM agents are unpredictable. Their coordination doesn't have to be. OMAR delivers deterministic, formally specified orchestration for multi-agent systems."
+  description="Deploy deterministic, verifiable, programmable agentic workflows."
 >
   <AgentMachineHero lang="en" />
 
@@ -43,10 +43,10 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           </p>
         </div>
         <div class="feature-card">
-          <h3>Messaging &amp; integrations</h3>
+          <h3>Workflow checkpoints</h3>
           <p>
-            Connect agents to Slack channels. Bridge the gap between human and
-            AI workflows seamlessly.
+            Pause and resume workflows at well-defined checkpoints. Stop a
+            session while keeping its state, then restart it when needed.
           </p>
         </div>
         <div class="feature-card">
@@ -124,7 +124,9 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
         <div class="install-panel" id="panel-source">
           <pre><code><span class="prompt">$</span> git clone https://github.com/omar-os/omar.git
 <span class="prompt">$</span> cd omar && make install</code></pre>
-          <p class="install-note">Requires Rust 1.70+ and GNU Make.</p>
+          <p class="install-note">
+            Requires Rust 1.89+, GNU Make, Node.js 22.13+, and elan.
+          </p>
         </div>
       </div>
       <div class="steps">
@@ -133,7 +135,7 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-content">
             <h3>Prerequisites</h3>
             <p>
-              tmux 3.0+ and at least one agent backend:
+              tmux 3.0+, Git, and at least one agent backend:
               <a
                 href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
                 >Claude Code</a
@@ -151,10 +153,11 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-num">2</div>
           <div class="step-content">
             <h3>Launch Mission Control</h3>
-            <pre><code><span class="prompt">$</span> omar serve --ui</code></pre>
+            <pre><code><span class="prompt">$</span> omar up --name dev --web</code></pre>
             <p>
               Opens the web UI in your browser. Describe a workflow, confirm the
-              program it drafts, and watch the run on a live diagram.
+              program it drafts, and watch the run on a live diagram. Closing
+              the browser leaves the session running.
             </p>
           </div>
         </div>
@@ -162,10 +165,10 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-num">3</div>
           <div class="step-content">
             <h3>Or drive it from the terminal</h3>
-            <pre><code><span class="prompt">$</span> omar</code></pre>
+            <pre><code><span class="prompt">$</span> omar attach -s dev --tui</code></pre>
             <p>
-              The same runtime in tmux. Copy a prompt into your Executive
-              Assistant window and watch agents spawn.
+              Attach to the same session in tmux. <code>omar down -s dev</code> stops
+              and keeps it; <code>omar rm -s dev</code> removes it and its state.
             </p>
           </div>
         </div>

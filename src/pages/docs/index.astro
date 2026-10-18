@@ -4,99 +4,110 @@ import DocsLayout from "../../layouts/DocsLayout.astro";
 
 <DocsLayout
   title="Getting Started"
-  description="Install OMAR and launch your first multi-agent workflow."
+  description="Install OMAR and run programmable agentic workflows."
 >
   <p class="docs-lead">
-    OMAR is a deterministic orchestration runtime for agentic systems. You
-    describe what a team should do; OMAR compiles that into a program with an
-    explicit topology, then runs it — in your browser, or from a terminal.
+    OMAR provides deterministic orchestration for agentic workflows. Describe a
+    task in Mission Control, review the team diagram, and confirm deployment.
   </p>
-
   <h2>Prerequisites</h2>
-  <ul>
-    <li>
-      <strong>tmux 3.0+</strong> — <code>brew install tmux</code> on macOS or
-      <code>apt install tmux</code> on Debian/Ubuntu.
-    </li>
-    <li>
-      At least one supported coding agent: Claude Code, Codex CLI, Cursor CLI,
-      Opencode, or Google Antigravity CLI.
-    </li>
-  </ul>
-
+  <p>
+    Install tmux 3.0+, Git, and at least one supported coding agent: Claude
+    Code, Codex CLI, Cursor CLI, OpenCode, Google Antigravity CLI, or Pi.
+  </p>
   <h2>Install</h2>
   <h3>One-liner (recommended)</h3>
   <pre><code>curl -fsSL https://omar.rs/install.sh | sh</code></pre>
   <p>
-    The installer supports macOS and Linux and installs OMAR binaries to
-    <code>/usr/local/bin</code> by default.
+    Supports macOS and Linux; installs omar and omarc to /usr/local/bin by
+    default.
   </p>
-
   <h3>Homebrew</h3>
   <pre><code>brew install omar-os/omar/omar</code></pre>
-  <p>The OMAR tap installs tmux as a dependency.</p>
-
   <h3>Build from source</h3>
   <pre><code>git clone https://github.com/omar-os/omar.git
 cd omar
 make install</code></pre>
-  <p>Building from source requires Rust 1.70+ and GNU Make.</p>
-
+  <p>
+    Requires Rust 1.89+, GNU Make, Node.js 22.13+, and elan. make install builds
+    Mission Control and the omarc compiler.
+  </p>
   <h2>Launch Mission Control</h2>
-  <pre><code>omar serve --ui</code></pre>
+  <pre><code>omar up --name dev --web</code></pre>
   <p>
-    Serves the web UI from the daemon's own address and opens it in your
-    browser. The page and the API share an origin, so there is nothing to point
-    at anything.
+    Start an independent background session and open Mission Control in your
+    browser. Describe a workflow, review the generated program, and confirm
+    deployment to watch it run. Closing the browser leaves the session running.
   </p>
-  <p>
-    Describe a workflow. The assistant drafts an OMAR program and shows you the
-    topology it compiles to; nothing runs until you confirm. Then the diagram
-    goes live — ports carry values, reactions light up as their agents work, and
-    double-clicking an agent opens its terminal.
-  </p>
-
-  <h2>Launch the terminal UI</h2>
-  <pre><code>omar</code></pre>
-  <p>
-    The same runtime, driven from tmux instead. OMAR detects installed backends
-    automatically; select one explicitly with <code>-a</code>:
-  </p>
+  <h2>Manage sessions</h2>
   <table>
-    <thead>
-      <tr><th>Backend</th><th>Command</th></tr>
-    </thead>
+    <thead><tr><th>Command</th><th>Behavior</th></tr></thead>
     <tbody>
-      <tr><td>Claude Code</td><td><code>omar -a claude</code></td></tr>
-      <tr><td>Codex CLI</td><td><code>omar -a codex</code></td></tr>
-      <tr><td>Cursor CLI</td><td><code>omar -a cursor</code></td></tr>
-      <tr><td>Opencode</td><td><code>omar -a opencode</code></td></tr>
-      <tr><td>Google Antigravity CLI</td><td><code>omar -a agy</code></td></tr>
+      <tr
+        ><td><code>omar up --name dev</code></td><td
+          >Start a session, or restart the stopped session with this name.</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar attach -s dev --web</code></td><td
+          >Open the session in your browser; use --tui for the terminal UI.</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar down -s dev</code></td><td
+          >Stop the session and keep its state.</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar rm -s dev</code></td><td
+          >Remove the session and its state, stopping it first if running.</td
+        ></tr
+      >
+      <tr><td><code>omar ls</code></td><td>List sessions.</td></tr>
     </tbody>
   </table>
-
-  <h2>Run your first workflow in the terminal</h2>
-  <ol>
-    <li>
-      Launch <code>omar</code> to open the dashboard and Executive Assistant.
-    </li>
-    <li>
-      Paste this task into the Executive Assistant window:
-      <pre><code>Run https://github.com/omar-os/omar/blob/main/prompts/tests/project-factory.md</code></pre>
-    </li>
-    <li>
-      Watch the team form. Use the arrow keys to move between agents,
-      <code>Tab</code> to drill down, and <code>Shift+Tab</code> to move back up.
-    </li>
-    <li>
-      When you are finished, tell the Executive Assistant:
-      <pre><code>Shutdown the test project and its agents.</code></pre>
-    </li>
-  </ol>
-
   <p>
-    Browse the source, releases, and issue tracker on
-    <a href="https://github.com/omar-os/omar">GitHub</a>.
+    Use omar --help for commands and omar &lt;command&gt; --help for options.
+  </p>
+  <h2>Choose a backend</h2>
+  <p>
+    Choose the backend for a new session’s initial assistant. Add --web or --tui
+    to open a client immediately.
+  </p>
+  <table>
+    <thead><tr><th>Command</th><th>Backend</th></tr></thead>
+    <tbody>
+      <tr
+        ><td><code>omar -a claude up --name claude</code></td><td
+          >Claude Code</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a codex up --name codex</code></td><td>Codex CLI</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a cursor up --name cursor</code></td><td>Cursor CLI</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a opencode up --name opencode</code></td><td
+          >OpenCode</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a agy up --name agy</code></td><td
+          >Google Antigravity CLI</td
+        ></tr
+      >
+      <tr><td><code>omar -a pi up --name pi</code></td><td>Pi</td></tr>
+    </tbody>
+  </table>
+  <h2>Terminal UI</h2>
+  <pre><code>omar attach -s dev --tui</code></pre>
+  <p>
+    Attach the terminal dashboard to the same session. Press z to detach and
+    leave it running; Q stops the session after confirmation.
   </p>
 </DocsLayout>
 

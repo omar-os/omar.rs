@@ -5,7 +5,7 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
 
 <BaseLayout
   title="首页"
-  description="LLM 智能体难以预测，它们的协作不必如此。OMAR 为多智能体系统提供确定性的、有形式化规约的编排。"
+  description="部署确定性、可验证、可编程的智能体工作流。"
   lang="zh-CN"
 >
   <AgentMachineHero lang="zh" />
@@ -35,8 +35,10 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
           <p>长运行或临时智能体，由你选择。跨会话的持久状态与记忆快照。</p>
         </div>
         <div class="feature-card">
-          <h3>消息与集成</h3>
-          <p>将智能体连接到 Slack 频道，无缝打通人类与 AI 的工作流。</p>
+          <h3>工作流检查点</h3>
+          <p>
+            在明确的检查点暂停和恢复工作流。停止会话后保留状态，需要时可重新启动。
+          </p>
         </div>
         <div class="feature-card">
           <h3>基于 tmux</h3>
@@ -103,7 +105,9 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
         <div class="install-panel" id="panel-source">
           <pre><code><span class="prompt">$</span> git clone https://github.com/omar-os/omar.git
 <span class="prompt">$</span> cd omar && make install</code></pre>
-          <p class="install-note">需要 Rust 1.70+ 和 GNU Make。</p>
+          <p class="install-note">
+            需要 Rust 1.89+、GNU Make、Node.js 22.13+ 和 elan。
+          </p>
         </div>
       </div>
       <div class="steps">
@@ -112,7 +116,7 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
           <div class="step-content">
             <h3>前置条件</h3>
             <p>
-              tmux 3.0+ 和至少一个智能体后端：
+              tmux 3.0+、Git 和至少一个智能体后端：
               <a
                 href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
                 >Claude Code</a
@@ -130,10 +134,10 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
           <div class="step-num">2</div>
           <div class="step-content">
             <h3>启动 Mission Control</h3>
-            <pre><code><span class="prompt">$</span> omar serve --ui</code></pre>
+            <pre><code><span class="prompt">$</span> omar up --name dev --web</code></pre>
             <p>
               在浏览器中打开 Web
-              界面。描述你的工作流，确认它起草的程序，然后在实时拓扑图上观察运行。
+              界面。描述你的工作流，确认它起草的程序，然后在实时拓扑图上观察运行。关闭浏览器后，会话仍继续运行。
             </p>
           </div>
         </div>
@@ -141,10 +145,11 @@ import AgentMachineHero from "../../components/AgentMachineHero.astro";
           <div class="step-num">3</div>
           <div class="step-content">
             <h3>或在终端中使用</h3>
-            <pre><code><span class="prompt">$</span> omar</code></pre>
+            <pre><code><span class="prompt">$</span> omar attach -s dev --tui</code></pre>
             <p>
-              同一个运行时，运行在 tmux
-              中。将提示词粘贴到执行助理窗口，观察智能体自动创建。
+              连接到同一会话的终端界面。<code>omar down -s dev</code> 停止并保留会话，<code
+                >omar rm -s dev</code
+              > 删除会话及其状态。
             </p>
           </div>
         </div>
