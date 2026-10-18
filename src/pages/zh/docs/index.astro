@@ -4,95 +4,99 @@ import DocsLayout from "../../../layouts/DocsLayout.astro";
 
 <DocsLayout
   title="快速开始"
-  description="安装 OMAR 并启动你的第一个多智能体工作流。"
+  description="安装 OMAR，启动并管理智能体工作流。"
   lang="zh-CN"
 >
   <p class="docs-lead">
-    OMAR 是面向智能体系统的确定性编排运行时。你描述团队要做什么，OMAR
-    将其编译为拓扑结构明确的程序，然后运行它——在浏览器中，或在终端里。
+    OMAR 为智能体工作流提供确定性的编排。在 Mission Control
+    中描述任务，审核团队拓扑，确认后再部署。
   </p>
-
   <h2>前置依赖</h2>
-  <ul>
-    <li>
-      <strong>tmux 3.0+</strong> — macOS 运行 <code>brew install tmux</code
-      >，Debian/Ubuntu 运行
-      <code>apt install tmux</code>。
-    </li>
-    <li>
-      至少安装一个受支持的编程智能体：Claude Code、Codex CLI、Cursor
-      CLI、Opencode 或 Google Antigravity CLI。
-    </li>
-  </ul>
-
+  <p>
+    需要 tmux 3.0+、Git，以及至少一个受支持的编程智能体：Claude Code、Codex
+    CLI、Cursor CLI、OpenCode、Google Antigravity CLI 或 Pi。
+  </p>
   <h2>安装</h2>
   <h3>一键安装（推荐）</h3>
   <pre><code>curl -fsSL https://omar.rs/install.sh | sh</code></pre>
-  <p>
-    安装脚本支持 macOS 和 Linux，默认将 OMAR 二进制安装到 <code
-      >/usr/local/bin</code
-    >。
-  </p>
-
+  <p>支持 macOS 和 Linux，默认将 omar 和 omarc 安装到 /usr/local/bin。</p>
   <h3>Homebrew</h3>
   <pre><code>brew install omar-os/omar/omar</code></pre>
-  <p>OMAR 的 Homebrew tap 会自动安装 tmux 依赖。</p>
-
   <h3>从源码编译</h3>
   <pre><code>git clone https://github.com/omar-os/omar.git
 cd omar
 make install</code></pre>
-  <p>从源码编译需要 Rust 1.70+ 和 GNU Make。</p>
-
+  <p>
+    需要 Rust 1.89+、GNU Make、Node.js 22.13+ 和 elan。make install 会构建
+    Mission Control 和 omarc 编译器。
+  </p>
   <h2>启动 Mission Control</h2>
-  <pre><code>omar serve --ui</code></pre>
+  <pre><code>omar up --name dev --web</code></pre>
   <p>
-    从守护进程自身的地址提供 Web 界面，并在浏览器中打开。页面与 API
-    同源，因此无需配置任何地址。
+    启动独立的后台会话，并在浏览器中打开 Mission
+    Control。描述工作流，审核生成的程序，确认部署后观察实时拓扑。关闭浏览器不会停止会话。
   </p>
-  <p>
-    描述你的工作流。助理会起草一个 OMAR
-    程序，并展示它编译出的拓扑；在你确认之前不会运行任何东西。确认后拓扑图即时生效——端口传递数值，反应随其智能体工作而高亮，双击智能体即可打开它的终端。
-  </p>
-
-  <h2>启动终端界面</h2>
-  <pre><code>omar</code></pre>
-  <p>
-    同一个运行时，改为在 tmux 中驱动。OMAR 会自动检测已安装的后端，也可使用
-    <code>-a</code> 明确选择：
-  </p>
+  <h2>管理会话</h2>
   <table>
-    <thead>
-      <tr><th>后端</th><th>命令</th></tr>
-    </thead>
+    <thead><tr><th>命令</th><th>作用</th></tr></thead>
     <tbody>
-      <tr><td>Claude Code</td><td><code>omar -a claude</code></td></tr>
-      <tr><td>Codex CLI</td><td><code>omar -a codex</code></td></tr>
-      <tr><td>Cursor CLI</td><td><code>omar -a cursor</code></td></tr>
-      <tr><td>Opencode</td><td><code>omar -a opencode</code></td></tr>
-      <tr><td>Google Antigravity CLI</td><td><code>omar -a agy</code></td></tr>
+      <tr
+        ><td><code>omar up --name dev</code></td><td
+          >启动新会话，或重启同名的已停止会话。</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar attach -s dev --web</code></td><td
+          >在浏览器中打开会话；用 --tui 连接终端界面。</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar down -s dev</code></td><td>停止会话并保留状态。</td></tr
+      >
+      <tr
+        ><td><code>omar rm -s dev</code></td><td
+          >删除会话及其状态；运行中的会话会先被停止。</td
+        ></tr
+      >
+      <tr><td><code>omar ls</code></td><td>列出会话。</td></tr>
     </tbody>
   </table>
-
-  <h2>在终端中运行第一个工作流</h2>
-  <ol>
-    <li>运行 <code>omar</code>，打开仪表盘和执行助理。</li>
-    <li>
-      将以下任务粘贴到执行助理窗口：
-      <pre><code>Run https://github.com/omar-os/omar/blob/main/prompts/tests/project-factory.md</code></pre>
-    </li>
-    <li>
-      观察智能体团队自动组建。使用方向键切换智能体，按 <code>Tab</code> 进入下层，按
-      <code>Shift+Tab</code> 返回上层。
-    </li>
-    <li>
-      完成后告诉执行助理：
-      <pre><code>Shutdown the test project and its agents.</code></pre>
-    </li>
-  </ol>
-
+  <p>使用 omar --help 查看命令，使用 omar &lt;command&gt; --help 查看选项。</p>
+  <h2>选择后端</h2>
+  <p>为新会话的初始助理选择后端。增加 --web 或 --tui 可立即打开对应界面。</p>
+  <table>
+    <thead><tr><th>命令</th><th>后端</th></tr></thead>
+    <tbody>
+      <tr
+        ><td><code>omar -a claude up --name claude</code></td><td
+          >Claude Code</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a codex up --name codex</code></td><td>Codex CLI</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a cursor up --name cursor</code></td><td>Cursor CLI</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a opencode up --name opencode</code></td><td
+          >OpenCode</td
+        ></tr
+      >
+      <tr
+        ><td><code>omar -a agy up --name agy</code></td><td
+          >Google Antigravity CLI</td
+        ></tr
+      >
+      <tr><td><code>omar -a pi up --name pi</code></td><td>Pi</td></tr>
+    </tbody>
+  </table>
+  <h2>终端界面</h2>
+  <pre><code>omar attach -s dev --tui</code></pre>
   <p>
-    可在 <a href="https://github.com/omar-os/omar">GitHub</a> 查看源码、版本发布和问题追踪。
+    连接同一会话的终端仪表盘。按 z 分离并保持会话运行；按 Q 确认后停止会话。
   </p>
 </DocsLayout>
 
@@ -100,6 +104,6 @@ make install</code></pre>
   .docs-lead {
     color: var(--text-bright);
     font-size: 1.1rem;
-    line-height: 1.85;
+    line-height: 1.75;
   }
 </style>
