@@ -31,7 +31,7 @@ make install</code></pre>
     Mission Control 和 omarc 编译器。
   </p>
   <h2>启动 Mission Control</h2>
-  <pre><code>omar up --name dev --web</code></pre>
+  <pre><code>omar up -s dev --web</code></pre>
   <p>
     启动独立的后台会话，并在浏览器中打开 Mission
     Control。描述工作流，审核生成的程序，确认部署后观察实时拓扑。关闭浏览器不会停止会话。
@@ -41,7 +41,7 @@ make install</code></pre>
     <thead><tr><th>命令</th><th>作用</th></tr></thead>
     <tbody>
       <tr
-        ><td><code>omar up --name dev</code></td><td
+        ><td><code>omar up -s dev</code></td><td
           >启动新会话，或重启同名的已停止会话。</td
         ></tr
       >
@@ -68,29 +68,29 @@ make install</code></pre>
     <thead><tr><th>命令</th><th>后端</th></tr></thead>
     <tbody>
       <tr
-        ><td><code>omar -a claude up --name claude</code></td><td
+        ><td><code>omar -a claude up -s claude</code></td><td
           >Claude Code</td
         ></tr
       >
       <tr
-        ><td><code>omar -a codex up --name codex</code></td><td>Codex CLI</td
+        ><td><code>omar -a codex up -s codex</code></td><td>Codex CLI</td
         ></tr
       >
       <tr
-        ><td><code>omar -a cursor up --name cursor</code></td><td>Cursor CLI</td
+        ><td><code>omar -a cursor up -s cursor</code></td><td>Cursor CLI</td
         ></tr
       >
       <tr
-        ><td><code>omar -a opencode up --name opencode</code></td><td
+        ><td><code>omar -a opencode up -s opencode</code></td><td
           >OpenCode</td
         ></tr
       >
       <tr
-        ><td><code>omar -a agy up --name agy</code></td><td
+        ><td><code>omar -a agy up -s agy</code></td><td
           >Google Antigravity CLI</td
         ></tr
       >
-      <tr><td><code>omar -a pi up --name pi</code></td><td>Pi</td></tr>
+      <tr><td><code>omar -a pi up -s pi</code></td><td>Pi</td></tr>
     </tbody>
   </table>
   <h2>终端界面</h2>
