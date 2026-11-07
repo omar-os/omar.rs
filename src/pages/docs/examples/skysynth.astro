@@ -1,0 +1,229 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+
+const base = import.meta.env.BASE_URL;
+const files = `${base}examples/skysynth/`;
+---
+
+<DocsLayout
+  title="Example: SkySynth"
+  description="SkyDiscover's SkySynth multi-agent synthesis workflow, written as an OMAR program on Claude and Codex."
+>
+  <p class="docs-lead">
+    <a
+      href="https://github.com/skydiscover-ai/skydiscover"
+      target="_blank"
+      rel="noopener">SkySynth</a
+    >
+    builds a system for your workload with a team of agents: a spec builder, a planner,
+    a coder, evaluators, an auditor and a critic, each started fresh for its step.
+    This page runs it as one OMAR program, so the order of steps, the gates between
+    them and which agent may speak when are fixed by the program instead of by a lead
+    agent's judgment.
+  </p>
+
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    src={`${files}skysynth.mp4`}></video>
+  <p class="caption">
+    A real run on the tutorial cache task: live Claude and Codex agents, 31
+    minutes, shown sped up.
+  </p>
+
+  <h2>What it shows</h2>
+  <table>
+    <thead><tr><th>SkySynth needs</th><th>OMAR construct</th></tr></thead>
+    <tbody>
+      <tr
+        ><td>A fresh agent for every step, but one lead throughout</td><td
+          ><code>coder : Codex per task</code>; the lead has no <code>per</code
+          ></td
+        ></tr
+      >
+      <tr
+        ><td>A model per role (Opus lead, Sonnet loop)</td><td
+          ><code>Claude(model = "claude-sonnet-5-5")</code></td
+        ></tr
+      >
+      <tr
+        ><td
+          >Delivery refused until every kept test passes, fixes in the same
+          conversation</td
+        ><td
+          ><code>check "bash delivery_check_wrap.sh tutorial"</code> on the coder's
+          task</td
+        ></tr
+      >
+      <tr
+        ><td>CLI hooks (clone-reuse guard) loaded before the agent starts</td
+        ><td
+          ><code>setup "bash install.sh --agent codex ."</code> on the team</td
+        ></tr
+      >
+      <tr
+        ><td>Score only after the test gate</td><td
+          >Reaction order, proved with <code>omarc --prove</code></td
+        ></tr
+      >
+    </tbody>
+  </table>
+  <p>
+    The coder's team, as it appears in the generated program (the long shared
+    context string is abbreviated as <code>$(ctx)</code>):
+  </p>
+  <pre><code>{`team Coder(ctx : string)[coder : Codex per task]
+{
+    setup "bash .../install.sh --agent codex ."
+    input iter_job : string
+    output changed : string
+    task coder(iter_job) -> changed within(3h)
+    "$(ctx) Role: coding-agent, iteration mode: one change, fast tests, exit. ..."
+    check "bash .../delivery_check_wrap.sh tutorial"
+}`}</code></pre>
+
+  <h2>Roles</h2>
+  <table>
+    <thead><tr><th>Role</th><th>Backend, model</th><th>Lifetime</th></tr></thead
+    >
+    <tbody>
+      <tr><td>lead</td><td>Claude, claude-opus-5-5</td><td>whole run</td></tr>
+      <tr
+        ><td>spec builder (discovery, environment, requirements, hardening)</td
+        ><td>Claude, claude-sonnet-5-5</td><td>per task</td></tr
+      >
+      <tr
+        ><td>kb builder (child team, parallel with requirements)</td><td
+          >Claude, claude-sonnet-5-5</td
+        ><td>per task</td></tr
+      >
+      <tr
+        ><td>planner</td><td>Claude, claude-sonnet-5-5</td><td>per task</td></tr
+      >
+      <tr
+        ><td>coder (bootstrap, then one change per iteration)</td><td
+          >Codex, default model</td
+        ><td>per task</td></tr
+      >
+      <tr
+        ><td>evaluator (correctness, performance)</td><td
+          >Claude, claude-sonnet-5-5</td
+        ><td>per task</td></tr
+      >
+      <tr
+        ><td>auditor (on every new best)</td><td>Claude, claude-sonnet-5-5</td
+        ><td>per task</td></tr
+      >
+      <tr><td>critic</td><td>Claude, claude-sonnet-5-5</td><td>per task</td></tr
+      >
+    </tbody>
+  </table>
+
+  <h2>Result</h2>
+  <p>
+    Tutorial cache task (<code>workload.py</code>), 3 iterations, 31 minutes.
+    Each iteration beat the last; the best cache scores 0.9368 against 0.3886
+    for FIFO, and an independent replay of the exported artifact gives the same
+    number.
+  </p>
+  <table>
+    <thead
+      ><tr
+        ><th>Iteration</th><th>app_hit_rate (seed 7)</th><th
+          >Held-out (seed 123)</th
+        ><th>FIFO</th></tr
+      ></thead
+    >
+    <tbody>
+      <tr><td>1</td><td>0.9215</td><td>0.9232</td><td>0.3886</td></tr>
+      <tr><td>2</td><td>0.9323</td><td>0.9342</td><td>0.3886</td></tr>
+      <tr><td>3 (best)</td><td>0.9368</td><td>0.9367</td><td>0.3886</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>
+      18 role tasks ran in 18 fresh conversations, all stopped afterwards.
+    </li>
+    <li>
+      The delivery check ran 4 times (3 coder iterations and the final report)
+      and passed each time. 5 kept tests are each shown to catch a mutant.
+    </li>
+    <li>
+      In this run the auditor ran once, at the end, instead of on every new
+      best: the helper that decides when to audit missed SkySynth's default row
+      role. The published <code>helper.sh</code> has the fix.
+    </li>
+  </ul>
+
+  <h2>Run it</h2>
+  <p>
+    Needs OMAR with <code>per</code>, <code>model</code>, <code>check</code> and
+    <code>setup</code> (not yet in a release), Claude Code and Codex signed in, Python
+    3 and jq, and a checkout of SkyDiscover. The program is generated for your paths:
+  </p>
+  <pre><code>{`mkdir skysynth && cd skysynth
+for f in gen.py helper.sh helper_dry.sh delivery_check_wrap.sh; do
+  curl -fsSLO https://omar.rs/examples/skysynth/$f
+done
+python3 gen.py ~/skydiscover
+omar up -s skysynth
+omar -s skysynth run SkySynth.omar \\
+  --input synth.ask="Build me a fast cache for the workload in workload.py." \\
+  --input synth.budget=3 --timeout-seconds 86400 --checkpoint-period tag --keep-workspaces`}</code></pre>
+  <p>
+    <code>python3 gen.py ~/skydiscover --stub</code> writes
+    <code>SkySynthStub.omar</code>, which runs the same control flow on the Stub
+    backend in under a minute with no model calls. Agents work on a read-only
+    copy of SkyDiscover; a check after every role stops the run if the copy or
+    your checkout changed.
+  </p>
+  <p>
+    Files: <a href={`${files}gen.py`}>gen.py</a>,
+    <a href={`${files}helper.sh`}>helper.sh</a>,
+    <a href={`${files}delivery_check_wrap.sh`}>delivery_check_wrap.sh</a>,
+    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>, and the program as
+    generated for <code>/home/you</code>:
+    <a href={`${files}SkySynth.omar`}>SkySynth.omar</a>.
+  </p>
+
+  <h2>Differences from SkySynth</h2>
+  <ul>
+    <li>
+      Smoke budget: 3 iterations (SkySynth's Quick is about 20). The production
+      lenses (security, reliability, attack) are not run, so the result is a
+      scoped run, not production-ready.
+    </li>
+    <li>
+      No web panels: the ask and budget are run inputs, and the lead answers
+      property questions with their declared defaults.
+    </li>
+    <li>
+      The kb builder runs alongside the requirements step and finishes before
+      the loop, instead of in the background.
+    </li>
+    <li>
+      OMAR cannot set per-agent environment variables, so each prompt exports
+      the <code>SKYDISCOVER_*</code> variables itself.
+    </li>
+    <li>Claude and Codex only.</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .docs-lead {
+    color: var(--text-bright);
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+  video {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  .caption {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+</style>
