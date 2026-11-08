@@ -29,7 +29,7 @@ const files = `${base}examples/skysynth/`;
     preload="metadata"
     src={`${files}skysynth.mp4`}></video>
   <p class="caption">
-    A real run on the tutorial cache task: live Claude and Codex agents, 31
+    A real run on the tutorial cache task: live Claude and Codex agents, 32
     minutes, shown sped up.
   </p>
 
@@ -123,8 +123,8 @@ const files = `${base}examples/skysynth/`;
 
   <h2>Result</h2>
   <p>
-    Tutorial cache task (<code>workload.py</code>), 3 iterations, 31 minutes.
-    Each iteration beat the last; the best cache scores 0.9368 against 0.3886
+    Tutorial cache task (<code>workload.py</code>), 3 iterations, 32 minutes.
+    Each iteration beat the last; the best cache scores 0.9327 against 0.3886
     for FIFO, and an independent replay of the exported artifact gives the same
     number.
   </p>
@@ -133,28 +133,24 @@ const files = `${base}examples/skysynth/`;
       ><tr
         ><th>Iteration</th><th>app_hit_rate (seed 7)</th><th
           >Held-out (seed 123)</th
-        ><th>FIFO</th></tr
+        ><th>FIFO (seed 7)</th></tr
       ></thead
     >
     <tbody>
-      <tr><td>1</td><td>0.9215</td><td>0.9232</td><td>0.3886</td></tr>
-      <tr><td>2</td><td>0.9323</td><td>0.9342</td><td>0.3886</td></tr>
-      <tr><td>3 (best)</td><td>0.9368</td><td>0.9367</td><td>0.3886</td></tr>
+      <tr><td>1</td><td>0.9195</td><td>0.9212</td><td>0.3886</td></tr>
+      <tr><td>2</td><td>0.9215</td><td>0.9232</td><td>0.3886</td></tr>
+      <tr><td>3 (best)</td><td>0.9327</td><td>0.9348</td><td>0.3886</td></tr>
     </tbody>
   </table>
   <ul>
     <li>
-      18 role tasks ran in 18 fresh conversations, all stopped afterwards.
+      20 role tasks ran in 20 fresh conversations, all stopped afterwards.
     </li>
     <li>
       The delivery check ran 4 times (3 coder iterations and the final report)
       and passed each time. 5 kept tests are each shown to catch a mutant.
     </li>
-    <li>
-      In this run the auditor ran once, at the end, instead of on every new
-      best: the helper that decides when to audit missed SkySynth's default row
-      role. The published <code>helper.sh</code> has the fix.
-    </li>
+    <li>The auditor ran on each of the 3 new bests, before the critic.</li>
   </ul>
 
   <h2>Run it</h2>
