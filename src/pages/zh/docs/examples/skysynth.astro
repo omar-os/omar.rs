@@ -1,0 +1,211 @@
+---
+import DocsLayout from "../../../../layouts/DocsLayout.astro";
+
+const base = import.meta.env.BASE_URL;
+const files = `${base}examples/skysynth/`;
+---
+
+<DocsLayout
+  title="示例：SkySynth"
+  description="用 OMAR 程序在 Claude 和 Codex 上实现 SkyDiscover 的 SkySynth 多智能体合成工作流。"
+  lang="zh-CN"
+>
+  <p class="docs-lead">
+    <a
+      href="https://github.com/skydiscover-ai/skydiscover"
+      target="_blank"
+      rel="noopener">SkySynth</a
+    >
+    用一组智能体为你的工作负载构建系统：规格构建者、规划者、编码者、评估者、审计者和评审者，每一步都启动一个新的智能体。本页把它写成一个
+    OMAR 程序，步骤顺序、步骤之间的关卡以及哪个智能体何时发言都由程序决定，而不是由主智能体自行判断。
+  </p>
+
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    src={`${files}skysynth.mp4`}></video>
+  <p class="caption">
+    教程缓存任务的一次真实运行：实时的 Claude 和 Codex 智能体，32
+    分钟，加速播放。
+  </p>
+
+  <h2>展示了什么</h2>
+  <table>
+    <thead><tr><th>SkySynth 的需求</th><th>OMAR 构造</th></tr></thead>
+    <tbody>
+      <tr
+        ><td>每一步一个新智能体，但主智能体贯穿全程</td><td
+          ><code>coder : Codex per task</code>；主智能体没有 <code>per</code
+          ></td
+        ></tr
+      >
+      <tr
+        ><td>每个角色一个模型（主智能体用 Opus，循环用 Sonnet）</td><td
+          ><code>Claude(model = "claude-sonnet-5-5")</code></td
+        ></tr
+      >
+      <tr
+        ><td>所有保留的测试通过前拒绝交付，修复在同一对话中完成</td><td
+          >编码者任务上的 <code
+            >check "bash delivery_check_wrap.sh tutorial"</code
+          ></td
+        ></tr
+      >
+      <tr
+        ><td>智能体启动前加载 CLI 钩子（防止复用克隆的守卫）</td><td
+          >团队上的 <code>setup "bash install.sh --agent codex ."</code></td
+        ></tr
+      >
+      <tr
+        ><td>只在测试关卡之后打分</td><td
+          >反应顺序，由 <code>omarc --prove</code> 证明</td
+        ></tr
+      >
+    </tbody>
+  </table>
+  <p>
+    生成的程序中编码者团队如下（较长的共享上下文字符串简写为 <code>$(ctx)</code
+    >）：
+  </p>
+  <pre><code>{`team Coder(ctx : string)[coder : Codex per task]
+{
+    setup "bash .../install.sh --agent codex ."
+    input iter_job : string
+    output changed : string
+    task coder(iter_job) -> changed within(3h)
+    "$(ctx) Role: coding-agent, iteration mode: one change, fast tests, exit. ..."
+    check "bash .../delivery_check_wrap.sh tutorial"
+}`}</code></pre>
+
+  <h2>角色</h2>
+  <table>
+    <thead><tr><th>角色</th><th>后端、模型</th><th>生命周期</th></tr></thead>
+    <tbody>
+      <tr><td>主智能体</td><td>Claude，claude-opus-5-5</td><td>整个运行</td></tr
+      >
+      <tr
+        ><td>规格构建者（发现、环境、需求、加固）</td><td
+          >Claude，claude-sonnet-5-5</td
+        ><td>每个任务</td></tr
+      >
+      <tr
+        ><td>知识库构建者（子团队，与需求并行）</td><td
+          >Claude，claude-sonnet-5-5</td
+        ><td>每个任务</td></tr
+      >
+      <tr><td>规划者</td><td>Claude，claude-sonnet-5-5</td><td>每个任务</td></tr
+      >
+      <tr
+        ><td>编码者（先引导，之后每轮迭代一个改动）</td><td>Codex，默认模型</td
+        ><td>每个任务</td></tr
+      >
+      <tr
+        ><td>评估者（正确性、性能）</td><td>Claude，claude-sonnet-5-5</td><td
+          >每个任务</td
+        ></tr
+      >
+      <tr
+        ><td>审计者（每次出现新最优时）</td><td>Claude，claude-sonnet-5-5</td
+        ><td>每个任务</td></tr
+      >
+      <tr><td>评审者</td><td>Claude，claude-sonnet-5-5</td><td>每个任务</td></tr
+      >
+    </tbody>
+  </table>
+
+  <h2>结果</h2>
+  <p>
+    教程缓存任务（<code>workload.py</code>），3 轮迭代，32
+    分钟。每轮都超过上一轮；最优缓存得分 0.9327，FIFO 为
+    0.3886，对导出产物的独立重放得到相同的分数。
+  </p>
+  <table>
+    <thead
+      ><tr
+        ><th>迭代</th><th>app_hit_rate（种子 7）</th><th>留出集（种子 123）</th
+        ><th>FIFO（种子 7）</th></tr
+      ></thead
+    >
+    <tbody>
+      <tr><td>1</td><td>0.9195</td><td>0.9212</td><td>0.3886</td></tr>
+      <tr><td>2</td><td>0.9215</td><td>0.9232</td><td>0.3886</td></tr>
+      <tr><td>3（最优）</td><td>0.9327</td><td>0.9348</td><td>0.3886</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>20 个角色任务在 20 个新对话中运行，结束后全部停止。</li>
+    <li>
+      交付检查运行了 4 次（3 次编码者迭代和最终报告），每次都通过。5
+      个保留的测试各自被证明能发现一个变异体。
+    </li>
+    <li>审计者在 3 次新最优时各运行一次，先于评审者。</li>
+  </ul>
+
+  <h2>运行</h2>
+  <p>
+    需要支持 <code>per</code>、<code>model</code>、<code>check</code> 和
+    <code>setup</code> 的 OMAR（尚未发布），已登录的 Claude Code 和 Codex，Python
+    3 和 jq，以及一份 SkyDiscover 检出。程序按你的路径生成：
+  </p>
+  <pre><code>{`mkdir skysynth && cd skysynth
+for f in gen.py helper.sh helper_dry.sh delivery_check_wrap.sh; do
+  curl -fsSLO https://omar.rs/examples/skysynth/$f
+done
+python3 gen.py ~/skydiscover
+omar up -s skysynth
+omar -s skysynth run SkySynth.omar \\
+  --input synth.ask="Build me a fast cache for the workload in workload.py." \\
+  --input synth.budget=3 --timeout-seconds 86400 --checkpoint-period tag --keep-workspaces`}</code></pre>
+  <p>
+    <code>python3 gen.py ~/skydiscover --stub</code> 会生成
+    <code>SkySynthStub.omar</code>，在 Stub
+    后端上以相同的控制流运行，不到一分钟，不调用模型。智能体在 SkyDiscover
+    的只读副本上工作；每个角色结束后都有检查，若副本或你的检出被改动则停止运行。
+  </p>
+  <p>
+    文件：<a href={`${files}gen.py`}>gen.py</a>、
+    <a href={`${files}helper.sh`}>helper.sh</a>、
+    <a href={`${files}delivery_check_wrap.sh`}>delivery_check_wrap.sh</a>、
+    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>，以及为
+    <code>/home/you</code> 生成的程序：
+    <a href={`${files}SkySynth.omar`}>SkySynth.omar</a>。
+  </p>
+
+  <h2>与 SkySynth 的差异</h2>
+  <ul>
+    <li>
+      冒烟预算：3 轮迭代（SkySynth 的 Quick 约 20
+      轮）。未运行生产视角（安全、可靠性、攻击），所以结果是有限范围的运行，不是可上线的产物。
+    </li>
+    <li>
+      没有网页面板：需求和预算是运行输入，主智能体用声明的默认值回答属性问题。
+    </li>
+    <li>
+      知识库构建者与需求步骤并行运行，并在循环开始前完成，而不是在后台运行。
+    </li>
+    <li>
+      OMAR 不能为单个智能体设置环境变量，所以每个提示词自己导出
+      <code>SKYDISCOVER_*</code> 变量。
+    </li>
+    <li>只支持 Claude 和 Codex。</li>
+  </ul>
+</DocsLayout>
+
+<style>
+  .docs-lead {
+    color: var(--text-bright);
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+  video {
+    width: 100%;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+  .caption {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+</style>

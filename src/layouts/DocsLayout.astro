@@ -12,8 +12,14 @@ const isZh = lang.startsWith("zh");
 const base = import.meta.env.BASE_URL;
 
 const sidebarItems = isZh
-  ? [{ href: `${base}zh/docs/`, label: "快速开始" }]
-  : [{ href: `${base}docs/`, label: "Getting Started" }];
+  ? [
+      { href: `${base}zh/docs/`, label: "快速开始" },
+      { href: `${base}zh/docs/examples/skysynth/`, label: "示例：SkySynth" },
+    ]
+  : [
+      { href: `${base}docs/`, label: "Getting Started" },
+      { href: `${base}docs/examples/skysynth/`, label: "Example: SkySynth" },
+    ];
 
 const pathname = Astro.url.pathname;
 ---
