@@ -153,6 +153,169 @@ const files = `${base}examples/skysynth/`;
     <li>The auditor ran on each of the 3 new bests, before the critic.</li>
   </ul>
 
+  <h2>What can go wrong</h2>
+  <p>
+    A SkySynth run is hours of agents working unattended, held together by one
+    lead agent that follows <code>SKILL.md</code>. Two failures of that design
+    cost the most, and the OMAR program rules both out.
+  </p>
+
+  <h3>A candidate scored before its tests pass</h3>
+  <p>
+    Each iteration must run the kept tests on the coder's change before the
+    performance evaluator scores it. In SkySynth that order holds as long as the
+    lead follows it; a delivery hook also runs the tests, but only on CLIs that
+    load hooks. A broken but fast candidate that gets scored can become the
+    best, and the next iterations build on it.
+  </p>
+  <p>
+    In the program, the evaluator's only input, <code>gated</code>, is written
+    by the reaction that runs the tests and stops the run if any fails.
+    <code>omarc --prove</code> proves that every run of the program respects this:
+    the evaluator is never invoked unless the gate completed and wrote
+    <code>gated</code>.
+  </p>
+  <pre><code>{`$ omarc --prove SkySynth.omar scoring-proof.json verdicts.json
+proved 1 of 1 properties of SkySynth.omar`}</code></pre>
+  <p>
+    The property, as a Lean theorem about every run (reaction 22 is the test
+    gate, reaction 23 the performance evaluator):
+  </p>
+  <pre><code>{`theorem scoring_follows_the_test_gate (e : Execution) (hv : Valid topology e) :
+  ∀ g, e.invoked g "synth.reaction.23" →
+    ∃ g', e.completed g' "synth.reaction.22" ∧
+          (e.wrote g' "synth.reaction.22" "synth.gated").isSome`}</code></pre>
+  <p>
+    Let the evaluator also start on another port that skips the gate, and the
+    same proof is rejected. Proof file:
+    <a href={`${files}scoring-proof.json`}>scoring-proof.json</a>.
+  </p>
+
+  <h3>The lead's context fills up</h3>
+  <p>
+    In SkySynth every role reports back to the lead, which runs the whole loop
+    in one conversation, so its context grows with every iteration. SkySynth's
+    <a
+      href="https://github.com/skydiscover-ai/skydiscover/blob/main/skydiscover/synthesize/workflow/scripts/unattended/supervisor.sh"
+      target="_blank"
+      rel="noopener">supervisor script</a
+    >
+    watches for "100% context used", compacts the lead, and starts a fresh lead when
+    compacting stops helping. Either way the lead then knows the run only from a summary
+    or the files on disk, including which iteration it is on and whether an audit
+    is owed.
+  </p>
+  <p>
+    In the program the lead has 3 tasks in the whole run: report the knowledge
+    base's status, settle the property questions, and write the final report.
+    That stays 3 whatever the iteration budget. The loop is the program's: the
+    iteration count is program state (<code>k</code> of <code>n</code>), the
+    audit decision is a script reading the leaderboard, and each role runs in a
+    fresh conversation (20 role tasks in 20 conversations in the run above).
+    Nothing about where the run is lives in an agent's context.
+  </p>
+
+  <h3>Also handled</h3>
+  <table>
+    <thead><tr><th>What can go wrong</th><th>What OMAR does</th></tr></thead>
+    <tbody>
+      <tr
+        ><td>An agent's process dies mid-task</td><td
+          >Starts a new agent on the same task, up to 2 retries within the
+          task's deadline. The lead resumes its own conversation; a
+          <code>per task</code> role starts fresh.</td
+        ></tr
+      >
+      <tr
+        ><td
+          >An agent stops without finishing: says it's done without completing,
+          or asks a question nobody will answer</td
+        ><td
+          >Sends one reminder naming the open task and its outputs (a question
+          is answered with it). If the agent stops again, it is restarted as
+          above.</td
+        ></tr
+      >
+      <tr
+        ><td>An agent hits its plan's usage limit</td><td
+          >Reads the limit and its reset time from the CLI, stops the task's
+          deadline clock, and neither reminds nor restarts the agent. After the
+          reset the same task continues.</td
+        ></tr
+      >
+      <tr
+        ><td>A role is lost when the lead's turn ends</td><td
+          >There is no lead turn to end: each role is an agent the runtime
+          supervises.</td
+        ></tr
+      >
+      <tr
+        ><td>The lead skips a role or does its job</td><td
+          >The runtime starts each role when its inputs arrive; the lead has no
+          say.</td
+        ></tr
+      >
+    </tbody>
+  </table>
+  <p>
+    The first three, shown with real Codex agents on small programs (not
+    SkySynth):
+  </p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}worker-restart.jpg`}
+    src={`${files}worker-restart.mp4`}></video>
+  <p class="caption">
+    A coder's Codex process is killed mid-task. OMAR starts a new one that
+    resumes the same conversation and finishes. The resumed work is sped up 4×.
+  </p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}worker-remind.jpg`}
+    src={`${files}worker-remind.mp4`}></video>
+  <p class="caption">
+    A writer asks the user a question and waits. OMAR answers with a reminder;
+    the writer picks an answer itself and completes. Not sped up.
+  </p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}usage-limit.jpg`}
+    src={`${files}usage-limit.mp4`}></video>
+  <p class="caption">
+    An agent with <code>within(15s)</code> hits a usage limit that resets in 35 s.
+    The model provider is simulated locally, so no real plan is used. OMAR waits past
+    the deadline without a reminder, restart or failure, and the same task completes.
+    Not sped up.
+  </p>
+  <p>
+    Restarts, reminders and usage-limit waits are in
+    <a
+      href="https://github.com/omar-os/omar/pull/414"
+      target="_blank"
+      rel="noopener">#414</a
+    >,
+    <a
+      href="https://github.com/omar-os/omar/pull/415"
+      target="_blank"
+      rel="noopener">#415</a
+    >
+    and
+    <a
+      href="https://github.com/omar-os/omar/pull/416"
+      target="_blank"
+      rel="noopener">#416</a
+    >, not yet in a release.
+  </p>
+
   <h2>Run it</h2>
   <p>
     Needs OMAR with <code>per</code>, <code>model</code>, <code>check</code> and
@@ -179,8 +342,9 @@ omar -s skysynth run SkySynth.omar \\
     Files: <a href={`${files}gen.py`}>gen.py</a>,
     <a href={`${files}helper.sh`}>helper.sh</a>,
     <a href={`${files}delivery_check_wrap.sh`}>delivery_check_wrap.sh</a>,
-    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>, and the program as
-    generated for <code>/home/you</code>:
+    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>,
+    <a href={`${files}scoring-proof.json`}>scoring-proof.json</a>, and the
+    program as generated for <code>/home/you</code>:
     <a href={`${files}SkySynth.omar`}>SkySynth.omar</a>.
   </p>
 
