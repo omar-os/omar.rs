@@ -143,6 +143,152 @@ const files = `${base}examples/skysynth/`;
     <li>审计者在 3 次新最优时各运行一次，先于评审者。</li>
   </ul>
 
+  <h2>可能出什么问题</h2>
+  <p>
+    一次 SkySynth 运行是智能体在无人值守下工作数小时，靠一个遵循
+    <code>SKILL.md</code>
+    的主智能体维系。这种设计中代价最大的两种失误，OMAR 程序都能排除。
+  </p>
+
+  <h3>候选方案在测试通过前就被打分</h3>
+  <p>
+    每轮迭代都必须先对编码者的改动运行保留的测试，再由性能评估者打分。在
+    SkySynth
+    中，这个顺序要靠主智能体遵守；交付钩子也会运行测试，但只在加载钩子的 CLI
+    上生效。一个有缺陷但很快的候选方案一旦被打分，就可能成为最优，后续迭代都建立在它之上。
+  </p>
+  <p>
+    在程序中，评估者唯一的输入 <code>gated</code>
+    由运行测试的反应写入，任何测试失败都会停止运行。<code>omarc --prove</code>
+    证明程序的每一次运行都遵守这一点：只有测试关卡完成并写入
+    <code>gated</code> 后，评估者才会被调用。
+  </p>
+  <pre><code>{`$ omarc --prove SkySynth.omar scoring-proof.json verdicts.json
+proved 1 of 1 properties of SkySynth.omar`}</code></pre>
+  <p>
+    这条性质是关于每一次运行的 Lean 定理（反应 22 是测试关卡，反应 23
+    是性能评估者）：
+  </p>
+  <pre><code>{`theorem scoring_follows_the_test_gate (e : Execution) (hv : Valid topology e) :
+  ∀ g, e.invoked g "synth.reaction.23" →
+    ∃ g', e.completed g' "synth.reaction.22" ∧
+          (e.wrote g' "synth.reaction.22" "synth.gated").isSome`}</code></pre>
+  <p>
+    如果让评估者也能由另一个绕过关卡的端口启动，同一个证明就会被拒绝。证明文件：
+    <a href={`${files}scoring-proof.json`}>scoring-proof.json</a>。
+  </p>
+
+  <h3>主智能体的上下文被填满</h3>
+  <p>
+    在 SkySynth
+    中，每个角色都向主智能体汇报，主智能体在一个对话里运行整个循环，所以上下文随每轮迭代增长。SkySynth
+    的
+    <a
+      href="https://github.com/skydiscover-ai/skydiscover/blob/main/skydiscover/synthesize/workflow/scripts/unattended/supervisor.sh"
+      target="_blank"
+      rel="noopener">监督脚本</a
+    >
+    会监测“100% context used”，压缩主智能体的上下文，压缩不再有效时启动一个新的主智能体。无论哪种情况，主智能体此后只能从摘要或磁盘上的文件了解这次运行，包括当前是第几轮迭代、是否还欠一次审计。
+  </p>
+  <p>
+    在程序中，主智能体整个运行只有 3
+    个任务：报告知识库状态、确定属性问题、撰写最终报告。无论迭代预算多少，都是 3
+    个。循环由程序运行：迭代计数是程序状态（<code>n</code> 中的第
+    <code>k</code>
+    轮），是否审计由读取排行榜的脚本决定，每个角色都在新对话中运行（上面那次运行中
+    20 个角色任务对应 20 个对话）。运行进行到哪里，不存在任何智能体的上下文里。
+  </p>
+
+  <h3>同样会处理的问题</h3>
+  <table>
+    <thead><tr><th>可能出的问题</th><th>OMAR 的做法</th></tr></thead>
+    <tbody>
+      <tr
+        ><td>智能体的进程在任务中途退出</td><td
+          >启动一个新智能体执行同一任务，在任务期限内最多重试 2
+          次。主智能体恢复自己的对话；<code>per task</code> 角色重新开始。</td
+        ></tr
+      >
+      <tr
+        ><td
+          >智能体没完成就停下：说做完了却没有完成任务，或问了一个没人会回答的问题</td
+        ><td
+          >发送一次提醒，指明未完成的任务及其输出（问题会用这条提醒作答）。若再次停下，就按上一行重启。</td
+        ></tr
+      >
+      <tr
+        ><td>智能体用到了套餐的用量上限</td><td
+          >从 CLI
+          读取上限及其重置时间，暂停任务的期限计时，不提醒也不重启。重置后同一任务继续。</td
+        ></tr
+      >
+      <tr
+        ><td>主智能体的回合结束时角色丢失</td><td
+          >没有可结束的主智能体回合：每个角色都是运行时监督的智能体。</td
+        ></tr
+      >
+      <tr
+        ><td>主智能体跳过某个角色或代做它的工作</td><td
+          >运行时在角色的输入到达时启动它，主智能体无权干预。</td
+        ></tr
+      >
+    </tbody>
+  </table>
+  <p>前三种情况，用真实的 Codex 智能体在小程序上演示（不是 SkySynth）：</p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}worker-restart.jpg`}
+    src={`${files}worker-restart.mp4`}></video>
+  <p class="caption">
+    编码者的 Codex 进程在任务中途被杀掉。OMAR
+    启动一个新进程，恢复同一对话并完成任务。恢复后的工作加速 4 倍播放。
+  </p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}worker-remind.jpg`}
+    src={`${files}worker-remind.mp4`}></video>
+  <p class="caption">
+    撰写者向用户提问并等待。OMAR
+    用一条提醒作答；撰写者自己选定答案并完成任务。未加速。
+  </p>
+  <video
+    controls
+    muted
+    playsinline
+    preload="metadata"
+    poster={`${files}usage-limit.jpg`}
+    src={`${files}usage-limit.mp4`}></video>
+  <p class="caption">
+    一个 <code>within(15s)</code> 的智能体遇到 35 秒后重置的用量上限。模型服务在本地模拟，不消耗真实套餐。OMAR
+    等过期限，没有提醒、重启或失败，同一任务最终完成。未加速。
+  </p>
+  <p>
+    重启、提醒和等待用量上限分别在
+    <a
+      href="https://github.com/omar-os/omar/pull/414"
+      target="_blank"
+      rel="noopener">#414</a
+    >、
+    <a
+      href="https://github.com/omar-os/omar/pull/415"
+      target="_blank"
+      rel="noopener">#415</a
+    >
+    和
+    <a
+      href="https://github.com/omar-os/omar/pull/416"
+      target="_blank"
+      rel="noopener">#416</a
+    >
+    中，尚未发布。
+  </p>
+
   <h2>运行</h2>
   <p>
     需要支持 <code>per</code>、<code>model</code>、<code>check</code> 和
@@ -168,7 +314,8 @@ omar -s skysynth run SkySynth.omar \\
     文件：<a href={`${files}gen.py`}>gen.py</a>、
     <a href={`${files}helper.sh`}>helper.sh</a>、
     <a href={`${files}delivery_check_wrap.sh`}>delivery_check_wrap.sh</a>、
-    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>，以及为
+    <a href={`${files}helper_dry.sh`}>helper_dry.sh</a>、
+    <a href={`${files}scoring-proof.json`}>scoring-proof.json</a>，以及为
     <code>/home/you</code> 生成的程序：
     <a href={`${files}SkySynth.omar`}>SkySynth.omar</a>。
   </p>

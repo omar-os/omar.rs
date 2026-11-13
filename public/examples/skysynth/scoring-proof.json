@@ -1,0 +1,9 @@
+{
+ "properties": [
+  {
+   "name": "scoring_follows_the_test_gate",
+   "statement": "\u2200 g, e.invoked g \"synth.reaction.23\" \u2192 \u2203 g', e.completed g' \"synth.reaction.22\" \u2227 (e.wrote g' \"synth.reaction.22\" \"synth.gated\").isSome",
+   "proof": "by\n  intro g hinv\n  obtain \u27e8r, hr, hid, t, ht, htrig\u27e9 := invoked_from hv hinv\n  simp [topology] at hr\n  rcases hr with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp at hid\n  simp at ht\n  subst ht\n  rcases htrig with hp | \u27e8tm, htm, -\u27e9\n  \u00b7 obtain \u27e8v, hv'\u27e9 := Option.isSome_iff_exists.mp hp\n    rcases present_from hv hv' with \u27e8g', id, hw, hc, hwr, hl\u27e9 | \u27e8c, hc, -\u27e9 | \u27e8port, hport, hn, hk, -\u27e9\n    \u00b7 simp [topology, Topology.writers, Topology.Reaction.mayWrite] at hw\n      subst hw\n      exact \u27e8g', hc, by simp [hwr]\u27e9\n    \u00b7 simp [topology, Topology.sources] at hc\n    \u00b7 simp [topology] at hport\n      rcases hport with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> simp_all\n  \u00b7 simp [topology] at htm"
+  }
+ ]
+}
