@@ -6,8 +6,10 @@ name: Developer Docs (Nightly)
 # accurate for its tag. Changes arrive as one rolling pull request
 # (devdocs/nightly) for a person to merge.
 #
-# Needs an OPENAI_API_KEY repository secret, and "Allow GitHub Actions to
-# create and approve pull requests" (Settings > Actions > General).
+# Runs on the self-hosted runner labelled omar-devdocs, with the Codex CLI
+# already installed and signed in there (`codex login`), so it needs no API key
+# secret. Also needs "Allow GitHub Actions to create and approve pull
+# requests" (Settings > Actions > General).
 
 on:
   schedule:
@@ -29,7 +31,7 @@ concurrency:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: omar-devdocs
     timeout-minutes: 90
     env:
       GH_TOKEN: ${{ github.token }}
@@ -47,7 +49,8 @@ jobs:
           fetch-depth: 0
 
       - name: Keep the omar checkout out of this repository's status
-        run: echo "/omar/" >> .git/info/exclude
+        # The runner keeps its workspace between nights: add the line once.
+        run: grep -qx "/omar/" .git/info/exclude || echo "/omar/" >> .git/info/exclude
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -57,13 +60,12 @@ jobs:
       - name: Install site dependencies
         run: npm ci
 
-      - name: Install the latest Codex CLI and sign in
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - name: Check the runner's Codex sign-in
+        # The runner's own Codex, signed in by whoever runs the machine. Fails
+        # here, before any work, if it is missing or signed out.
         run: |
-          npm install -g @openai/codex@latest
           codex --version
-          printenv OPENAI_API_KEY | codex login --with-api-key
+          codex login status
 
       - name: Bring main's docs up to date
         id: main
