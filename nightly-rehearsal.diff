@@ -1,0 +1,109 @@
+diff --git a/src/content/devdocs/main/_meta.json b/src/content/devdocs/main/_meta.json
+index 675aa40..edc3d88 100644
+--- a/src/content/devdocs/main/_meta.json
++++ b/src/content/devdocs/main/_meta.json
+@@ -1,5 +1,5 @@
+ {
+   "ref": "main",
+-  "commit": "043fda0feda519bb48af18307984776d668720e3",
+-  "synced": "2026-11-15"
++  "commit": "9849aeb6473be210226b89c7b25667687e343d29",
++  "synced": "2026-11-16"
+ }
+diff --git a/src/content/devdocs/main/backends-and-tests.md b/src/content/devdocs/main/backends-and-tests.md
+index 53eb395..4783715 100644
+--- a/src/content/devdocs/main/backends-and-tests.md
++++ b/src/content/devdocs/main/backends-and-tests.md
+@@ -27,6 +27,8 @@ Delivery follows the transport recorded at launch: managed runner sockets, hook
+ 
+ Integration tests create temporary homes and runtime sessions with dedicated tmux servers. They require tmux. Compiler and workflow tests also need the Lean toolchain; fixtures and test scripts show which compiler path or backend each test expects.
+ 
++[tests/ci/scoped_memory.py](https://github.com/omar-os/omar/blob/main/tests/ci/scoped_memory.py) checks memory scope, revision conflicts, concurrent MCP writes, operator authentication, restart persistence, and EA deletion through session IPC and HTTP. Manager unit tests check saved-knowledge startup context across assistant backends.
++
+ ## Build and validation entry points
+ 
+ The Rust package declares a minimum Rust version of 1.89 in [Cargo.toml](https://github.com/omar-os/omar/blob/main/Cargo.toml). Lean targets and the test driver are in [lang/lakefile.lean](https://github.com/omar-os/omar/blob/main/lang/lakefile.lean); the Lean version is pinned in [lang/lean-toolchain](https://github.com/omar-os/omar/blob/main/lang/lean-toolchain).
+diff --git a/src/content/devdocs/main/http-and-browser.md b/src/content/devdocs/main/http-and-browser.md
+index f559c03..5dae8d9 100644
+--- a/src/content/devdocs/main/http-and-browser.md
++++ b/src/content/devdocs/main/http-and-browser.md
+@@ -21,6 +21,7 @@ The HTTP implementation uses TCP streams and blocking connection handlers. Reque
+ | `GET /v1/runs/{id}/checkpoints`                       | Inspect recovery points                            |
+ | `POST /v1/runs/{id}/rollback`, `/mutate`              | Restore or change a run                            |
+ | `/v1/chat`, `/v1/chats`                               | Messages and conversation lifecycle                |
++| `POST /v1/memory`                                    | Operator actions on scoped assistant knowledge      |
+ | `/v1/workspaces`                                      | Saved workflow drafts and properties               |
+ | `POST /v1/programs/check`, `/v1/properties/check`     | Compile or check properties without starting a run |
+ 
+@@ -35,3 +36,9 @@ The full listener binds loopback. An optional view listener serves unauthenticat
+ [src/protocol.rs](https://github.com/omar-os/omar/blob/main/src/protocol.rs) generates the TypeScript contract under Rust tests and checks that the committed output matches. Change the Rust wire definitions when changing shared types.
+ 
+ The standalone browser entry is [web/spa/main.tsx](https://github.com/omar-os/omar/blob/main/web/spa/main.tsx). The optional Cargo `ui` feature embeds the prebuilt `web/dist/spa` bundle through [src/web_assets.rs](https://github.com/omar-os/omar/blob/main/src/web_assets.rs); a plain Rust build does not require Node. Build commands live in [web/package.json](https://github.com/omar-os/omar/blob/main/web/package.json).
++
++## Operator interactions
++
++[web/app/memory-manager.tsx](https://github.com/omar-os/omar/blob/main/web/app/memory-manager.tsx) sends `{key, request}` to `POST /v1/memory`. The route requires full access, passes origin checks, and verifies the operator key paired through the terminal memory wizard. `request` uses the action enum in [src/knowledge.rs](https://github.com/omar-os/omar/blob/main/src/knowledge.rs) for review settings, record changes, recall, and project links.
++
++[web/app/studio.tsx](https://github.com/omar-os/omar/blob/main/web/app/studio.tsx) lists all pending manual responses until accepted. [web/app/port-panel.tsx](https://github.com/omar-os/omar/blob/main/web/app/port-panel.tsx) renders invocation prompts and typed output fields, preserves drafts on submission failure, and offers the next waiting agent after acceptance. [response-guide.ts](https://github.com/omar-os/omar/blob/main/web/app/lib/response-guide.ts) derives copy from the invocation and recognizes simple `a | b` output contracts for a single-choice form.
+diff --git a/src/content/devdocs/main/mcp.md b/src/content/devdocs/main/mcp.md
+index 9b50996..ac709b1 100644
+--- a/src/content/devdocs/main/mcp.md
++++ b/src/content/devdocs/main/mcp.md
+@@ -21,6 +21,12 @@ General tools cover agent spawning and inspection, task coordination, projects,
+ 
+ Use the definitions in `mcp.rs` for exact signatures and result formats. The hold-mode server restricts its tool set and supports waiting for worker results through `wait_s`.
+ 
++## Saved knowledge
++
++Outside topology and hold modes, only the EA receives `memory_search(query?)`, `memory_get(id)`, and `memory_propose(scope, key, kind, text, source, expires_at_ms?)`. Workers cannot call them. Scope identities come from runtime context; project scope requires an operator link.
++
++Search returns bounded recall; an empty query selects preferences and decisions. Get returns the current revision and provenance, including the EA's own candidate. Propose returns the saved status: `confirmed` by default or `candidate` when review is enabled. Identical retries with a stable key are safe; corrections require operator revision checks. Memory arguments and errors are redacted in MCP debug logs. See [state and recovery](state-and-recovery.md) for storage and visibility rules.
++
+ ## Workflow invocation protocol
+ 
+ A topology-scoped agent receives only these tools (the server can also expose bare names):
+diff --git a/src/content/devdocs/main/sessions-and-cli.md b/src/content/devdocs/main/sessions-and-cli.md
+index 837e94b..c448e48 100644
+--- a/src/content/devdocs/main/sessions-and-cli.md
++++ b/src/content/devdocs/main/sessions-and-cli.md
+@@ -16,6 +16,7 @@ The session-facing commands are implemented in [src/sessions.rs](https://github.
+ | `attach --tui`, `attach --web` | Open a runtime interface                                        |
+ | `run`, `runs`                  | Submit a program and inspect runs                               |
+ | `ea`                           | Manage assistants and their events                              |
++| `memory`                       | Open the selected assistant’s saved-knowledge manager           |
+ | `down`                         | Pause workflows and stop the runtime                            |
+ | `rm`                           | Remove a runtime and its state                                  |
+ 
+@@ -34,3 +35,5 @@ The Unix control socket accepts JSON requests with `protocol`, `id`, `incarnatio
+ [src/ea.rs](https://github.com/omar-os/omar/blob/main/src/ea.rs) defines EA IDs, registry entries, and scoped tmux names. [src/ea_lifecycle.rs](https://github.com/omar-os/omar/blob/main/src/ea_lifecycle.rs) handles lifecycle admission and recovery.
+ 
+ [src/app.rs](https://github.com/omar-os/omar/blob/main/src/app.rs) holds terminal application state; [src/ui/dashboard.rs](https://github.com/omar-os/omar/blob/main/src/ui/dashboard.rs) renders it. Tmux operations live in [src/tmux](https://github.com/omar-os/omar/tree/main/src/tmux). Persistent scheduled events and delivery belong to [src/scheduler](https://github.com/omar-os/omar/tree/main/src/scheduler), separate from the workflow runtime's logical timers.
++
++The `memory` command runs [src/memory_wizard.rs](https://github.com/omar-os/omar/blob/main/src/memory_wizard.rs). First use pairs a runtime operator key locally; only its hash is stored. Subsequent actions use the daemon's `memory` control operation with `{key, request}`, where `request` is a tagged `knowledge::Action`. The same actions support the browser memory manager.
+diff --git a/src/content/devdocs/main/state-and-recovery.md b/src/content/devdocs/main/state-and-recovery.md
+index 7d7b57e..273301e 100644
+--- a/src/content/devdocs/main/state-and-recovery.md
++++ b/src/content/devdocs/main/state-and-recovery.md
+@@ -31,6 +31,22 @@ Rollback selects an earlier checkpoint, including its program. This can undo a s
+ 
+ The runtime checks that the plan transforms the old bytecode into the new program before applying it. It carries the checkpoint forward: dropping queued events for removed ports/timers, applying state changes, arming new timers, and creating fresh workspaces for replaced instances. It publishes a `mutation` checkpoint for resume. The previous checkpoint retains the old program.
+ 
++## Assistant knowledge
++
++[src/knowledge.rs](https://github.com/omar-os/omar/blob/main/src/knowledge.rs) stores versioned records in `knowledge/store.json` under the runtime directory. Writes hold a file lock and publish through a synced temporary file and rename. This store is separate from workflow checkpoints and the legacy handoff files managed by [src/memory.rs](https://github.com/omar-os/omar/blob/main/src/memory.rs); handoff notes are not automatically imported.
++
++| Scope | Visibility |
++| ----- | ---------- |
++| `ea` | One assistant |
++| `project` | Assistants explicitly linked by the operator to a memory project UUID |
++| `user` | All assistants in this runtime; preferences only |
++
++Memory projects are separate from EA-local task project numbers. Records carry a stable key, kind, source, expiry, and revision history. Assistant proposals are confirmed immediately by default; per-assistant review mode keeps new proposals as candidates until operator confirmation. Recall includes only visible, confirmed, unexpired records. Saved knowledge is reference data, not authorization or runtime task status.
++
++Operator edits, confirmation, and forgetting require the current revision. Forgetting erases text and source from all revisions and retains a tombstone to block retries. EA deletion removes private records, its candidate proposals, and project membership; confirmed shared records survive.
++
++The manager appends bounded saved knowledge to EA startup prompts. The legacy notes and state snapshot budgets account for the assistant template and the 6 KiB knowledge allowance.
++
+ ## Sandbox boundary
+ 
+ [src/sandbox.rs](https://github.com/omar-os/omar/blob/main/src/sandbox.rs) optionally runs team instances inside Docker Sandboxes. Explicit workspace directories cross the VM boundary, and control uses `sbx exec` pipes. A workspace snapshot is file history; the sandbox supplies the separate execution boundary.

@@ -1,15 +1,17 @@
-$ node scripts/devdocs.mjs pending --omar omar   # before
+Freeze v0.4.4 through the pipeline (local codex, codex-cli 0.163.0)
 
-codex
-I’ll check the copied pages against the release source, remove or correct anything that differs, and pin the source links to the release commit.
+$ node scripts/devdocs.mjs pending --omar omar
+(nothing: no release newer than the newest frozen one)
+$ node scripts/devdocs.mjs freeze v0.4.4 --omar omar
+tokens used
+44,230
+Pinned all 70 source links across eight pages to the v0.4.4 commit. Removed an unsupported claim about EA memory tools.
 
-exec
-/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*.md' . /tmp/omar-v0.4.4-dZbPjp | head -70" in /home/ubuntu/omar-site/src/content/devdocs/v0.4.4
- succeeded in 0ms:
-/home/ubuntu/omar-site/src/content/devdocs/v0.4.4
-/tmp/omar-v0.4.4-dZbPjp/AGENTS.md
+Checked the docs against the release source and validated source paths, local links, front matter, and page lengths.
 devdocs: summary in /tmp/devdocs-wfyAuU/summary.md
-freeze exit 0
-pending after: []
+
+real	0m56.392s
+real	0m56.392s
+$ node scripts/devdocs.mjs freeze v0.4.4 --omar omar   # again
 devdocs: v0.4.4 already has docs, and a release's docs are frozen
 refreeze exit 1
