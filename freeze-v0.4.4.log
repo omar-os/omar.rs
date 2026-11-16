@@ -1,0 +1,15 @@
+$ node scripts/devdocs.mjs pending --omar omar   # before
+
+codex
+I’ll check the copied pages against the release source, remove or correct anything that differs, and pin the source links to the release commit.
+
+exec
+/bin/bash -lc "pwd; rg --files -g 'AGENTS.md' -g '*.md' . /tmp/omar-v0.4.4-dZbPjp | head -70" in /home/ubuntu/omar-site/src/content/devdocs/v0.4.4
+ succeeded in 0ms:
+/home/ubuntu/omar-site/src/content/devdocs/v0.4.4
+/tmp/omar-v0.4.4-dZbPjp/AGENTS.md
+devdocs: summary in /tmp/devdocs-wfyAuU/summary.md
+freeze exit 0
+pending after: []
+devdocs: v0.4.4 already has docs, and a release's docs are frozen
+refreeze exit 1
