@@ -101,12 +101,12 @@ const pathname = Astro.url.pathname;
               </>
             ) : (
               <>
-                Developer docs frozen at release <strong>{dev.version}</strong>{" "}
-                (
+                Developer docs frozen at release <strong>{dev.version}</strong>,
+                commit{" "}
                 <a href={commitUrl(dev.meta.commit)}>
                   <code>{dev.meta.commit.slice(0, 7)}</code>
                 </a>
-                ). <a href={dev.choices[0].href}>See main</a>.
+                · <a href={dev.choices[0].href}>See main</a>
               </>
             )}
           </p>
@@ -126,6 +126,11 @@ const pathname = Astro.url.pathname;
           window.location.href = select.value;
         }),
       );
+
+    // On a phone the sidebar is one scrolling row; show the current page.
+    document
+      .querySelector(".sidebar .sidebar-link.active")
+      ?.scrollIntoView({ block: "nearest", inline: "center" });
 
     // Wrap bare tables in a scrollable container for mobile
     document.querySelectorAll(".docs-content table").forEach((table) => {
