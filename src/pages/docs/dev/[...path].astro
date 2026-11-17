@@ -1,0 +1,90 @@
+---
+import { render } from "astro:content";
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import { devHref, devVersions, type DevVersion } from "../../../lib/devdocs";
+
+// Every page lives at /docs/dev/<version>/<page>/. /docs/dev/ redirects to
+// main's first page and /docs/dev/<version>/ to that version's, so relative
+// links between pages always resolve the same way.
+export async function getStaticPaths() {
+  const versions = await devVersions();
+  return versions.flatMap((version) => {
+    const first = version.pages[0].slug;
+    return [
+      ...(version.name === "main"
+        ? [
+            {
+              params: { path: undefined },
+              props: { version, slug: first, redirect: true },
+            },
+          ]
+        : []),
+      {
+        params: { path: version.name },
+        props: { version, slug: first, redirect: true },
+      },
+      ...version.pages.map(({ slug }) => ({
+        params: { path: `${version.name}/${slug}` },
+        props: { version, slug, redirect: false },
+      })),
+    ];
+  });
+}
+
+interface Props {
+  version: DevVersion;
+  slug: string;
+  redirect: boolean;
+}
+
+const { version, slug, redirect } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const target = devHref(base, version.name, slug);
+
+const versions = await devVersions();
+const { page } = version.pages.find((p) => p.slug === slug)!;
+const { Content } = await render(page);
+
+// Switching version keeps the page when the other version has it.
+const choices = versions.map((v) => ({
+  name: v.name,
+  href: devHref(
+    base,
+    v.name,
+    v.pages.some((p) => p.slug === slug) ? slug : undefined,
+  ),
+}));
+---
+
+{
+  redirect ? (
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="refresh" content={`0;url=${target}`} />
+        <link rel="canonical" href={target} />
+        <title>OMAR developer docs</title>
+      </head>
+      <body>
+        <a href={target}>OMAR developer docs</a>
+      </body>
+    </html>
+  ) : (
+    <DocsLayout
+      title={page.data.title}
+      description={`OMAR developer docs (${version.name}): ${page.data.title}`}
+      dev={{
+        version: version.name,
+        meta: version.meta,
+        choices,
+        pages: version.pages.map((p) => ({
+          href: devHref(base, version.name, p.slug),
+          label: p.page.data.title,
+          current: p.slug === slug,
+        })),
+      }}
+    >
+      <Content />
+    </DocsLayout>
+  )
+}

@@ -36,6 +36,19 @@ function remarkBaseUrl() {
   };
 }
 
+// Developer docs link each other as `overview.md`, which reads on GitHub and
+// in an editor; on the site that page is `../overview/` (every developer docs
+// page is /docs/dev/<version>/<page>/).
+function remarkDevdocsLinks() {
+  return (tree, file) => {
+    if (!file.path?.includes("/src/content/devdocs/")) return;
+    visit(tree, "link", (node) => {
+      const match = /^([a-z0-9-]+)\.md(#.*)?$/.exec(node.url);
+      if (match) node.url = `../${match[1]}/${match[2] ?? ""}`;
+    });
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   base,
@@ -48,6 +61,6 @@ export default defineConfig({
     shikiConfig: {
       theme: "github-dark",
     },
-    remarkPlugins: [remarkBaseUrl],
+    remarkPlugins: [remarkBaseUrl, remarkDevdocsLinks],
   },
 });
