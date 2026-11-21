@@ -19,6 +19,8 @@ Agent tasks become prompts delivered through a backend. An invocation records tr
 
 Native Rust bodies use [src/reaction.rs](https://github.com/omar-os/omar/blob/main/src/reaction.rs). It generates a crate, builds an executable with Cargo, and invokes that executable with a line-based input/output protocol. Rust bodies are captured by the Lean compiler as source; Cargo compiles them.
 
+`OMAR_CARGO` selects the Cargo executable. By default, the runtime tries `cargo` on `PATH`, then `$CARGO_HOME/bin/cargo` if configured, then `~/.cargo/bin/cargo`. Only a missing executable advances the search.
+
 Shared contexts are string state associated with selected agents. Their values and directives are included in task context, and completion requires an update or explicit preservation.
 
 ## Control and observation

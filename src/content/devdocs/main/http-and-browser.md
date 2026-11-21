@@ -26,6 +26,8 @@ The HTTP implementation uses TCP streams and blocking connection handlers. Reque
 
 Run diagram traffic is relayed through `/v1/runs/{id}/diagram`. Chat updates use the event stream at `GET /v1/chat/events`. Agent terminals use WebSocket routes under `/v1/agents/{name}/terminal`.
 
+Serve watches the response queue for manual Web steps and posts a chat notice when a response is needed, even with the browser closed. Chat messages with `runtime: true` appear as OMAR notices. They leave the assistant's turn state unchanged in Serve and the browser. [src/serve_recovery.rs](https://github.com/omar-os/omar/blob/main/src/serve_recovery.rs), [web/app/studio.tsx](https://github.com/omar-os/omar/blob/main/web/app/studio.tsx), [web/app/chat-message.tsx](https://github.com/omar-os/omar/blob/main/web/app/chat-message.tsx)
+
 The full listener binds loopback. An optional view listener serves unauthenticated read-only access; its route restrictions are enforced by `view_refusal`. EA callback routes such as `/v1/agent/reply` resolve their conversation through a token in the request body.
 
 ## Browser contract
