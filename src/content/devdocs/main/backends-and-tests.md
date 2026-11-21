@@ -27,6 +27,10 @@ Delivery follows the transport recorded at launch: managed runner sockets, hook 
 
 Integration tests create temporary homes and runtime sessions with dedicated tmux servers. They require tmux. Compiler and workflow tests also need the Lean toolchain; fixtures and test scripts show which compiler path or backend each test expects.
 
+The Rust unit-test binary sets a private `TMUX_TMPDIR` and clears inherited tmux session variables before tests run. It cleans up its servers on exit and sweeps directories left by dead test processes on startup. [src/test_tmux.rs](https://github.com/omar-os/omar/blob/main/src/test_tmux.rs)
+
+The browser recovery test uses fake Serve to check that runtime notices leave an active assistant turn open. [web/tests/e2e/recovery.spec.ts](https://github.com/omar-os/omar/blob/main/web/tests/e2e/recovery.spec.ts)
+
 ## Build and validation entry points
 
 The Rust package declares a minimum Rust version of 1.89 in [Cargo.toml](https://github.com/omar-os/omar/blob/main/Cargo.toml). Lean targets and the test driver are in [lang/lakefile.lean](https://github.com/omar-os/omar/blob/main/lang/lakefile.lean); the Lean version is pinned in [lang/lean-toolchain](https://github.com/omar-os/omar/blob/main/lang/lean-toolchain).
