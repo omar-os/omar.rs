@@ -1,19 +1,31 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 
+import type { DevMeta } from "../lib/devdocs";
+
 interface Props {
   title: string;
   description?: string;
   lang?: string;
+  /** Set on a developer docs page: its version and that version's pages. */
+  dev?: {
+    version: string;
+    meta?: DevMeta;
+    choices: { name: string; href: string }[];
+    pages: { href: string; label: string; current: boolean }[];
+  };
 }
 
-const { title, description, lang = "en" } = Astro.props;
+const { title, description, lang = "en", dev } = Astro.props;
 const isZh = lang.startsWith("zh");
 const base = import.meta.env.BASE_URL;
 
 const sidebarItems = isZh
   ? [{ href: `${base}zh/docs/`, label: "快速开始" }]
   : [{ href: `${base}docs/`, label: "Getting Started" }];
+const devRoot = `${base}docs/dev/`;
+const commitUrl = (sha: string) =>
+  `https://github.com/omar-os/omar/commit/${sha}`;
 
 const pathname = Astro.url.pathname;
 ---
@@ -33,15 +45,93 @@ const pathname = Astro.url.pathname;
             </a>
           ))
         }
+        {
+          !isZh && (
+            <>
+              <p class="sidebar-title sidebar-group">Developer</p>
+              {dev ? (
+                <>
+                  <label class="version-picker">
+                    <span>Version</span>
+                    <select
+                      data-version-picker
+                      aria-label="Developer docs version"
+                    >
+                      {dev.choices.map((choice) => (
+                        <option
+                          value={choice.href}
+                          selected={choice.name === dev.version}
+                        >
+                          {choice.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {dev.pages.map((item) => (
+                    <a
+                      href={item.href}
+                      class:list={["sidebar-link", { active: item.current }]}
+                      aria-current={item.current ? "page" : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </>
+              ) : (
+                <a href={devRoot} class="sidebar-link">
+                  How OMAR works
+                </a>
+              )}
+            </>
+          )
+        }
       </nav>
     </aside>
     <article class="docs-content prose">
+      {
+        dev?.meta && (
+          <p class="dev-version">
+            {dev.version === "main" ? (
+              <>
+                Developer docs for <strong>main</strong>, checked against{" "}
+                <a href={commitUrl(dev.meta.commit)}>
+                  <code>{dev.meta.commit.slice(0, 7)}</code>
+                </a>{" "}
+                on {dev.meta.synced}.
+              </>
+            ) : (
+              <>
+                Developer docs frozen at release <strong>{dev.version}</strong>,
+                commit{" "}
+                <a href={commitUrl(dev.meta.commit)}>
+                  <code>{dev.meta.commit.slice(0, 7)}</code>
+                </a>
+                · <a href={dev.choices[0].href}>See main</a>
+              </>
+            )}
+          </p>
+        )
+      }
       <h1>{title}</h1>
       <slot />
     </article>
   </div>
 
   <script>
+    // The version picker's options are the same page in each version.
+    document
+      .querySelectorAll<HTMLSelectElement>("[data-version-picker]")
+      .forEach((select) =>
+        select.addEventListener("change", () => {
+          window.location.href = select.value;
+        }),
+      );
+
+    // On a phone the sidebar is one scrolling row; show the current page.
+    document
+      .querySelector(".sidebar .sidebar-link.active")
+      ?.scrollIntoView({ block: "nearest", inline: "center" });
+
     // Wrap bare tables in a scrollable container for mobile
     document.querySelectorAll(".docs-content table").forEach((table) => {
       if (table.parentElement?.classList.contains("table-wrapper")) return;
@@ -82,6 +172,43 @@ const pathname = Astro.url.pathname;
   .sidebar-nav {
     display: flex;
     flex-direction: column;
+  }
+
+  .sidebar-group {
+    margin-top: 1.5rem;
+  }
+
+  .version-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.75rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  .version-picker select {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    color: var(--text-bright);
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.45rem;
+  }
+
+  .version-picker select:hover,
+  .version-picker select:focus-visible {
+    border-color: var(--border-hover);
+  }
+
+  .dev-version {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    border-left: 2px solid var(--accent);
+    padding-left: 0.75rem;
+    margin-bottom: 1.5rem;
   }
 
   .sidebar-link {
@@ -129,6 +256,15 @@ const pathname = Astro.url.pathname;
     }
 
     .sidebar-title {
+      display: none;
+    }
+
+    .version-picker {
+      padding: 0 0.25rem 0 0;
+      flex: none;
+    }
+
+    .version-picker span {
       display: none;
     }
 

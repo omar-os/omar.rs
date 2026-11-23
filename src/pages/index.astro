@@ -5,7 +5,7 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
 
 <BaseLayout
   title="Home"
-  description="LLM agents are unpredictable. Their coordination doesn't have to be. OMAR delivers deterministic, formally specified orchestration for multi-agent systems."
+  description="Deploy deterministic, verifiable, programmable agentic workflows."
 >
   <AgentMachineHero lang="en" />
 
@@ -15,45 +15,59 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
       <h2 class="section-title">Features</h2>
       <div class="features-grid">
         <div class="feature-card">
-          <h3>Deep hierarchies</h3>
+          <h3>📜 Explicit coordination contracts</h3>
           <p>
-            Agents managing agents, just like a company. Create parallel
-            organizations of arbitrary depth.
+            Declare typed inputs and outputs, triggers, and permitted output
+            writes. OMAR provides system-level determinism for scheduling and
+            handoffs, with compiler validation and runtime enforcement of output
+            contracts.
           </p>
         </div>
         <div class="feature-card">
-          <h3>Heterogeneous backends</h3>
+          <h3>🤝 Mixed agent teams</h3>
           <p>
-            Let Claude, Codex, Cursor, Opencode, and Google Antigravity
-            collaborate as a team. Mix and match the best model for each task.
+            Put Claude Code, Codex, Cursor, OpenCode, Antigravity, and Pi in the
+            same workflow. Choose a backend for each role using the <a
+              href="/docs/">supported agent backends</a
+            >.
           </p>
         </div>
         <div class="feature-card">
-          <h3>Full control</h3>
+          <h3>🪆 Teams within teams</h3>
           <p>
-            Talk to and control any subagent you want. Navigate hierarchies with
-            arrow keys and attach via popup.
+            Compose reusable, parameterized teams into deeper hierarchies. Build
+            pipelines, parallel branches, and feedback loops with explicit
+            connections between them.
           </p>
         </div>
         <div class="feature-card">
-          <h3>Flexible lifespans</h3>
+          <h3>🔎 Live visibility and direct access</h3>
           <p>
-            Long-running or ephemeral agents, your choice. Persistent state
-            across sessions with memory snapshots.
+            Follow execution status and values in Mission Control's live
+            diagram. Open an individual agent's terminal to inspect its session
+            and interact directly.
           </p>
         </div>
         <div class="feature-card">
-          <h3>Messaging &amp; integrations</h3>
+          <h3>🧠 Model heterogeneity</h3>
           <p>
-            Connect agents to Slack channels. Bridge the gap between human and
-            AI workflows seamlessly.
+            Combine fast System I models such as Jev with System II reasoning
+            models in the same workflow.
           </p>
         </div>
         <div class="feature-card">
-          <h3>Built on tmux</h3>
+          <h3>⏯️ Checkpointed workflows</h3>
           <p>
-            Supports all tmux commands and key bindings. Highly customizable
-            with battle-tested session management.
+            Pause and resume workflows at well-defined checkpoints between
+            logical tags.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3>🛠️ Flexible sessions and familiar tools</h3>
+          <p>
+            Run long-lived or task-specific agents, with terminal access and the <code
+              >tmux</code
+            > controls you already use.
           </p>
         </div>
       </div>
@@ -124,7 +138,9 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
         <div class="install-panel" id="panel-source">
           <pre><code><span class="prompt">$</span> git clone https://github.com/omar-os/omar.git
 <span class="prompt">$</span> cd omar && make install</code></pre>
-          <p class="install-note">Requires Rust 1.70+ and GNU Make.</p>
+          <p class="install-note">
+            Requires Rust 1.89+, GNU Make, Node.js 22.13+, and elan.
+          </p>
         </div>
       </div>
       <div class="steps">
@@ -133,7 +149,7 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-content">
             <h3>Prerequisites</h3>
             <p>
-              tmux 3.0+ and at least one agent backend:
+              tmux 3.0+, Git, and at least one agent backend:
               <a
                 href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
                 >Claude Code</a
@@ -151,10 +167,11 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-num">2</div>
           <div class="step-content">
             <h3>Launch Mission Control</h3>
-            <pre><code><span class="prompt">$</span> omar serve --ui</code></pre>
+            <pre><code><span class="prompt">$</span> omar up -s dev --web</code></pre>
             <p>
               Opens the web UI in your browser. Describe a workflow, confirm the
-              program it drafts, and watch the run on a live diagram.
+              program it drafts, and watch the run on a live diagram. Closing
+              the browser leaves the session running.
             </p>
           </div>
         </div>
@@ -162,10 +179,10 @@ import AgentMachineHero from "../components/AgentMachineHero.astro";
           <div class="step-num">3</div>
           <div class="step-content">
             <h3>Or drive it from the terminal</h3>
-            <pre><code><span class="prompt">$</span> omar</code></pre>
+            <pre><code><span class="prompt">$</span> omar attach -s dev --tui</code></pre>
             <p>
-              The same runtime in tmux. Copy a prompt into your Executive
-              Assistant window and watch agents spawn.
+              Attach to the same session in tmux. <code>omar down -s dev</code> stops
+              and keeps it; <code>omar rm -s dev</code> removes it and its state.
             </p>
           </div>
         </div>

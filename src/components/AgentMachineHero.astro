@@ -9,27 +9,27 @@ const copy = zh
   ? {
       no: "拒绝智能体「蜂群」。",
       deploy: "部署",
-      deterministic: "确定性、可验证的",
+      deterministic: "确定性、可验证、可编程的",
       machinePrefix: "智能体",
-      machineWord: "协作体",
+      machineWord: "工作流",
       machinePeriod: "。",
       description: "为多智能体系统提供确定性的、有形式化规约的编排。",
       start: "快速开始",
       swarmWarning: "不受控制的智能体蜂群可能难以预测且危险。",
       incidentLead: "请查看",
       incident: "OpenAI / Hugging Face 事件",
-      ensembleLead: "智能体协作体应当具有",
-      ensembleDeterministic: "确定性",
-      ensembleAnd: "和",
-      ensembleVerifiable: "可验证性",
+      workflowLead: "智能体工作流应当具有",
+      workflowDeterministic: "确定性",
+      workflowAnd: "和",
+      workflowVerifiable: "可验证性",
       alt: "智能体蜂群与确定性 OMAR 拓扑的轮播对比。",
     }
   : {
       no: "Say no to agent “swarms”.",
       deploy: "Deploy",
-      deterministic: "deterministic, verifiable",
+      deterministic: "deterministic, verifiable, programmable",
       machinePrefix: "agentic ",
-      machineWord: "ensembles",
+      machineWord: "workflows",
       machinePeriod: ".",
       description:
         "delivers deterministic, formally specified orchestration for multi-agent systems.",
@@ -38,10 +38,10 @@ const copy = zh
         "An uncontrolled agent swarm can be unpredictable and dangerous.",
       incidentLead: "Check the",
       incident: "OpenAI / Hugging Face incident",
-      ensembleLead: "An agentic ensemble should be",
-      ensembleDeterministic: "deterministic",
-      ensembleAnd: "and",
-      ensembleVerifiable: "verifiable",
+      workflowLead: "An agentic workflow should be",
+      workflowDeterministic: "deterministic",
+      workflowAnd: "and",
+      workflowVerifiable: "verifiable",
       alt: "A carousel comparing an ephemeral agent swarm with a deterministic OMAR topology.",
     };
 const backends = [
@@ -174,12 +174,12 @@ const points = Array.from({ length: 36 }, (_, i) => [
         data-slide="1"
         role="group"
         aria-roledescription={zh ? "幻灯片" : "slide"}
-        aria-label={zh ? "2 / 2：智能体协作体" : "2 of 2: Agentic ensemble"}
+        aria-label={zh ? "2 / 2：智能体工作流" : "2 of 2: Agentic workflow"}
       >
         <h3 class="slide-label machine-label">
-          {copy.ensembleLead}{" "}<em>{copy.ensembleDeterministic}</em>{" "}{
-            copy.ensembleAnd
-          }{" "}<em>{copy.ensembleVerifiable}</em>{copy.machinePeriod}
+          {copy.workflowLead}{" "}<em>{copy.workflowDeterministic}</em>{" "}{
+            copy.workflowAnd
+          }{" "}<em>{copy.workflowVerifiable}</em>{copy.machinePeriod}
         </h3>
         <MachineTopology lang={lang} />
       </section>
@@ -194,7 +194,7 @@ const points = Array.from({ length: 36 }, (_, i) => [
           >{zh ? "蜂群" : "Swarm"}</button
         >
         <button type="button" data-select="1" aria-pressed="false"
-          >{zh ? "协作体" : "Ensemble"}</button
+          >{zh ? "工作流" : "Workflow"}</button
         >
       </div>
     </div>
