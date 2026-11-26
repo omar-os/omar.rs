@@ -34,4 +34,6 @@ The full listener binds loopback. An optional view listener serves unauthenticat
 
 [src/protocol.rs](https://github.com/omar-os/omar/blob/main/src/protocol.rs) generates the TypeScript contract under Rust tests and checks that the committed output matches. Change the Rust wire definitions when changing shared types.
 
+Runtime notices arrive on the chat event stream with role `assistant` and the optional `runtime: true` flag. [Mission Control](https://github.com/omar-os/omar/blob/main/web/app/studio.tsx) displays these notices while preserving the assistant's turn state.
+
 The standalone browser entry is [web/spa/main.tsx](https://github.com/omar-os/omar/blob/main/web/spa/main.tsx). The optional Cargo `ui` feature embeds the prebuilt `web/dist/spa` bundle through [src/web_assets.rs](https://github.com/omar-os/omar/blob/main/src/web_assets.rs); a plain Rust build does not require Node. Build commands live in [web/package.json](https://github.com/omar-os/omar/blob/main/web/package.json).
