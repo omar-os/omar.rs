@@ -1,0 +1,126 @@
+---
+// User docs, written by hand. The nightly developer-docs job only writes
+// src/content/devdocs/, so it never changes this page.
+import DocsLayout from "../../layouts/DocsLayout.astro";
+---
+
+<DocsLayout
+  title="Messaging"
+  description="Chat with OMAR and review and run saved workflows from Slack."
+>
+  <p class="docs-lead">
+    Connect OMAR to Slack to chat with the assistant and to review and run your
+    saved workflows from a DM or a channel thread.
+  </p>
+  <pre><code>omar messaging slack connect</code></pre>
+  <h2>Prerequisites</h2>
+  <ul>
+    <li>Linux or WSL.</li>
+    <li>
+      <code>omar</code> and <code>omarc</code>, tmux, and a signed-in agent backend.
+    </li>
+    <li>
+      A system font for graph previews, for example <code>fonts-dejavu-core</code>
+      on Ubuntu.
+    </li>
+    <li>
+      For source builds, build the compiler with
+      <code>(cd lang &amp;&amp; lake build Omar.Verify omarc)</code> before building
+      OMAR.
+    </li>
+  </ul>
+  <h2>Create the Slack app</h2>
+  <ol>
+    <li>
+      Create your app from
+      <a
+        href="https://github.com/omar-os/omar/blob/main/integrations/slack/app-manifest.json"
+        ><code>integrations/slack/app-manifest.json</code></a
+      >.
+    </li>
+    <li>Enable Socket Mode and install the app to your workspace.</li>
+    <li>Create an app-level token with <code>connections:write</code>.</li>
+  </ol>
+  <h2>Connect</h2>
+  <p>
+    On first use, <code>omar messaging slack connect</code> asks for provider
+    credentials and approved user IDs, saves them privately, and starts or
+    reuses the local runtime at <code>127.0.0.1:45073</code>. OMAR selects and
+    remembers the assistant chat automatically. Keep the connector running;
+    rerun the same command to reconnect.
+  </p>
+  <h2>Use it in Slack</h2>
+  <table>
+    <thead><tr><th>In Slack</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>/omar help</code></td><td>Show the commands.</td></tr>
+      <tr
+        ><td><code>/omar list</code></td><td
+          >List workflows approved and saved in OMAR.</td
+        ></tr
+      >
+      <tr
+        ><td><code>/omar run NAME</code></td><td>Run a saved workflow.</td></tr
+      >
+      <tr
+        ><td><code>/omar new-chat</code></td><td
+          >Start a new conversation with the assistant.</td
+        ></tr
+      >
+      <tr
+        ><td>A regular DM</td><td>Goes to the assistant.</td></tr
+      >
+      <tr
+        ><td><code>@Omar</code> in an approved channel</td><td
+          >Ask a question or send a control; replies stay in the originating
+          thread.</td
+        ></tr
+      >
+    </tbody>
+  </table>
+  <p>
+    Use the slash commands in a DM. Slack slash commands cannot be invoked
+    inside threads, so use mentions there.
+  </p>
+  <h2>Review a workflow</h2>
+  <p>
+    Review a proposed workflow's graph and source files, then choose
+    <strong>Run workflow</strong>, <strong>Revise</strong>, or
+    <strong>Cancel</strong>. Only the requester can approve that version.
+  </p>
+  <h2>Security</h2>
+  <p>
+    Treat approved users as trusted operators: they can direct agents using the
+    host's files, tools and configured harness credentials. Separate chats do
+    not isolate files or persistent agent memory.
+  </p>
+  <p>
+    Never distribute a shared bot token to untrusted users; it permits bot
+    impersonation and access to the bot's permitted traffic. Saved tokens use
+    private Unix file permissions, not encryption.
+  </p>
+  <h2>Log out</h2>
+  <pre><code>omar messaging slack logout</code></pre>
+  <p>
+    Removes saved credentials. Logout does not revoke provider tokens, clear
+    environment variables, or stop a running connector.
+  </p>
+  <h2>Limitations</h2>
+  <p>
+    Queues, event deduplication and busy state are in memory. Restarting a
+    connector during a run can lose result delivery; there is no durable outbox.
+    Starting a new chat resets the conversation, not harness memory. Each
+    connector process has its own queue.
+  </p>
+  <p>
+    Run <code>omar messaging slack --help</code> for provider requirements.
+  </p>
+</DocsLayout>
+
+<style>
+  .docs-lead {
+    color: var(--text-bright);
+    font-size: 1.1rem;
+    line-height: 1.75;
+  }
+</style>
