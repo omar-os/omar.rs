@@ -16,7 +16,9 @@ works: its parts, how they fit together, and the interfaces between them.
 
 These are developer docs, not user docs: they explain the code and its
 interfaces (CLI commands, the session daemon, HTTP routes, MCP tools, the
-compiler/runtime boundary, bytecode, tests), not how to use OMAR.
+compiler/runtime boundary, bytecode, tests), not how to use OMAR. The user docs
+(Getting Started, Messaging) are written by hand under `src/pages/docs/`; leave
+them alone, and leave user how-tos out of these pages.
 
 ## Format
 
