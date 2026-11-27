@@ -30,7 +30,7 @@ omarc [--local-imports] --prove input.omar properties.json verdicts.json
 
 ## Bytecode contract
 
-[Bytecode and Instruction](https://github.com/omar-os/omar/blob/main/src/topology.rs) are the Rust wire definitions. `Bytecode` carries `version`, `team`, and `instructions`. Instructions use an `op` discriminator with snake-case names; the VM accepts version 1.
+[Bytecode and Instruction](https://github.com/omar-os/omar/blob/main/src/topology.rs) are the Rust wire definitions. `Bytecode` carries `version`, `team`, and `instructions`. Instructions use an `op` discriminator with snake-case names. The VM accepts versions 1 and 2. The compiler emits version 2 when a `spawn_agent` instruction carries a `lifetime` with a `unit` (`task` or `tag`) and a positive `count`. The compiler and VM both check that the backend supports fresh conversations. See [the generated compiler allowlist](https://github.com/omar-os/omar/blob/main/lang/Omar/Backends.lean).
 
 Instructions describe declarations and connections: instances, agents, ports, imported types, state, parameters, timers, and reactions. They also include plan/control operations. Read the enum for the complete vocabulary rather than copying it into a second specification.
 

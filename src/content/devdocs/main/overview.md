@@ -16,6 +16,7 @@ OMAR runs agent processes and coordinates their work. The Rust `omar` binary own
 | Bytecode, VM, and workflow execution   | [src/topology.rs](https://github.com/omar-os/omar/blob/main/src/topology.rs)                                                                                   |
 | Agent tool server                      | [src/mcp.rs](https://github.com/omar-os/omar/blob/main/src/mcp.rs)                                                                                             |
 | Backend adapters                       | [src/backend](https://github.com/omar-os/omar/tree/main/src/backend)                                                                                           |
+| Slack connector                        | [src/messaging](https://github.com/omar-os/omar/tree/main/src/messaging) |
 | Browser client                         | [web](https://github.com/omar-os/omar/tree/main/web)                                                                                                           |
 
 ## Ownership and execution

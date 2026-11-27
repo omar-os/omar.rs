@@ -13,6 +13,8 @@ Delivery follows the transport recorded at launch: managed runner sockets, hook 
 
 [src/backend/connect.rs](https://github.com/omar-os/omar/blob/main/src/backend/connect.rs) and [src/backend/connection.rs](https://github.com/omar-os/omar/blob/main/src/backend/connection.rs) manage backend connection/setup state. The deterministic [stub backend](https://github.com/omar-os/omar/blob/main/src/backend/stub.rs) supports tests without a live model.
 
+The backend's `fresh_conversation` capability enables workflow agent lifetimes. The runtime checks the ID reported by the backend against the chosen ID or the run's prior IDs, depending on who assigned it. Backends can supply an additional freshness check. The registry test keeps the Lean compiler's capability list in sync. See [the backend trait and registry](https://github.com/omar-os/omar/blob/main/src/backend/mod.rs).
+
 ## Where behavior is tested
 
 | Layer                                                  | Tests                                                                                                                                                            |
@@ -30,6 +32,8 @@ Integration tests create temporary homes and runtime sessions with dedicated tmu
 [src/test_tmux.rs](https://github.com/omar-os/omar/blob/main/src/test_tmux.rs) gives the Rust unit-test binary and its children a private `TMUX_TMPDIR` and clears inherited `TMUX` and `TMUX_PANE`. It kills those servers at exit and sweeps leftovers from dead test processes at startup.
 
 [team_sandboxes.py](https://github.com/omar-os/omar/blob/main/tests/ci/team_sandboxes.py) exercises sandbox admission with a fake CLI. It waits for the Codex run's background sandbox creation before stopping the run and checking that a signed-out request creates no sandbox.
+
+[invocation_scope.py](https://github.com/omar-os/omar/blob/main/tests/ci/invocation_scope.py) exercises conversation reuse and reset through workflow runs. [the CLI integration tests](https://github.com/omar-os/omar/blob/main/tests/integration_test.rs) cover session cleanup after failed admission, and [messaging tests](https://github.com/omar-os/omar/blob/main/src/messaging/tests.rs) exercise the gateway with fake runtime and transport implementations.
 
 ## Build and validation entry points
 

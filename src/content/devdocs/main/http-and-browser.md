@@ -28,6 +28,18 @@ Run diagram traffic is relayed through `/v1/runs/{id}/diagram`. Chat updates use
 
 The full listener binds loopback. An optional view listener serves unauthenticated read-only access; its route restrictions are enforced by `view_refusal`. EA callback routes such as `/v1/agent/reply` resolve their conversation through a token in the request body.
 
+## Messaging and workflow review
+
+The Slack connector receives Socket Mode events and passes them to the messaging gateway. The gateway checks the configured sender and conversation allowlists, deduplicates events, and uses the runtime HTTP client for chat and run requests. The client maps Slack channels and threads to runtime chats and polls for replies and run results. See [slack.rs](https://github.com/omar-os/omar/blob/main/src/messaging/slack.rs), [the gateway](https://github.com/omar-os/omar/blob/main/src/messaging/mod.rs), and [the runtime client](https://github.com/omar-os/omar/blob/main/src/messaging/runtime.rs).
+
+| Route | Purpose |
+| --- | --- |
+| `POST /v1/chats/messaging` | Find or create a chat for a messaging identity |
+| `POST /v1/chat/approve` | Consume a proposal by sequence in its chat and submit it through run admission |
+| `GET /v1/workflows` | List approved workflow requests saved in chat history |
+
+The connector scopes chat and approval requests with the `/chats/{id}` prefix. Slack presents proposed designs for review before requesting approval. The server checks that the proposal is current and can be consumed only once. Run admission saves requests that match a submitted design to the catalog. Saved runs from Slack are submitted in the requesting thread's runtime chat. See [proposal handling](https://github.com/omar-os/omar/blob/main/src/messaging/proposal.rs), [route handlers](https://github.com/omar-os/omar/blob/main/src/serve.rs), and [chat history](https://github.com/omar-os/omar/blob/main/src/chat_history.rs).
+
 ## Browser contract
 
 [runtime-client.ts](https://github.com/omar-os/omar/blob/main/web/app/lib/runtime-client.ts) implements browser requests and terminal URLs. [protocol.ts](https://github.com/omar-os/omar/blob/main/web/app/lib/protocol.ts) contains protocol handling; [protocol-generated.ts](https://github.com/omar-os/omar/blob/main/web/app/lib/protocol-generated.ts) contains generated Rust wire types and runtime vocabularies.
