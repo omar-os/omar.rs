@@ -17,7 +17,9 @@ For a tag, the runtime propagates events and runs triggered reactions. Agent inv
 
 Agent tasks become prompts delivered through a backend. An invocation records trigger values, permitted effects, and team state. The agent buffers writes through MCP and completes the invocation; the runtime validates those writes before accepting them.
 
-Native Rust bodies use [src/reaction.rs](https://github.com/omar-os/omar/blob/main/src/reaction.rs). It generates a crate, builds an executable with Cargo, and invokes that executable with a line-based input/output protocol. Rust bodies are captured by the Lean compiler as source; Cargo compiles them.
+The Lean compiler captures native Rust bodies as source. [src/reaction.rs](https://github.com/omar-os/omar/blob/main/src/reaction.rs) generates a crate, builds it offline with Cargo, and invokes the executable with a line-based input/output protocol.
+
+`OMAR_CARGO` selects the executable. Without it, the builder tries `cargo` on `PATH`, then `$CARGO_HOME/bin/cargo` if set, then `~/.cargo/bin/cargo`. It advances to the next candidate only if launching Cargo returns a file-not-found error.
 
 Shared contexts are string state associated with selected agents. Their values and directives are included in task context, and completion requires an update or explicit preservation.
 

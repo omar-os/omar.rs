@@ -25,6 +25,12 @@ Recovery code in [src/topology.rs](https://github.com/omar-os/omar/blob/main/src
 
 Rollback selects an earlier checkpoint, including its program. This can undo a subsequent program mutation as well as restore execution state.
 
+## Run follow-up
+
+[src/serve_recovery.rs](https://github.com/omar-os/omar/blob/main/src/serve_recovery.rs) posts run status notices and watches the response queue for manual Web steps. For the latest failed or completed run, it sends the owning assistant the recorded outcome and artifact paths once the chat is idle. The prompt asks the assistant to diagnose and verify a repair or summarize the results. Reruns require explicit action.
+
+The server can revisit the latest failed or completed run when the assistant resumes. An `assistant-followup-delivered` marker beside the run record records successful delivery.
+
 ## Live program changes
 
 [src/mutation.rs](https://github.com/omar-os/omar/blob/main/src/mutation.rs) applies program changes to a paused run. The Lean compiler computes a plan from the two sources with `omarc --diff`; [Omar.Mutation](https://github.com/omar-os/omar/blob/main/lang/Omar/Mutation.lean) defines the diff machinery.
