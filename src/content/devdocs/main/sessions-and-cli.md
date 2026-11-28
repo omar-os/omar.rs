@@ -21,6 +21,10 @@ The session-facing commands are implemented in [src/sessions.rs](https://github.
 
 Follow the command enum for the remaining agent, workspace, checkpoint, and backend commands rather than treating this table as a full CLI reference.
 
+`omar run` reads source and imported files before creating a scratch session. When no runtime is selected, it creates a session for that run and cleans it up on failed admission or when a foreground run completes, stops, or fails. A paused run keeps its session.
+
+`omar messaging slack` dispatches to the standalone connector before session command handling. The connector communicates with the runtime through the [messaging HTTP interface](http-and-browser.md#messaging-and-workflow-review). See [src/messaging/mod.rs](https://github.com/omar-os/omar/blob/main/src/messaging/mod.rs).
+
 ## Daemon ownership
 
 The session registry lives under `OMAR_HOME` (default `~/.omar`). `Session` records the name, process, state directory, socket, executable/build identity, tmux server, and HTTP URL. `OMAR_STATE_DIR` selects the runtime state root.

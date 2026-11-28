@@ -23,10 +23,18 @@ The Lean compiler captures native Rust bodies as source. [src/reaction.rs](https
 
 Shared contexts are string state associated with selected agents. Their values and directives are included in task context, and completion requires an update or explicit preservation.
 
+## Agent conversations
+
+An agent normally uses one conversation for a run. A `per task`, `per tag`, `per N tasks`, or `per N tags` lifetime tells the runtime when to start a fresh conversation. Tag lifetimes count only tags in which that agent runs. Invocations for the same agent in a tag run sequentially, in declaration order, when the agent has a lifetime.
+
+The first invocation in each window starts a worker. The runtime verifies its conversation before delivery and checks it again before releasing the invocation's effects. The runtime confirms that a retiring worker has stopped before starting its replacement. Each new worker inherits the same instance workspace, and workflow state carries forward across windows. Jev handles invocations as independent requests without a worker or conversation. Runs with agent lifetimes require unsandboxed execution. See [the lifetime contract](https://github.com/omar-os/omar/blob/main/lang/spec.md).
+
 ## Control and observation
 
 [src/deploy.rs](https://github.com/omar-os/omar/blob/main/src/deploy.rs) defines deployment lifecycle states and control operations. A pause takes effect at a tag boundary and produces a durable checkpoint. The runner exits; resume starts a new runner from that checkpoint.
 
 [src/diagram.rs](https://github.com/omar-os/omar/blob/main/src/diagram.rs) defines snapshots, events, and the observer interface used by diagram clients. [src/serve.rs](https://github.com/omar-os/omar/blob/main/src/serve.rs) maintains the externally visible run record and relays diagram requests.
+
+The run logs worker windows to `attempts.jsonl`. Diagram snapshots include agent lifetimes and the latest record for each window. An `agent_attempt` event updates a window by attempt ID. See [the diagram publisher](https://github.com/omar-os/omar/blob/main/src/diagram.rs).
 
 For persistence, mutation, and the distinction between file snapshots and runtime checkpoints, continue to [state and recovery](state-and-recovery.md).

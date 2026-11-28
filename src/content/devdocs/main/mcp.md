@@ -36,4 +36,4 @@ omar_complete(task_id, keep?)
 
 Completion validates the final effect snapshot and releases the runtime barrier. Each shared context supplied to the task must be updated or explicitly listed in `keep`. Expired or failed invocations do not retain buffered state writes.
 
-The receiving invocation registry and ownership/type checks live in [src/topology.rs](https://github.com/omar-os/omar/blob/main/src/topology.rs). This boundary turns an agent's tool calls into values the workflow runtime can accept.
+The receiving invocation registry and ownership/type checks live in [src/topology.rs](https://github.com/omar-os/omar/blob/main/src/topology.rs). For workers with a `per` lifetime, the launch context supplies an attempt key. The runtime uses it to ensure that a worker can see and answer only invocations for its own conversation window.

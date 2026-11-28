@@ -35,7 +35,7 @@ The server can revisit the latest failed or completed run when the assistant res
 
 [src/mutation.rs](https://github.com/omar-os/omar/blob/main/src/mutation.rs) applies program changes to a paused run. The Lean compiler computes a plan from the two sources with `omarc --diff`; [Omar.Mutation](https://github.com/omar-os/omar/blob/main/lang/Omar/Mutation.lean) defines the diff machinery.
 
-The runtime checks that the plan transforms the old bytecode into the new program before applying it. It carries the checkpoint forward: dropping queued events for removed ports/timers, applying state changes, arming new timers, and creating fresh workspaces for replaced instances. It publishes a `mutation` checkpoint for resume. The previous checkpoint retains the old program.
+The runtime checks that the plan transforms the old bytecode into the new program before applying it. It carries the checkpoint forward: dropping queued events for removed ports/timers, applying state changes, arming new timers, and creating fresh workspaces for replaced instances. It publishes a `mutation` checkpoint for resume. The previous checkpoint retains the old program. Changing an agent's lifetime replaces the agent in the mutation plan.
 
 ## Sandbox boundary
 
